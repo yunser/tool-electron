@@ -1,0 +1,20 @@
+{
+  "name": "mclans",
+  "version": "1.0.0",
+  "description": "mc_login_app",
+  "main": "app/main.js",
+  "dependencies": {
+    "electron-prebuilt": "^0.37.3"
+  },
+  "devDependencies": {
+    "electron-packager": "^8.3.0",
+    "electron-prebuilt": "^0.37.3"
+  },
+  "scripts": {
+    "test": "hello",
+    "start": "electron .",
+    "packager": "electron-packager ./app mclans --all --out ./OutApp --version 0.37.3 --overwrite --icon=./app/img/icon/icon.ico"
+  },
+  "author": "yupeglv",
+  "license": "ISC"
+}

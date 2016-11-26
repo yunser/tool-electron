@@ -1,0 +1,7 @@
+# dist
+dep/
+dist/
+.idea/
+node_modules/
+/tmp
+todo.md
