@@ -136,10 +136,10 @@ $('#global-menu-help').on('click', function () {
 });
 
 var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
-    //theme: 'ambiance',
+    //theme: 'emd',
     mode: 'gfm',
     selectionPointer: true,
-    lineNumbers: true,
+    //lineNumbers: true,
     matchBrackets: true,
     indentUnit: 4,
     indentWithTabs: true,
@@ -149,16 +149,19 @@ var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
 });
 editor.setOption('lineWrapping', true);
 
-
+function setEditorTheme(theme) {
+    editor.setOption("theme", theme);
+    if (!$('#style-' + theme).length) {
+        $('head').append($('<link id="style-' + theme + '" rel="stylesheet" href="asset/lib/codemirror/theme/' + theme + '.css">'));
+    }
+}
+setEditorTheme('emd')
 
 $('#theme-select').on('change', function () {
 
     console.log(this.options[this.selectedIndex].text);
     var theme = this.options[this.selectedIndex].text;
-    editor.setOption("theme", theme);
-    if (!$('#style-' + theme).length) {
-        $('head').append($('<link id="style-' + theme + '" rel="stylesheet" href="asset/lib/codemirror/theme/' + theme + '.css">'));
-    }
+    setEditorTheme(theme);
 });
 
 var markdownString = '```js\n console.log("hello"); \n```';
