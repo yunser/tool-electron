@@ -136,7 +136,7 @@ $('#global-menu-help').on('click', function () {
 });
 
 var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
-    theme: 'ambiance',
+    //theme: 'ambiance',
     mode: 'gfm',
     selectionPointer: true,
     lineNumbers: true,
@@ -150,6 +150,16 @@ var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
 editor.setOption('lineWrapping', true);
 
 
+
+$('#theme-select').on('change', function () {
+
+    console.log(this.options[this.selectedIndex].text);
+    var theme = this.options[this.selectedIndex].text;
+    editor.setOption("theme", theme);
+    if (!$('#style-' + theme).length) {
+        $('head').append($('<link id="style-' + theme + '" rel="stylesheet" href="asset/lib/codemirror/theme/' + theme + '.css">'));
+    }
+});
 
 var markdownString = '```js\n console.log("hello"); \n```';
 
@@ -165,10 +175,9 @@ var marked = require('./asset/lib/marked/marked.js');
 });*/
 
 // Using async version of marked
-marked(markdownString, function (err, content) {
+/*marked(markdownString, function (err, content) {
     if (err) throw err;
-    console.log(content);
-});
+});*/
 
 // Synchronous highlighting with highlight.js
 /*marked.setOptions({
@@ -180,15 +189,23 @@ marked(markdownString, function (err, content) {
 //editor.setSize('auto', 'auto');
 var preview = document.getElementById("preview");
 editor.on("change", function (cm, event) {
-    console.log(123)
     var html = editor.getValue();
 
     //preview.innerHTML = markdown.toHTML(html);
     preview.innerHTML = marked(html, {});
 });
+editor.on("scroll", function (cm, event) {
+    //var html = editor.mirror.currentLine();
+    //var scrollTop = $('#layout-preview').height() * cm.getScrollInfo().top / cm.getScrollInfo().height;
+    scrollTop = cm.getScrollInfo().top;
+    $('#layout-preview').scrollTop(scrollTop);
+});
+$('#layout-preview').on('scroll', function () {
+
+});
+
 
 function openFile(path) {
-    console.log(path);
     curFile = path;
     fs.readFile(path,'utf8',function(err,data){
         editor.setValue(data);
@@ -210,7 +227,6 @@ ipc.on('open-directory', function (event, arg) {
 
 });
 ipc.on('open-file', function (event, arg) {
-    console.log(arg) // prints "pong"
 });
 ipc.send('asynchronous-message', 'ping')
 
@@ -235,6 +251,7 @@ $(document.body).on('keydown', function (e) {
     }
 });
 var curFile;
+var curFolder;
 var holder = document.getElementById('layout-editor');
 holder.ondragover = function () {
     return false;
@@ -250,7 +267,6 @@ holder.ondrop = function (e) {
 };
 $('#show-files').on('click', function (e) {
     e.preventDefault();
-    console.log('显示目录')
     $('#layout-file').show();
 });
 $('#hide-files').on('click', function (e) {
@@ -273,7 +289,45 @@ $('#save').on('click', function (e) {
     e.preventDefault();
     save();
 });
-
+$('#remove-file').on('click', function () {
+    ui.confirm('删除' + curFile, function (index) {
+        ui.close(index);
+        fs.unlink(curFile, function () {
+            console.log('刷新')
+            showFolder(basePath);
+        });
+        console.log('刷新2')
+    });
+});
+$('#remame').on('click', function () {
+    var fileName = getNameFromPath(curFile);
+    ui.prompt({
+        title: '新的名称',
+        value: fileName
+    }, function (name, index) {
+        if (!name) {
+            ui.msg('请输入文件名');
+            return;
+        }
+        ui.close(index);
+        fs.rename(curFile, curFile.replace(fileName, name));
+    })
+});
+$('#add-file').on('click', function () {
+    ui.prompt({
+        title: '文件名',
+    }, function (name, index) {
+        if (!name) {
+            ui.msg('请输入文件名');
+            return;
+        }
+        ui.close(index);
+        fs.writeFile(curFolder + '\\' + name, '', function () {
+            ui.msg('添加成功');
+            showFolder(basePath);
+        });
+    })
+});
 
 showFolder(basePath);
 openFile(basePath + '\\other\\readme.md');
@@ -282,7 +336,6 @@ openFile(basePath + '\\other\\readme.md');
 
 function showFolder(path) {
     walk(path, function(err, results) {
-        console.log('最终结果', results);
 
         if (err) throw err;
 
@@ -296,12 +349,12 @@ function showFolder(path) {
             callback: {
                 onClick: function (event, treeId, treeNode, clickFlag) {
                     if (treeNode.children) {
-                        return;
+                        curFolder = treeNode.file;
+                    } else {
+                        openFile(treeNode.file);
+                        //$('#layout-file').hide();
                     }
-                    console.log(treeNode);
-                    console.log(clickFlag)
-                    openFile(treeNode.file);
-                    //$('#layout-file').hide();
+
                 }
             }
 
@@ -333,6 +386,29 @@ function getNameFromPath(filename) {
 }
 function walk(dir, done) {
     var results = [];
+    function compare(a, b) {
+        return a > b;
+        if (/^\w/.test(a)) {
+            return false;
+        }
+        return b.localeCompare(a);
+    }
+    function sortHandle(a, b) {
+        if (a.isParent) {
+            if (b.isParent) {
+                return compare(a.name, b.name);
+            } else {
+                return false;
+            }
+        } else {
+            if (b.isParent) {
+                return true;
+            } else {
+                return compare(a.name, b.name);
+            }
+        }
+        return true;
+    }
     fs.readdir(dir, function(err, list) {
         if (err) return done(err);
         var pending = list.length;
@@ -342,7 +418,6 @@ function walk(dir, done) {
             fs.stat(file, function(err, stat) {
                 if (stat && stat.isDirectory()) {
                     walk(file, function(err, res) {
-                        console.log('目录',getNameFromPath(file));
                         results.push({
                             open: true,
                             id: 'asd121212',
@@ -351,16 +426,16 @@ function walk(dir, done) {
                             isParent: true,
                             children: res
                         });
-                        if (!--pending) done(null, results);
+                        if (!--pending) done(null, results.sort(sortHandle));
                     });
                 } else {
-                    console.log('文件',getNameFromPath(file))
                     results.push({
                         id: 'asd121212',
                         file: file,
+                        isParent: false,
                         name: getNameFromPath(file)
                     });
-                    if (!--pending) done(null, results);
+                    if (!--pending) done(null, results.sort(sortHandle));
                 }
             });
         });
