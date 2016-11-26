@@ -6,6 +6,7 @@ const {BrowserWindow} = electron;
 const {dialog} = require('electron');
 const remote = require('electron').remote;
 const ipcMain = require('electron').ipcMain;
+const {shell} = require('electron');
 
 ipcMain.on('asynchronous-message', function (event, arg) {
     event.sender.send('asynchronous-reply', 'pong')
@@ -23,7 +24,7 @@ function createWindow () {
     mainWindow = new BrowserWindow(/*{width: 800, height: 600}*/);
     mainWindow.loadURL(`file://${__dirname}/markdown.html`);
     //mainWindow.loadURL(`file://${__dirname}/index.html`);
-    //mainWindow.loadURL('https://github.com')
+    //mainWindow.loadURL('http://baidu.com')
     //mainWindow.setMenuBarVisibility(false);
     // 启用开发工具。
     mainWindow.webContents.openDevTools();
@@ -58,6 +59,11 @@ function createWindow () {
     ipcMain.on('open-files', function (event, arg) {
         var ret = dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
         event.sender.send('open-directory', ret);
+    });
+
+    // 打开外部网址
+    ipcMain.on('open-url', function (event, arg) {
+        shell.openExternal(arg);
     });
 }
 

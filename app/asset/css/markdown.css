@@ -4,6 +4,9 @@
     padding-bottom: 5px;
     font-size: 36px;
 }
+blockquote {
+    font-size: inherit;
+}
 
 
 html, body{
@@ -52,6 +55,7 @@ body {
     width: 50%;
     height: 100%;
     background-color: #fff;
+    overflow: auto;
 }
 .CodeMirror {
     width: 100%;
@@ -78,6 +82,7 @@ body {
 /* 预览 */
 .preview {
     padding: 16px;
+    margin-bottom: 16px;
 }
 .theme-default {
 

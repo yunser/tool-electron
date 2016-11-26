@@ -1,11 +1,139 @@
-﻿var fs = require('fs');
+﻿var require = nodeRequire;
+var fs = require('fs');
+var path = require('path');
 var ipc = require("electron").ipcRenderer;
 var remote = require('remote');
 var Tray = remote.require('tray');
 var Menu = remote.require('menu');
-var path = require('path');
 
-require('./markdown.js');
+
+// 上下文菜单插件
+;(function ($) {
+    UI.$curContextElem = null;
+
+    function Context(elem, option) {
+        var that = this;
+        that.opts = $.extend({}, Context.DEFAULTS, option);
+        that.elem = elem;
+        var $menu = $(that.opts.content);
+        $menu.css('zIndex', 10000001);
+
+        function pot($elem, x, y) {
+            var width = $elem.outerWidth();
+            var height = $elem.outerHeight();
+            var winWidth = $(window).width();
+            var winHeight = $(window).height();
+            var ptX = x;
+            var ptY = y;
+
+            if (ptY < winHeight - height) {
+
+            } else if (ptY > height) {
+                ptY = y - height;
+            } else {
+                ptY = winHeight - height;
+            }
+
+            if (ptX < winWidth - width) {
+
+            } else if (ptX > width) {
+                ptX = x - width;
+            } else {
+                ptX = winWidth - width;
+            }
+
+            $elem.css({
+                'left': ptX,
+                'top': ptY
+            });
+        }
+
+        function handle(elem, e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (UI.$curContextElem) {
+                UI.$curContextElem.hide();
+            }
+            UI.$curContextElem = $menu;
+
+            pot($menu, e.clientX, e.clientY);
+
+            //$overlay.show();
+            $menu.show();
+            that.opts.show && that.opts.show(elem);
+
+            $menu.addClass('context-active');
+
+            UI.$curContextElem = $menu;
+
+        }
+
+        if (that.opts.item) {
+            $(elem).on('contextmenu', that.opts.item, function (e) {
+                handle(this, e);
+                return true;
+            });
+        } else {
+            $(elem).on('contextmenu', function (e) {
+                handle(this, e);
+                return true;
+            });
+        }
+
+
+        $menu.on('contextmenu', function () {
+            return false;
+        });
+
+
+    }
+
+    Context.DEFAULTS = {
+        //content
+        show: function (ui) {},
+        hide: function (ui) {}
+    };
+
+    $.fn.contextmenu = function (option) {
+        return $(this).each(function (e) {
+            new Context(this, option);
+        });
+    }
+
+    $(document).on('click', function (e) {
+        if ($(e.target).parents(".context-active").length == 0
+            || $(e.target).is('.dropdown-menu a')) {
+            if (UI.$curContextElem) {
+                UI.$curContextElem.hide();
+                UI.$curContextElem.removeClass('context-active');
+                UI.$curContextElem = null;
+            }
+        }
+    });
+})(jQuery);
+
+;(function () {
+    function MdEditor() {
+
+    }
+
+    MdEditor.DEFAULTS = {
+
+    };
+})();
+
+$(document).contextmenu({
+    content: '#global-menu'
+});
+$('#global-menu-about').on('click', function () {
+    ui.alert('markdown编辑器 v2016.11.26');
+});
+$('#global-menu-help').on('click', function () {
+    ui.frame('help.html', {
+        title: '帮助'
+    });
+});
 
 var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
     theme: 'ambiance',
@@ -20,13 +148,43 @@ var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
     }
 });
 editor.setOption('lineWrapping', true);
+
+
+
+var markdownString = '```js\n console.log("hello"); \n```';
+
+var marked = require('./asset/lib/marked/marked.js');
+
+// Async highlighting with pygmentize-bundled
+/*marked.setOptions({
+    highlight: function (code, lang, callback) {
+        require('pygmentize-bundled')({ lang: lang, format: 'html' }, code, function (err, result) {
+            callback(err, result.toString());
+        });
+    }
+});*/
+
+// Using async version of marked
+marked(markdownString, function (err, content) {
+    if (err) throw err;
+    console.log(content);
+});
+
+// Synchronous highlighting with highlight.js
+/*marked.setOptions({
+    highlight: function (code) {
+        return require('highlight.js').highlightAuto(code).value;
+    }
+});*/
+
 //editor.setSize('auto', 'auto');
 var preview = document.getElementById("preview");
 editor.on("change", function (cm, event) {
     console.log(123)
     var html = editor.getValue();
-    preview.innerHTML = markdown.toHTML(html);
 
+    //preview.innerHTML = markdown.toHTML(html);
+    preview.innerHTML = marked(html, {});
 });
 
 function openFile(path) {
@@ -90,20 +248,21 @@ holder.ondrop = function (e) {
     openFile(file.path);
     return false;
 };
-$('#file-list').on('click', '.file-link', function (e) {
-    e.preventDefault();
-    var url = this.parentNode.getAttribute('data-url');
-    openFile(url);
-    $('#layout-file').hide();
-});
 $('#show-files').on('click', function (e) {
     e.preventDefault();
+    console.log('显示目录')
     $('#layout-file').show();
 });
 $('#hide-files').on('click', function (e) {
     e.preventDefault();
     $('#layout-file').hide();
 });
+var basePath = 'F:\\Users\\cjh1\\Desktop\\note';
+$('#files-refresh').on('click', function (e) {
+    e.preventDefault();
+    showFolder(basePath);
+});
+
 function save() {
     if (curFile) {
         fs.writeFileSync(curFile, editor.getValue(), 'utf8');
@@ -116,28 +275,62 @@ $('#save').on('click', function (e) {
 });
 
 
-var dir = 'e:\\note';
-showFolder(dir);
-openFile('e:\\note\\readme.md');
+showFolder(basePath);
+openFile(basePath + '\\other\\readme.md');
 
-var fs = require('fs');
-var path = require('path');
+
 
 function showFolder(path) {
     walk(path, function(err, results) {
+        console.log('最终结果', results);
+
         if (err) throw err;
 
-        console.log(results);
-        var $list = $('#file-list');
-        $list.empty();
-        var html = '';
-        for (var i = 0; i < results.length; i++) {
-            html += '<li class="file-item" data-url="' + results[i] + '"><a class="file-link" href="">' + results[i] + '</a> </li>'
-        }
-        $list[0].innerHTML = html;
+        var zTreeObj;
+        // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+        var setting = {
+            view: {
+                showLine: false,
+                dblClickExpand: false,
+            },
+            callback: {
+                onClick: function (event, treeId, treeNode, clickFlag) {
+                    if (treeNode.children) {
+                        return;
+                    }
+                    console.log(treeNode);
+                    console.log(clickFlag)
+                    openFile(treeNode.file);
+                    //$('#layout-file').hide();
+                }
+            }
+
+        };
+        // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+        var zNodes = [
+            {
+                id: '1212',
+                name:"test1",
+                open:true,
+                children:[
+                    {name:"test1_1"}, {name:"test1_2"}
+                ]
+            },
+            {
+                id: '1aaa',
+                name:"test2",
+                open:true,
+                children: [
+                    {
+                        name:"test2_1"}, {name:"test2_2"}]}
+        ];
+        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, results);
     });
 }
 
+function getNameFromPath(filename) {
+    return filename.substr(filename.lastIndexOf('\\')+1);
+}
 function walk(dir, done) {
     var results = [];
     fs.readdir(dir, function(err, list) {
@@ -149,11 +342,24 @@ function walk(dir, done) {
             fs.stat(file, function(err, stat) {
                 if (stat && stat.isDirectory()) {
                     walk(file, function(err, res) {
-                        results = results.concat(res);
+                        console.log('目录',getNameFromPath(file));
+                        results.push({
+                            open: true,
+                            id: 'asd121212',
+                            file: file,
+                            name: getNameFromPath(file),
+                            isParent: true,
+                            children: res
+                        });
                         if (!--pending) done(null, results);
                     });
                 } else {
-                    results.push(file);
+                    console.log('文件',getNameFromPath(file))
+                    results.push({
+                        id: 'asd121212',
+                        file: file,
+                        name: getNameFromPath(file)
+                    });
                     if (!--pending) done(null, results);
                 }
             });
@@ -169,7 +375,7 @@ var trayMenu = null;
 var trayMenuTemplate = [
     {
         label: '文件',
-        /*enabled: false*/
+        //enabled: false
         submenu: [
             {
                 label: '新建',
@@ -222,9 +428,6 @@ var trayMenuTemplate = [
     },
     {
         label: '帮助',
-        /*click: function () {
-            ipc.send('close-main-window');
-        },*/
         submenu: [
             {
                 label: '查看帮助',
@@ -236,38 +439,22 @@ var trayMenuTemplate = [
             },
             {
                 label: '关于',
+                //accelerator: 'CmdOrCtrl+M',
+                //role: 'reload', minimize minimize
                 click: function () {
                     ui.frame('about.html', {
                         title: '关于'
                     });
                 }
             },
-            /*{
-                label: '查看帮助',
-                accelerator: 'CmdOrCtrl+M',
-                role: 'minimize'
-            },*/
-            /*{
-                label: 'Close',
-                accelerator: 'CmdOrCtrl+W',
-                role: 'reload',
-                //role: 'close'
-            }*/
         ]
     }
 ];
 trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 Menu.setApplicationMenu(trayMenu);
 
-/*
+$('#preview').on('click', 'a', function (e) {
+    e.preventDefault();
+    ipc.send('open-url', this.href);
+});
 
-
- var menu = new Menu();
- menu.append(new MenuItem({ label: 'MenuItem1', click: function() { console.log('item 1 clicked'); } }));
- menu.append(new MenuItem({ type: 'separator' }));
- menu.append(new MenuItem({ label: 'MenuItem2', type: 'checkbox', checked: true }));
-
- window.addEventListener('contextmenu', function (e) {
- e.preventDefault();
- menu.popup(remote.getCurrentWindow());
- }, false);*/
