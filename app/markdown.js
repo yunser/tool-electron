@@ -1,11 +1,8 @@
-﻿var require = nodeRequire;
-var fs = require('fs');
-var path = require('path');
-var ipc = require("electron").ipcRenderer;
-var remote = require('remote');
-var Tray = remote.require('tray');
-var Menu = remote.require('menu');
-var http = require("http");
+﻿
+var system = System.getInstance();
+system.on('init', function () {
+    
+});
 
 Array.prototype.contains = Array.prototype.contains || function(obj) {
     var i = this.length;
@@ -196,7 +193,7 @@ $('#theme-select').on('change', function () {
 
 var markdownString = '```js\n console.log("hello"); \n```';
 
-var marked = require('./asset/lib/marked/marked.js');
+//var marked = require('./asset/lib/marked/marked.js');
 
 // Async highlighting with pygmentize-bundled
 /*marked.setOptions({
@@ -238,18 +235,13 @@ editor.on("scroll", function (cm, event) {
     //var scrollTop = $('#layout-preview').height() * cm.getScrollInfo().top / cm.getScrollInfo().height;
     //scrollTop = cm.getScrollInfo().top;
     //$('#layout-preview').scrollTop(scrollTop);
-    console.log();
     var info = cm.getScrollInfo();
     var percent = info.top / (info.height - info.clientHeight);
-    console.log(percent);
-    //console.log(info);
     var scrollTop = ($('#layout-preview')[0].scrollHeight - $('#layout-preview')[0].clientHeight) * percent;
     $('#layout-preview').scrollTop(scrollTop);
 
 });
 $('#layout-preview').on('scroll', function () {
-    console.log(this.scrollTop / (this.scrollHeight - this.clientHeight))
-
     var range = this.scrollHeight - this.clientHeight;
 });
 
@@ -301,23 +293,7 @@ editor.on("paste", function (cm, e) {
                         console.log("down success");
                     });*/
 
-                    /*var url = "http://s0.hao123img.com/res/img/logo/logonew.png";
-                    http.get(url, function(res){
-                        var imgData = "";
-                        console.log(res);
-                        res.setEncoding("binary"); //一定要设置response的编码为binary否则会下载下来的图片打不开
-                        res.on("data", function(chunk){
-                            imgData+=chunk;
-                        });
-                        res.on("end", function(){
-                            fs.writeFile(imagePath, imgData, "binary", function(err){
-                                if(err){
-                                    console.log("down fail");
-                                }
-                                console.log("down success");
-                            });
-                        });
-                    });*/
+
                 }
             }
         } else {
@@ -357,7 +333,6 @@ function createDir() {
         return;
     }
 
-    console.log('开始');
     $("#toc").append('<div class="BlogAnchor">' +
         '<span style="color:red;position:absolute;top:-6px;left:0px;cursor:pointer;" onclick="$(\'.BlogAnchor\').hide();">×</span>' +
         '<p>' +
@@ -433,39 +408,31 @@ function createDir() {
 
 function openFile(path) {
     curFile = path;
-    fs.readFile(path,'utf8',function(err,data){
+    system.readFile(path, function(err, data) {
         editor.setValue(data);
     });
+    
+    
     var html = editor.getValue();
     preview.innerHTML = markdown.toHTML(html);
-    console.log('1212')
     createDir();
 }
-ipc.on('asynchronous-reply', function (event, arg) {
-});
-ipc.on('open-file', function (event, arg) {
-    if (arg) {
-        openFile(arg[0]);
-    }
-});
-ipc.on('open-directory', function (event, arg) {
-    if (arg) {
-        showFolder(arg[0]);
-    }
 
-});
-ipc.on('open-file', function (event, arg) {
-});
-ipc.send('asynchronous-message', 'ping')
+
+
+
 
 var btn = document.getElementById('open-file');
 
 function openFolder() {
-    ipc.send('open-files');
+    system.selectDir(function (path) {
+        if (path) {
+            showFolder(path);
+        }
+    });
 }
 
 $(document).on('keydown', function (e) {
-    console.log(e.keyCode)
     if (e.ctrlKey) {
 
         switch (e.keyCode) {
@@ -485,6 +452,7 @@ $(document).on('keydown', function (e) {
                 help();
                 break;
         }
+        return false;
     }
 });
 var curFile;
@@ -503,7 +471,6 @@ function getExt(filename) {
 }
 
 holder.ondrop = function (e) {
-    console.log(112);
     e.preventDefault();
     var file = e.dataTransfer.files[0];
     if (/image\/*/.test(file.type)) {
@@ -520,9 +487,6 @@ holder.ondrop = function (e) {
 
             editor.replaceSelection('![](' + newImageFile + ')');
         });
-
-
-        console.log(curFolder);
     } else {
         fs.stat(file.path, function(err, stat) {
             if (stat && stat.isDirectory()) {
@@ -532,11 +496,6 @@ holder.ondrop = function (e) {
             }
         });
     }
-
-
-
-    console.log(file);
-
     //openFile(file.path);
     return false;
 };
@@ -556,8 +515,9 @@ $('#files-refresh').on('click', function (e) {
 
 function save() {
     if (curFile) {
-        fs.writeFileSync(curFile, editor.getValue(), 'utf8');
-        ui.msg('保存成功');
+        system.writeFile(curFile, editor.getValue(), function () {
+            ui.msg('保存成功');
+        });
     }
 }
 $('#save').on('click', function (e) {
@@ -568,10 +528,8 @@ $('#remove-file').on('click', function () {
     ui.confirm('删除' + curFile, function (index) {
         ui.close(index);
         fs.unlink(curFile, function () {
-            console.log('刷新')
             showFolder(basePath);
         });
-        console.log('刷新2')
     });
 });
 $('#remame').on('click', function () {
@@ -597,7 +555,7 @@ $('#add-file').on('click', function () {
             return;
         }
         ui.close(index);
-        fs.writeFile(curFolder + '\\' + name, '', function () {
+        system.writeFile(curFolder + '\\' + name, '', function () {
             ui.msg('添加成功');
             showFolder(basePath);
         });
@@ -612,7 +570,7 @@ $('#add-folder').on('click', function () {
             return;
         }
         ui.close(index);
-        fs.mkdir(curFolder + '\\' + name, 0777, function () {
+        system.mkdir(curFolder + '\\' + name, function () {
             ui.msg('添加成功');
             showFolder(basePath);
         });
@@ -626,7 +584,7 @@ openFile(basePath + '\\readme.md');
 
 function showFolder(path) {
     curFolder = path;
-    walk(path, function(err, results) {
+    system.loadFiles(path, function(err, results) {
 
         if (err) throw err;
 
@@ -675,83 +633,6 @@ function showFolder(path) {
 function getNameFromPath(filename) {
     return filename.substr(filename.lastIndexOf('\\')+1);
 }
-function walk(dir, done) {
-    var results = [];
-    function compare(a, b) {
-        return a > b;
-        if (/^\w/.test(a)) {
-            return false;
-        }
-        return b.localeCompare(a);
-    }
-    function sortHandle(a, b) {
-        if (a.isParent) {
-            if (b.isParent) {
-                return compare(a.name, b.name);
-            } else {
-                return false;
-            }
-        } else {
-            if (b.isParent) {
-                return true;
-            } else {
-                return compare(a.name, b.name);
-            }
-        }
-        return true;
-    }
-    fs.readdir(dir, function(err, list) {
-        if (err) return done(err);
-        var pending = list.length;
-        console.log('长度'+pending)
-        if (!pending) {
-            return done(null, results);
-        }
-        list.forEach(function(file) {
-            file = path.resolve(dir, file);
-            fs.stat(file, function(err, stat) {
-                if (stat && stat.isDirectory()) {
-                    var fileName = getNameFromPath(file);
-                    if (fileName.charAt(0) !== '.') {
-                        walk(file, function(err, res) {
-                            results.push({
-                                open: true,
-                                id: 'asd121212',
-                                file: file,
-                                name: getNameFromPath(file),
-                                isParent: true,
-                                children: res
-                            });
-                            if (!--pending) {
-                                done(null, results.sort(sortHandle));
-                            }
-                        });
-                    } else {
-                        if (!--pending) {
-                            done(null, results.sort(sortHandle));
-                        }
-                    }
-
-
-                } else {
-                    if (file.charAt(0) !== '.') {
-                        results.push({
-                            id: 'asd121212',
-                            file: file,
-                            isParent: false,
-                            name: getNameFromPath(file)
-                        });
-                    }
-
-                    if (!--pending) {
-                        done(null, results.sort(sortHandle));
-                    }
-                }
-            });
-        });
-    });
-}
-
 
 function help() {
     ui.frame('help.html', {
@@ -763,93 +644,8 @@ var    textarea = document.getElementsByTagName('textarea')[0],
     read_btn = document.getElementById('read_btn'),
     write_btn = document.getElementById('write_btn');
 
-var trayMenu = null;
-var trayMenuTemplate = [
-    {
-        label: '文件',
-        //enabled: false
-        submenu: [
-            {
-                label: '新建',
-                click: function () {
-                    curFile = null;
-                    editor.setValue(''); // TODO
-                }
-            },
-            {
-                label: '打开文件',
-                click: function () {
-                    ipc.send('open-file');
-                }
-            },
-            {
-                label: '打开文件夹',
-                click: function () {
-                    openFolder();
-                }
-            },
-            {
-                label: '保存',
-                click: function () {
-                    save();
-                    if (!curFile) {
-
-                    }
-                }
-            },
-            {
-                label: '另存为',
-                click: function () {
-                    ui.msg('暂不支持');
-                }
-            }
-        ]
-    },
-    {
-        label: '更多',
-        submenu: [
-            {
-                label: '设置',
-                click: function () {
-                    ui.frame('setting.html', {
-                        title: '关于'
-                    });
-                }
-            },
-            {
-                label: 'html转markdown',
-                click: function () {
-                    window.open('html2md.html');
-                }
-            }
-        ]
-    },
-    {
-        label: '帮助',
-        submenu: [
-            {
-                label: '查看帮助',
-                click: function () {
-                    help();
-                }
-            },
-            {
-                label: '关于',
-                //accelerator: 'CmdOrCtrl+M',
-                //role: 'reload', minimize minimize
-                click: function () {
-                    ui.frame('about.html', {
-                        title: '关于'
-                    });
-                }
-            },
-        ]
-    }
-];
-trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
-Menu.setApplicationMenu(trayMenu);
-
 $('#preview').on('click', 'a', function (e) {
     e.preventDefault();
-    ipc.send('open-url', this.href);
+    system.openUri(this.href);
 });
+

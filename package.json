@@ -4,6 +4,9 @@
   "description": "mc_login_app",
   "main": "app/main.js",
   "dependencies": {
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.8",
+    "babel-preset-es2015": "^6.18.0",
     "electron-prebuilt": "^0.37.3",
     "qiniu": "^6.1.13"
   },
@@ -16,6 +19,6 @@
     "start": "electron .",
     "packager": "electron-packager ./app mclans --all --out ./OutApp --version 0.37.3 --overwrite --icon=./app/img/icon/icon.ico"
   },
-  "author": "yupeglv",
-  "license": "ISC"
+  "author": "chen",
+  "license": "MIT"
 }
