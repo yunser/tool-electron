@@ -68,6 +68,7 @@
         <option>yeti</option>
         <option>zenburn</option>
     </select>
+    <span id="status"></span>
 </div>
 <div class="layout-body">
     <div id="layout-editor" class="layout-editor">
@@ -78,12 +79,13 @@
     </div>
 </div>
 <div id="layout-file" class="layout-file">
-    <div>
-        <a id="files-refresh" class="btn btn-default">刷新目录</a>
-        <a id="hide-files" class="btn btn-default">隐藏目录</a>
-        <a id="remove-file" class="btn btn-default">删除文件</a>
-        <a id="remame" class="btn btn-default">文件重命名</a>
+    <div class="layout-tool">
+        <a id="files-refresh" class="btn btn-default">刷新</a>
+        <a id="hide-files" class="btn btn-default">隐藏</a>
+        <a id="remove-file" class="btn btn-default">删除</a>
+        <a id="remame" class="btn btn-default">重命名</a>
         <a id="add-file" class="btn btn-default">添加文件</a>
+        <a id="add-folder" class="btn btn-default">添加文件夹</a>
     </div>
     <ul id="treeDemo" class="ztree"></ul>
 </div>
@@ -92,6 +94,12 @@
     <li><a id="global-menu-about" href="#">关于</a></li>
     <li><a id="global-menu-help" href="#">帮助</a></li>
 </ul>
+<ul id="image-menu" class="dropdown-menu">
+    <li><a id="image-menu-about" href="#">复制地址</a></li>
+</ul>
+<div class="toc">
+
+</div>
 <script>
     window.nodeRequire = require;
     delete window.require;

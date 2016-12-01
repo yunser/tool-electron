@@ -78,17 +78,19 @@
 .cm-s-emd .cm-header {
     color: #F8BB39;
 }
-
 .cm-s-emd .cm-header-1 {
+    color: #ffc233;
     font-size: 1.7em;
 }
 .cm-s-emd .cm-header-2 {
+    color: #e5ae2e;
     font-size: 1.4em;
 }
 .cm-s-emd .cm-header-3,
 .cm-s-emd .cm-header-4
 .cm-s-emd .cm-header-5
 .cm-s-emd .cm-header-6 {
+    color: #e5bc5c;
     font-size: 1.2em;
 }
 .cm-s-emd .cm-quote {
@@ -120,7 +122,7 @@
 }
 
 .cm-s-emd .CodeMirror-selected {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, .8);
 }
 
 .cm-s-emd.CodeMirror-focused .CodeMirror-selected {

@@ -21,7 +21,10 @@ let mainWindow;
 
 function createWindow () {
     // 创建浏览器窗口。
-    mainWindow = new BrowserWindow(/*{width: 800, height: 600}*/);
+    mainWindow = new BrowserWindow({
+        titleBarStyle: 'hidden'
+        //fullscreen: true isFullScreen()
+    }/*{width: 800, height: 600}*/);
     mainWindow.loadURL(`file://${__dirname}/markdown.html`);
     //mainWindow.loadURL(`file://${__dirname}/index.html`);
     //mainWindow.loadURL('http://baidu.com')

@@ -29,8 +29,8 @@ body {
     position: absolute;
     top: 50px;
     left: 0;
+    bottom: 0;
     width: 100%;
-    height: 100%;
 }
 .layout-editor {
     position: absolute;
@@ -48,6 +48,13 @@ body {
     padding: 16px;
     overflow: auto;
 }
+.layout-tool {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 50%;
+    background-color: #fff;
+}
 .layout-file {
     position: absolute;
     top: 0;
@@ -56,6 +63,7 @@ body {
     display: none;
     width: 50%;
     height: 100%;
+    padding-top: 50px;
     background-color: #fff;
     overflow: auto;
 }
@@ -89,4 +97,69 @@ body {
 
 .article-default ul li {
     list-style: disc;
+}
+/* 目录 */
+.toc {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: none;
+    width: 300px;
+    height: 300px;
+    background-color: #f1f1f1;
+}
+/*导航*/
+.BlogAnchor {
+    background: #f1f1f1;
+    padding: 10px;
+    line-height: 180%;
+    position: fixed;
+    right: 48px;
+    top: 48px;
+    border: 1px solid #aaaaaa;
+}
+.BlogAnchor p {
+    font-size: 18px;
+    color: #15a230;
+    margin: 0 0 0.3rem 0;
+    text-align: right;
+}
+.BlogAnchor .AnchorContent {
+    padding: 5px 0px;
+    overflow: auto;
+}
+.BlogAnchor li{
+    text-indent: 0.5rem;
+    font-size: 14px;
+    list-style: none;
+}
+.BlogAnchor li .nav_item{
+    padding: 3px;
+}
+.BlogAnchor li .item_h1{
+    margin-left: 0rem;
+}
+.BlogAnchor li .item_h2{
+    margin-left: 2rem;
+    font-size: 0.8rem;
+}
+.BlogAnchor li .nav_item.current{
+    color: white;
+    background-color: #5cc26f;
+}
+#AnchorContentToggle {
+    font-size: 13px;
+    font-weight: normal;
+    color: #FFF;
+    display: inline-block;
+    line-height: 20px;
+    background: #5cc26f;
+    font-style: normal;
+    padding: 1px 8px;
+}
+.BlogAnchor a:hover {
+    color: #5cc26f;
+}
+.BlogAnchor a {
+    text-decoration: none;
 }

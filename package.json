@@ -4,7 +4,8 @@
   "description": "mc_login_app",
   "main": "app/main.js",
   "dependencies": {
-    "electron-prebuilt": "^0.37.3"
+    "electron-prebuilt": "^0.37.3",
+    "qiniu": "^6.1.13"
   },
   "devDependencies": {
     "electron-packager": "^8.3.0",

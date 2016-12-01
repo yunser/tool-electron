@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="theme-default" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <title>云笔记</title>
+    <link rel="stylesheet" href="asset/lib/eui/1.3/ui.min.css">
+    <link rel="stylesheet" href="asset/lib/editor/eui-editor.min.css">
+    <link rel="stylesheet" href="asset/lib/eui/1.3/iconfont.css">
+    <link rel="stylesheet" href="asset/css/markdown.css">
+    <link rel="stylesheet" href="asset/lib/codemirror/codemirror.min.css">
+    <link rel="stylesheet" href="asset/lib/codemirror/hint/show-hint.css">
+    <link rel="stylesheet" href="asset/lib/ztree/zTreeStyle/zTreeStyle.css">
+    <style>
+        .html-input {
+            width: 400px;
+            height: 400px;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+<div class="layout-header">
+    <a id="refresh" href="#">刷新</a>
+    <a id="create" href="#">生成markdown</a>
+</div>
+<div class="layout-body">
+    <div class="html-input" contenteditable="true"></div>
+    <div id="layout-preview" class="layout-preview">
+        <div id="preview" class="preview article article-default"> </div>
+    </div>
+</div>
+<script>
+    window.nodeRequire = require;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
+</script>
+<script src="asset/lib/jquery/jquery-1.10.2.min.js"></script>
+<script src="asset/lib/eui/1.3/ui.min.js"></script>
+<script src="asset/js/html2md.js"></script>
+
+</body>
+</html>
