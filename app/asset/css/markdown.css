@@ -1,3 +1,24 @@
+/* 滚动条� */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, .08);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, .2);
+}
+::-webkit-scrollbar-track {
+    background-color: rgba(0,0,0,0);
+}
+::-webkit-scrollbar-track:hover {
+    background-color: rgba(0,0,0,.1);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: #ccc;
+}
+/**/
 .article h1 {
     margin-top: 20px;
     margin-bottom: 15px;
@@ -24,47 +45,52 @@ body {
     left: 0;
     width: 100%;
     height: 50px;
+    border-bottom: 1px solid #eee;
+}
+.layout-status-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 32px;
+    padding: 4px 16px;
+    background-color: #f1f1f1;
+    border-top: 1px solid #ccc;
+    z-index: 10;
 }
 .layout-body {
     position: absolute;
     top: 50px;
     left: 0;
-    bottom: 0;
+    bottom: 32px;
     width: 100%;
 }
 .layout-editor {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 50%;
+    left: 20%;
+    width: 40%;
     height: 100%;
 }
 .layout-preview {
     position: absolute;
     top: 0;
     right: 0;
-    width: 50%;
+    width: 40%;
     height: 100%;
     padding: 16px;
+    border-left: 1px solid #eee;
     overflow: auto;
-}
-.layout-tool {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 50%;
-    background-color: #fff;
 }
 .layout-file {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 10000;
-    display: none;
-    width: 50%;
+    /*display: none;*/
+    width: 20%;
     height: 100%;
-    padding-top: 50px;
     background-color: #fff;
+    border-right: 1px solid #eee;
     overflow: auto;
 }
 .CodeMirror {
@@ -162,4 +188,30 @@ body {
 }
 .BlogAnchor a {
     text-decoration: none;
+}
+.layout-editor .tab {
+    height: 100%;
+}
+.layout-ediotr .file-tab {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+}
+.layout-editor .tab-content {
+    position: absolute;
+    top: 42px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: auto;
+}
+.layout-ediotr .tab-panel {
+    position: absolute;
+    top: 100px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: auto;
 }

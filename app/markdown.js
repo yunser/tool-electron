@@ -1,8 +1,8 @@
-﻿
+﻿import {asd} from './es6';
+import TabEx from './tab-ex';
+
+
 var system = System.getInstance();
-system.on('init', function () {
-    
-});
 
 Array.prototype.contains = Array.prototype.contains || function(obj) {
     var i = this.length;
@@ -12,6 +12,10 @@ Array.prototype.contains = Array.prototype.contains || function(obj) {
         }
     }
     return false;
+};
+
+String.prototype.contains = String.prototype.contains || function (str) {
+    return this.indexOf(str) >= 0;
 };
 
 // 上下文菜单插件
@@ -151,7 +155,10 @@ $(document).contextmenu({
 $('#layout-preview').contextmenu({
     item: 'img',
     content: '#image-menu'
-})
+});
+$('#layout-file').contextmenu({
+    content: '#file-menu'
+});
 
 $('#global-menu-about').on('click', function () {
     ui.alert('markdown编辑器 v2016.11.26');
@@ -161,6 +168,10 @@ $('#global-menu-help').on('click', function () {
         title: '帮助'
     });
 });
+$('#global-menu-close-preview').on('click', function () {
+    $('#layout-preview').hide();
+});
+
 
 var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
     //theme: 'emd',
@@ -191,56 +202,24 @@ $('#theme-select').on('change', function () {
     setEditorTheme(theme);
 });
 
-var markdownString = '```js\n console.log("hello"); \n```';
-
-//var marked = require('./asset/lib/marked/marked.js');
-
-// Async highlighting with pygmentize-bundled
-/*marked.setOptions({
-    highlight: function (code, lang, callback) {
-        require('pygmentize-bundled')({ lang: lang, format: 'html' }, code, function (err, result) {
-            callback(err, result.toString());
-        });
-    }
-});*/
-
-// Using async version of marked
-/*marked(markdownString, function (err, content) {
-    if (err) throw err;
-});*/
-
-// Synchronous highlighting with highlight.js
-/*marked.setOptions({
-    highlight: function (code) {
-        return require('highlight.js').highlightAuto(code).value;
-    }
-});*/
-
-//editor.setSize('auto', 'auto');
 var preview = document.getElementById("preview");
 editor.on("change", function (cm, event) {
     var html = editor.getValue();
-
-    //preview.innerHTML = markdown.toHTML(html);
     preview.innerHTML = marked(html, {});
 
     // 字数统计
-
     var p = $('#preview').find('p').length;
     $('#status').text(html.replace(/\s/g, '').length + '字符, ' + p + '段落');
-
 });
+
 editor.on("scroll", function (cm, event) {
-    //var html = editor.mirror.currentLine();
-    //var scrollTop = $('#layout-preview').height() * cm.getScrollInfo().top / cm.getScrollInfo().height;
-    //scrollTop = cm.getScrollInfo().top;
-    //$('#layout-preview').scrollTop(scrollTop);
     var info = cm.getScrollInfo();
     var percent = info.top / (info.height - info.clientHeight);
     var scrollTop = ($('#layout-preview')[0].scrollHeight - $('#layout-preview')[0].clientHeight) * percent;
     $('#layout-preview').scrollTop(scrollTop);
 
 });
+
 $('#layout-preview').on('scroll', function () {
     var range = this.scrollHeight - this.clientHeight;
 });
@@ -282,9 +261,9 @@ editor.on("paste", function (cm, e) {
                     console.log(111);
                     var buf = new Buffer(blob, 'base64'); // decode
                     console.log(222);
-                    fs.writeFile(imagePath, blob, function(err) {
+                    /*fs.writeFile(imagePath, blob, function(err) {
 
-                    })
+                    })*/
 
                     /*fs.writeFile(imagePath, blob, "binary", function(err){
                         if(err){
@@ -301,6 +280,7 @@ editor.on("paste", function (cm, e) {
         }
     }
 
+    return true;
 });
 
 
@@ -438,21 +418,21 @@ $(document).on('keydown', function (e) {
         switch (e.keyCode) {
             case 66: // b
                 editor.replaceSelection('**' + editor.getSelection() + '**');
-                break;
+                return false;
             case 73: // i
                 editor.replaceSelection('*' + editor.getSelection() + '*');
-                break;
+                return false;
             case 82: // r
                 window.location.reload(true);
-                break;
+                return false;
             case 83: // s
                 save();
-                break;
+                return false;
             case 191: // /
                 help();
-                break;
+                return false;
         }
-        return false;
+
     }
 });
 var curFile;
@@ -469,11 +449,35 @@ holder.ondragleave = holder.ondragend = function () {
 function getExt(filename) {
     return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
 }
+function getNameFromPath(filename) {
+    return filename.substr(filename.lastIndexOf('\\')+1);
+}
+
+function getType(filename) {
+    var ext = getExt(filename);
+    if (!ext) {
+        return null;
+    }
+    if ('txt|css|md'.contains(ext)) {
+        return 'text';
+    } else if ('png|jpg|gif'.contains(ext)) {
+        return 'image'
+    } else if ('mp4'.contains(ext)) {
+        return 'video';
+    } else if ('mp3'.contains(ext)) {
+        return 'audio';
+    }
+
+    return 'text'; // TODO
+    //text/plain
+    //text/html
+    //application
+}
 
 holder.ondrop = function (e) {
     e.preventDefault();
     var file = e.dataTransfer.files[0];
-    if (/image\/*/.test(file.type)) {
+    /*if (/image\/!*!/.test(file.type)) {
 
 
         var imagePath = basePath + '\\data\\img';
@@ -495,7 +499,7 @@ holder.ondrop = function (e) {
                 openFile(file.path);
             }
         });
-    }
+    }*/
     //openFile(file.path);
     return false;
 };
@@ -503,9 +507,25 @@ $('#show-files').on('click', function (e) {
     e.preventDefault();
     $('#layout-file').show();
 });
-$('#hide-files').on('click', function (e) {
+
+$('#global-menu-toggle').on('click', function (e) {
     e.preventDefault();
-    $('#layout-file').hide();
+    if ($('#layout-file').is(':hidden')) {
+        $('#layout-file').show();
+        $('#layout-editor').css({
+            'width': '40%',
+            'left': '20%'
+        });
+        $('#layout-preview').css('width', '40%');
+    } else {
+        $('#layout-file').hide();
+        $('#layout-editor').css({
+            'width': '50%',
+            'left': '0'
+        });
+        $('#layout-preview').css('width', '50%');
+    }
+
 });
 
 $('#files-refresh').on('click', function (e) {
@@ -543,7 +563,7 @@ $('#remame').on('click', function () {
             return;
         }
         ui.close(index);
-        fs.rename(curFile, curFile.replace(fileName, name));
+        system.rename(curFile, curFile.replace(fileName, name));
     })
 });
 $('#add-file').on('click', function () {
@@ -592,20 +612,50 @@ function showFolder(path) {
         // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
         var setting = {
             view: {
-                showLine: false,
+                /*showLine: false,*/
                 dblClickExpand: false,
             },
             callback: {
                 onClick: function (event, treeId, treeNode, clickFlag) {
-                    if (treeNode.children) {
-                        curFolder = treeNode.file;
+                    var ext = getExt(treeNode.file);
+                    var type = getType(treeNode.file);
+                    if (type === 'text') {
+                        if (treeNode.children) {
+                            curFolder = treeNode.file;
+                        } else {
+                            openFile(treeNode.file);
+                            //$('#layout-file').hide();
+                        }
+                    } else if (type === 'image') {
+                        system.openUri(treeNode.file);
                     } else {
-                        openFile(treeNode.file);
-                        //$('#layout-file').hide();
+                        ui.msg('暂不支持打开此类型的文件')
+                    }
+
+                },
+                beforeDrop: function(treeId, treeNodes, targetNode, moveType) {
+                    return targetNode ? targetNode.drop !== false : true;
+                },
+                onDrop: function(event, treeId, treeNodes, targetNode, moveType, isCopy) {
+                    if (targetNode) {
+                        console.log(treeNodes, targetNode);
+                        var fileName = getNameFromPath(treeNodes[0].file);
+                        var newName = targetNode.file + '\\' + fileName ;
+                        console.log('把' + treeNodes[0].file + '重命名' + newName);
+                        system.rename(treeNodes[0].file, newName);
                     }
 
                 }
+            },
+            edit: {
+                enable: true,
+                showRemoveBtn: false,
+                showRenameBtn: false,
+                drag: {
+                    isMove: true
+                }
             }
+
 
         };
         // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
@@ -630,9 +680,7 @@ function showFolder(path) {
     });
 }
 
-function getNameFromPath(filename) {
-    return filename.substr(filename.lastIndexOf('\\')+1);
-}
+
 
 function help() {
     ui.frame('help.html', {
@@ -649,3 +697,181 @@ $('#preview').on('click', 'a', function (e) {
     system.openUri(this.href);
 });
 
+var trayMenuTemplate = [
+    {
+        label: '文件',
+        //enabled: false
+        submenu: [
+            {
+                label: '新建',
+                click: function () {
+                    curFile = null;
+                    editor.setValue(''); // TODO
+                }
+            },
+            {
+                label: '打开文件',
+                click: function () {
+                    system.selectFile(function (uri) {
+                        if (uri) {
+                            openFile(uri);
+                        }
+                    });
+                }
+            },
+            {
+                label: '打开文件夹',
+                click: function () {
+                    openFolder();
+                }
+            },
+            {
+                label: '保存',
+                click: function () {
+                    save();
+                    if (!curFile) {
+
+                    }
+                }
+            },
+            {
+                label: '另存为',
+                click: function () {
+                    ui.msg('暂不支持');
+                }
+            }
+        ]
+    },
+    {
+        label: '更多',
+        submenu: [
+            {
+                label: '设置',
+                click: function () {
+                    ui.frame('setting.html', {
+                        title: '关于'
+                    });
+                }
+            },
+            {
+                label: 'html转markdown',
+                click: function () {
+                    window.open('html2md.html');
+                }
+            },
+            {
+                label: '导出为网页',
+                click: function () {
+
+                }
+            }
+        ]
+    },
+    {
+        label: '工具',
+        submenu: [
+            {
+                label: '生成文档',
+                click: function () {
+                    system.selectDir(function (path) {
+                        system.createDoc(path);
+                    });
+                }
+            }
+        ]
+    },
+    {
+        label: '帮助',
+        submenu: [
+            {
+                label: '查看帮助',
+                click: function () {
+                    help();
+                }
+            },
+            {
+                label: '关于',
+                //accelerator: 'CmdOrCtrl+M',
+                //role: 'reload', minimize minimize
+                click: function () {
+                    ui.frame('about.html', {
+                        title: '关于'
+                    });
+                }
+            },
+        ]
+    }
+];
+
+var menuevent = {};
+function showMenu(menu) {
+    var html = '';
+    for (var i = 0; i < menu.length; i++) {
+        var item = menu[i];
+
+        html += '<li class="nav-item dropdown dropdown-hover">' +
+            '<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" data-id="' + i + '-0">' +
+            item.label + '<i class="caret"></i>' +
+            '</a>' +
+            (function () {
+                if (item.submenu) {
+                    var submenu = '<ul class="dropdown-menu">';
+                    for (var j = 0; j < item.submenu.length; j++) {
+                        submenu += '<li><a data-id="' + i + (j + 1)+ '" href="#">' + item.submenu[j].label + '</a></li>';
+                        if (item.submenu[j].click) {
+                            menuevent[i + '' + (j + 1)] = item.submenu[j].click;
+                        }
+                    }
+                    submenu += '</ul>';
+                    return submenu;
+
+                } else {
+                    return '';
+                }
+
+            })() + '</li>';
+        if (item.click) {
+            menuevent[i + '0'] = click;
+        }
+    }
+    $('#menu-layoutit')[0].innerHTML = html;
+    $('#menu-layoutit').on('click', 'a', function () {
+        var id = $(this).data('id');
+        if (menuevent[id]) {
+            menuevent[id]();
+        }
+    })
+}
+
+showMenu(trayMenuTemplate);
+
+var tab = new TabEx('#tabs', {
+    //monitor: '.topbar'
+});
+
+//$('#tabs').addtabs({});
+
+var iddd = 123;
+function getIdd() {
+    return iddd++;
+}
+
+var id = getIdd();
+/*tab.add({
+    id: $(this).attr('addtabs'),
+    title: '标题',
+    content: '<textarea id="' + id + '"></textarea>',
+})
+var editor = CodeMirror.fromTextArea(document.getElementById(id), {
+    //theme: 'emd',
+    mode: 'gfm',
+    selectionPointer: true,
+    //lineNumbers: true,
+    matchBrackets: true,
+    indentUnit: 4,
+    indentWithTabs: true,
+    onChange: function () {
+
+    }
+});
+ */

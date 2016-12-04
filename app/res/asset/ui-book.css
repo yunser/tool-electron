@@ -1,0 +1,142 @@
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+.article {
+    font-size: 16px;
+}
+.article h1 {
+    font-size: 2em; /* TODO */
+    margin: 1em 0;
+}
+.article ul li {
+    list-style: disc;
+}
+
+/* 滚动条� */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, .08);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, .2);
+}
+::-webkit-scrollbar-track {
+    background-color: rgba(0,0,0,0);
+}
+::-webkit-scrollbar-track:hover {
+    background-color: rgba(0,0,0,.1);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: #ccc;
+}
+/**/
+.layout-summary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100%;
+    padding: 32px;
+    background-color: #fafafa;
+    border-right: 1px solid #eee;
+}
+.layout-content {
+    position: absolute;
+    top: 0;
+    left: 300px;
+    right: 0;
+    height: 100%;
+    padding: 32px;
+    background-color: #fefefe;
+    overflow: auto;
+    transition: all .5s;
+}
+.layout-article {
+
+}
+.layout-content .article {
+
+}
+.layout-content-header {
+    margin-bottom: 16px;
+}
+.layout-content-header .icon-menu {
+    color: #999;
+    font-size: 16px;
+}
+
+.summary-list {}
+.summary-list li {
+
+}
+.summary-list li > a {
+    display: block;
+    color: #999;
+    font-size: 18px;
+    padding: 4px 0;
+}
+.summary-list li > a:hover {
+    color: #000;
+}
+.summary-list ul {
+    padding-left: 32px;
+}
+
+/* 黑色主题 */
+.theme-dark .article {
+    background-color: 
+}
+
+.theme-dark body {
+    background-color: #2e3144;
+}
+.theme-dark .layout-summary {
+    background-color: #2e3144;
+    border: none;
+}
+.theme-dark .layout-content {
+    color: #fff;
+    background-color: #1c1e2b;
+}
+.theme-dark .article {
+    color: #fff;
+    background-color: #1c1e2b;
+}
+.theme-dark .summary-list a {
+    color: #c9c7d2;
+}
+.theme-dark .summary-list a:hover {
+    color: #fff;
+}
+
+/* 纸张主题 */
+.theme-book .article {
+    background-color: 
+}
+
+.theme-book body {
+    background-color: #faf8ec;
+}
+.theme-book .layout-summary {
+    background-color: #eee7d5;
+    border: none;
+}
+.theme-book .layout-content {
+    color: #fff;
+    background-color: #faf8ec;
+}
+.theme-book .article {
+    color: #753e17;
+    background-color: #faf8ec;
+}
+.theme-book .summary-list a {
+    color: #6f4219;
+}
+.theme-book .summary-list a:hover {
+    color: #000;
+}

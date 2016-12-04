@@ -1,14 +1,14 @@
 var path = require('path');
 module.exports = {
-    entry: ["./app/system.js", "./app/markdown.js"],
+    entry: ["./app/markdown.js"],
     output: {
-        path: __dirname + 'app',
-        filename: "all.js"
+        path: __dirname,
+        filename: "app/all.js"
     },
     module: {
         loaders: [
             {
-                test: path.join(__dirname, 'asset/js'),
+                test: path.join(__dirname, 'app'),
                 loader: 'babel-loader',
                 query: {
                     presets: ['es2015']

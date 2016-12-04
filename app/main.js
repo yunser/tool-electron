@@ -28,8 +28,7 @@ function createWindow () {
     mainWindow.loadURL(`file://${__dirname}/markdown.html`);
     //mainWindow.loadURL(`file://${__dirname}/index.html`);
     //mainWindow.loadURL('http://baidu.com')
-    //mainWindow.setMenuBarVisibility(false);
-    // 启用开发工具。
+    mainWindow.setMenuBarVisibility(false);
     mainWindow.webContents.openDevTools();
 
     mainWindow.on('closed', function () {
@@ -87,3 +86,4 @@ app.on('activate', function () {
         createWindow()
     }
 });
+

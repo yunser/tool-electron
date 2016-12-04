@@ -69,7 +69,6 @@
 			nameIsHTML: false,
 			selectedMulti: true,
 			showIcon: true,
-			showLine: true,
 			showTitle: true,
 			txtSelectedEnable: false
 		},
@@ -1238,7 +1237,7 @@
 			html.push("</li>");
 		},
 		makeDOMNodeMainBefore: function(html, setting, node) {
-			html.push("<li id='", node.tId, "' class='", consts.className.LEVEL, node.level,"' tabindex='0' hidefocus='true' treenode>");
+			html.push("<li id='", node.tId, "' class='" + node.className + " ", consts.className.LEVEL, node.level,"' tabindex='0' hidefocus='true' treenode>");
 		},
 		makeDOMNodeNameAfter: function(html, setting, node) {
 			html.push("</a>");
@@ -1286,19 +1285,7 @@
 		},
 		makeNodeLineClass: function(setting, node) {
 			var lineClass = [];
-			if (setting.view.showLine) {
-				if (node.level == 0 && node.isFirstNode && node.isLastNode) {
-					lineClass.push(consts.line.ROOT);
-				} else if (node.level == 0 && node.isFirstNode) {
-					lineClass.push(consts.line.ROOTS);
-				} else if (node.isLastNode) {
-					lineClass.push(consts.line.BOTTOM);
-				} else {
-					lineClass.push(consts.line.CENTER);
-				}
-			} else {
-				lineClass.push(consts.line.NOLINE);
-			}
+            lineClass.push(consts.line.NOLINE);
 			if (node.isParent) {
 				lineClass.push(node.open ? consts.folder.OPEN : consts.folder.CLOSE);
 			} else {
@@ -1317,12 +1304,9 @@
 			return node[urlKey] ? node[urlKey] : null;
 		},
 		makeUlHtml: function(setting, node, html, content) {
-			html.push("<ul id='", node.tId, consts.id.UL, "' class='", consts.className.LEVEL, node.level, " ", view.makeUlLineClass(setting, node), "' style='display:", (node.open ? "block": "none"),"'>");
+			html.push("<ul id='", node.tId, consts.id.UL, "' class='", consts.className.LEVEL, node.level, " ", "' style='display:", (node.open ? "block": "none"),"'>");
 			html.push(content);
 			html.push("</ul>");
-		},
-		makeUlLineClass: function(setting, node) {
-			return ((setting.view.showLine && !node.isLastNode) ? consts.line.LINE : "");
 		},
 		removeChildNodes: function(setting, node) {
 			if (!node) return;
@@ -1476,25 +1460,6 @@
 				view.replaceIcoClass(parentNode, tmp_icoObj, consts.folder.DOCU);
 				tmp_ulObj.css("display", "none");
 
-			} else if (setting.view.showLine && childLength > 0) {
-				//old parentNode has child nodes
-				var newLast = parentNode[childKey][childLength - 1];
-				tmp_ulObj = $$(newLast, consts.id.UL, setting);
-				tmp_switchObj = $$(newLast, consts.id.SWITCH, setting);
-				tmp_icoObj = $$(newLast, consts.id.ICON, setting);
-				if (parentNode == root) {
-					if (parentNode[childKey].length == 1) {
-						//node was root, and ztree has only one root after move node
-						view.replaceSwitchClass(newLast, tmp_switchObj, consts.line.ROOT);
-					} else {
-						var tmp_first_switchObj = $$(parentNode[childKey][0], consts.id.SWITCH, setting);
-						view.replaceSwitchClass(parentNode[childKey][0], tmp_first_switchObj, consts.line.ROOTS);
-						view.replaceSwitchClass(newLast, tmp_switchObj, consts.line.BOTTOM);
-					}
-				} else {
-					view.replaceSwitchClass(newLast, tmp_switchObj, consts.line.BOTTOM);
-				}
-				tmp_ulObj.removeClass(consts.line.LINE);
 			}
 		},
 		replaceIcoClass: function(node, obj, newName) {
@@ -1556,13 +1521,8 @@
 			if (!node) return;
 			var switchObj = $$(node, consts.id.SWITCH, setting),
 			ulObj = $$(node, consts.id.UL, setting),
-			icoObj = $$(node, consts.id.ICON, setting),
-			ulLine = view.makeUlLineClass(setting, node);
-			if (ulLine.length==0) {
-				ulObj.removeClass(consts.line.LINE);
-			} else {
-				ulObj.addClass(ulLine);
-			}
+			icoObj = $$(node, consts.id.ICON, setting);
+            ulObj.removeClass(consts.line.LINE);
 			switchObj.attr("class", view.makeNodeLineClass(setting, node));
 			if (node.isParent) {
 				switchObj.removeAttr("disabled");
@@ -1881,3 +1841,4 @@
 	$$ = tools.$,
 	consts = zt.consts;
 })(jQuery);
+// 1844 line

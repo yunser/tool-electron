@@ -10,89 +10,138 @@
     <link rel="stylesheet" href="asset/lib/codemirror/codemirror.min.css">
     <link rel="stylesheet" href="asset/lib/codemirror/hint/show-hint.css">
     <link rel="stylesheet" href="asset/lib/ztree/zTreeStyle/zTreeStyle.css">
+    <link rel="stylesheet" href="tabs-ex.css">
 </head>
 <body>
 <div class="layout-header">
-    <a href="index.html">富文本编辑器</a>
-    <a id="show-files" href="#">显示目录</a>
-    <span>主题</span>
-    <select id="theme-select">
-        <option value="default">default</option>
-        <option selected>emd</option>
-        <option>3024-day</option>
-        <option>3024-night</option>
-        <option>abcdef</option>
-        <option>ambiance</option>
-        <option>base16-dark</option>
-        <option>base16-light</option>
-        <option>bespin</option>
-        <option>blackboard</option>
-        <option>cobalt</option>
-        <option>colorforth</option>
-        <option>dracula</option>
-        <option>duotone-dark</option>
-        <option>duotone-light</option>
-        <option>eclipse</option>
-        <option>elegant</option>
-        <option>erlang-dark</option>
-        <option>hopscotch</option>
-        <option>icecoder</option>
-        <option>isotope</option>
-        <option>lesser-dark</option>
-        <option>liquibyte</option>
-        <option>material</option>
-        <option>mbo</option>
-        <option>mdn-like</option>
-        <option>midnight</option>
-        <option>monokai</option>
-        <option>neat</option>
-        <option>neo</option>
-        <option>night</option>
-        <option>panda-syntax</option>
-        <option>paraiso-dark</option>
-        <option>paraiso-light</option>
-        <option>pastel-on-dark</option>
-        <option>railscasts</option>
-        <option>rubyblue</option>
-        <option>seti</option>
-        <option>solarized dark</option>
-        <option>solarized light</option>
-        <option>the-matrix</option>
-        <option>tomorrow-night-bright</option>
-        <option>tomorrow-night-eighties</option>
-        <option>ttcn</option>
-        <option>twilight</option>
-        <option>vibrant-ink</option>
-        <option>xq-dark</option>
-        <option>xq-light</option>
-        <option>yeti</option>
-        <option>zenburn</option>
-    </select>
-    <span id="status"></span>
+    <div class="topmenu">
+
+    </div>
+    <header class="navbar navbar-light navbar-fixed-top" role="navigation">
+        <ul class="nav navbar-nav" id="menu-layoutit">
+            <li class="nav-item dropdown dropdown-hover">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                    文件 <i class="caret"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="save" href="#">保存</a></li>
+                    <li><a id="" href="#">保存</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                    插入 <i class="caret"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="" href="#">保存</a></li>
+                    <li><a id="" href="#">保存</a></li>
+                </ul>
+            </li>
+        </ul>
+        <span>主题</span>
+        <select id="theme-select">
+            <option value="default">default</option>
+            <option selected>emd</option>
+            <option>3024-day</option>
+            <option>3024-night</option>
+            <option>abcdef</option>
+            <option>ambiance</option>
+            <option>base16-dark</option>
+            <option>base16-light</option>
+            <option>bespin</option>
+            <option>blackboard</option>
+            <option>cobalt</option>
+            <option>colorforth</option>
+            <option>dracula</option>
+            <option>duotone-dark</option>
+            <option>duotone-light</option>
+            <option>eclipse</option>
+            <option>elegant</option>
+            <option>erlang-dark</option>
+            <option>hopscotch</option>
+            <option>icecoder</option>
+            <option>isotope</option>
+            <option>lesser-dark</option>
+            <option>liquibyte</option>
+            <option>material</option>
+            <option>mbo</option>
+            <option>mdn-like</option>
+            <option>midnight</option>
+            <option>monokai</option>
+            <option>neat</option>
+            <option>neo</option>
+            <option>night</option>
+            <option>panda-syntax</option>
+            <option>paraiso-dark</option>
+            <option>paraiso-light</option>
+            <option>pastel-on-dark</option>
+            <option>railscasts</option>
+            <option>rubyblue</option>
+            <option>seti</option>
+            <option>solarized dark</option>
+            <option>solarized light</option>
+            <option>the-matrix</option>
+            <option>tomorrow-night-bright</option>
+            <option>tomorrow-night-eighties</option>
+            <option>ttcn</option>
+            <option>twilight</option>
+            <option>vibrant-ink</option>
+            <option>xq-dark</option>
+            <option>xq-light</option>
+            <option>yeti</option>
+            <option>zenburn</option>
+        </select>
+    </header>
+
+
 </div>
 <div class="layout-body">
+    <div id="layout-file" class="layout-file">
+        <ul id="treeDemo" class="ztree"></ul>
+    </div>
     <div id="layout-editor" class="layout-editor">
-        <textarea id="text-input" rows="6" cols="60">Type **Markdown** here.</textarea>
+        <div id="tabs" class="tab">
+            <ul class="file-tab nav nav-tabs">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#home" data-toggle="tab">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#asd" data-toggle="tab">asd</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div id="home" class="tab-pane active in">
+                    <textarea id="text-input" rows="6" cols="60">Type **Markdown** here.</textarea>
+                </div>
+                <div id="asd" class="tab-pane">
+                    <div>11323</div>
+                </div>
+            </div>
+        </div>
+
     </div>
     <div id="layout-preview" class="layout-preview">
         <div id="preview" class="preview article article-default"> </div>
     </div>
 </div>
-<div id="layout-file" class="layout-file">
-    <div class="layout-tool">
-        <a id="files-refresh" class="btn btn-default">刷新</a>
-        <a id="hide-files" class="btn btn-default">隐藏</a>
-        <a id="remove-file" class="btn btn-default">删除</a>
-        <a id="remame" class="btn btn-default">重命名</a>
-        <a id="add-file" class="btn btn-default">添加文件</a>
-        <a id="add-folder" class="btn btn-default">添加文件夹</a>
-    </div>
-    <ul id="treeDemo" class="ztree"></ul>
+<div class="layout-status-bar">
+    <span id="status"></span>
 </div>
 <!-- 全局右键菜单 -->
 <ul id="global-menu" class="dropdown-menu">
     <li><a id="global-menu-about" href="#">关于</a></li>
     <li><a id="global-menu-help" href="#">帮助</a></li>
+    <li><a id="global-menu-toggle" href="#">显示/隐藏文件视图</a></li>
+    <li><a id="global-menu-close-preview" href="#">关闭预览</a></li>
+</ul>
+<ul id="file-menu" class="dropdown-menu">
+    <li><a id="files-refresh" href="#">刷新</a></li>
+    <li><a id="hide-files" href="#">隐藏</a></li>
+    <li><a id="remove-file" href="#">删除</a></li>
+    <li><a id="remame" href="#">重命名</a></li>
+    <li><a id="add-file" href="#">添加文件</a></li>
+    <li><a id="add-folder" href="#">添加文件夹</a></li>
+    <li><a id="add-folder" href="index.html">富文本编辑器</a></li>
 </ul>
 <ul id="image-menu" class="dropdown-menu">
     <li><a id="image-menu-about" href="#">复制地址</a></li>
@@ -126,11 +175,13 @@
 <script src="asset/lib/codemirror/addon/edit/continuelist.js"></script>
 <script src="asset/lib/codemirror/mode/markdown/markdown.js"></script>
 <script src="asset/lib/codemirror/mode/gfm/gfm.js"></script>
-<script src="asset/lib/ztree/jquery.ztree.core.min.js"></script>
+<script src="asset/lib/ztree/jquery.ztree.core.js"></script>
+<script src="asset/lib/ztree/jquery.ztree.exedit.js"></script>
 <script src="asset/lib/markdown/markdown.min.js"></script>
 <script src="asset/lib/marked/marked.js"></script>
+<script src="asset/lib/vue/vue.js"></script>
+<!--<script src="http://unpkg.com/vue/dist/vue.js"></script>-->
 <script src="system.js"></script>
-<script src="markdown.js"></script>
-<!--<script src="all.js"></script>-->
+<script src="all.js"></script>
 </body>
 </html>

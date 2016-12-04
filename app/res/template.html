@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zhcn" class="theme-{{theme}}">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="keywords" content="{{keywords}}">
+<meta name="description" content="{{description}}">
+<title>{{title}}</title>
+<link rel="stylesheet" href="{{path}}asset/lib/eui/16.12/ui.min.css">
+<link rel="stylesheet" href="{{path}}asset/lib/eui/16.12/iconfont.css">
+<link rel="stylesheet" href="{{path}}asset/ui-book.css">
+<style></style>
+</head>
+<body>
+<div id="layout-summary" class="layout-summary">
+    {{summary}}
+</div>
+<div id="layout-content" class="layout-content">
+    <div class="layout-content-header">
+        <a id="toggle-summary" href="#"><i class="icon icon-menu"></i></a>
+    </div>
+    <div class="layout-article">
+        <article class="article">
+            {{content}}
+        </article>
+    </div>
+        
+</div>
+<script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+<script src="{{path}}asset/ui-book.js"></script>
+</body>
+</html>
