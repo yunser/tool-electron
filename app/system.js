@@ -73,17 +73,25 @@ function getNameFromPath(filename) {
     return filename.substr(filename.lastIndexOf('\\')+1);
 }
 
-function walk(dir, done) {
+function walk(dir, depth, done) {
     var results = [];
     function compare(a, b) {
-        return a > b;
+       /* return a > b;
         if (/^\w/.test(a)) {
             return false;
-        }
+        }*/
         return b.localeCompare(a);
     }
     function sortHandle(a, b) {
+        if (a.isParent && !b.isParent) {
+            return false;
+        }
+        if (b.isParent && !a.isParent) {
+            return true;
+        }
         if (a.isParent) {
+        }
+        /*if (a.isParent) {
             if (b.isParent) {
                 return compare(a.name, b.name);
             } else {
@@ -95,14 +103,24 @@ function walk(dir, done) {
             } else {
                 return compare(a.name, b.name);
             }
-        }
-        return true;
+        }*/
+        return compare(a.name, b.name);
+    }
+    function myDown(results) {
+        done(null, results.sort(sortHandle));
     }
     fs.readdir(dir, function(err, list) {
-        if (err) return done(err);
+       /* console.log(['123', 'a', 'c', 'd', '456', '中文', '呵呵'].sort(function (a, b) {
+            return a.localeCompare(b);
+        }));*/
+
+        if (err) {
+            return done(err);
+        }
+
         var pending = list.length;
         if (!pending) {
-            return done(null, results);
+            return myDown(results);
         }
         list.forEach(function(file) {
             file = path.resolve(dir, file);
@@ -110,22 +128,21 @@ function walk(dir, done) {
                 if (stat && stat.isDirectory()) {
                     var fileName = getNameFromPath(file);
                     if (fileName.charAt(0) !== '.') {
-                        walk(file, function(err, res) {
+                        walk(file, depth + 1, function(err, res) {
                             results.push({
-                                open: true,
-                                id: 'asd121212',
+                                open: depth < 1,
                                 file: file,
                                 name: getNameFromPath(file),
                                 isParent: true,
                                 children: res,
                             });
                             if (!--pending) {
-                                done(null, results.sort(sortHandle));
+                                myDown(results);
                             }
                         });
                     } else {
                         if (!--pending) {
-                            done(null, results.sort(sortHandle));
+                            myDown(results);
                         }
                     }
 
@@ -134,16 +151,16 @@ function walk(dir, done) {
                     if (file.charAt(0) !== '.') {
                         var ext = getExt(file);
                         results.push({
-                            id: 'asd121212',
                             file: file,
                             className: 'node-' + ext,
                             drop: false,
+                            isParent: false,
                             name: getNameFromPath(file)
                         });
                     }
 
                     if (!--pending) {
-                        done(null, results.sort(sortHandle));
+                        myDown(results);
                     }
                 }
             });
@@ -154,6 +171,20 @@ function walk(dir, done) {
 function System() {
     this.init();
 }
+
+System.prototype.loadFiles = function (path, done) {
+    walk(path, 1, function (err, results) {
+
+        let root = {
+            open: true,
+            file: path,
+            name: getNameFromPath(path),
+            isParent: true,
+            children: results
+        };
+        done(err, [root]);
+    });
+};
 
 System.prototype.init = function () {
     var that = this;
@@ -202,9 +233,7 @@ System.prototype.openUri = function (uri) {
     ipc.send('open-url', uri);
 };
 
-System.prototype.loadFiles = function (path, done) {
-    walk(path, done);
-};
+
 
 System.prototype.mkdir = function (path, done) {
     fs.mkdir(path, 0777, done);
@@ -544,6 +573,7 @@ function dealSummary(htmlObj, relativePath) {
     html += '</ul>';
     return html;
 }
+
 System.prototype.createDoc = function (bookPath) {
     let resPath = path.join(__dirname, 'res');
     let tplPath = path.join(resPath, 'template.html');
@@ -569,14 +599,11 @@ System.prototype.createDoc = function (bookPath) {
     var summary = fs.readFileSync(summaryPath, 'utf-8');
     let sObj = summaryObj(summary);
 
-    console.log(dealFiles);
-
     dealFiles.unshift('README.md');
     // 遍历目录
     dealFiles.forEach(function (file) {
         var mdFile = path.join(bookPath, file);
         if (!fs.existsSync(mdFile)) {
-            console.log('文件不存在');
             return;
         }
         let markdown = fs.readFileSync(mdFile, 'utf8');
@@ -620,12 +647,48 @@ System.prototype.createDoc = function (bookPath) {
     window.open(path.join(destPath, 'index.html'));
 };
 
+var deleteFolderRecursive = function(path) {
 
+    var files = [];
 
+    if( fs.existsSync(path) ) {
 
+        files = fs.readdirSync(path);
 
+        files.forEach(function(file,index){
 
+            var curPath = path + "/" + file;
 
+            if(fs.statSync(curPath).isDirectory()) { // recurse
+
+                deleteFolderRecursive(curPath);
+
+            } else { // delete file
+
+                fs.unlinkSync(curPath);
+
+            }
+
+        });
+
+        fs.rmdirSync(path);
+
+    }
+
+};
+System.prototype.removeFile = function (path, call) {
+    if (!fs.existsSync(path)) {
+        return;
+    }
+    fs.stat(path, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+            deleteFolderRecursive(path);
+            typeof call === 'function' && call();
+        } else {
+            fs.unlink(path, call);
+        }
+    });
+};
 
 
 /*var url = "http://s0.hao123img.com/res/img/logo/logonew.png";

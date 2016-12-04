@@ -1,8 +1,198 @@
 ﻿import {asd} from './es6';
 import TabEx from './tab-ex';
+import ContextMenu from './component/contextmenu';
+import storage from './component/storage';
 
+
+const isInline = token => token && token.type === 'inline'
+const isParagraph = token => token && token.type === 'paragraph_open'
+const isListItem = token => token && token.type === 'list_item_open'
+const startsWithTodoMarkdown = token => token && /^\[( |x|X)\]/.test(token.content)
+
+function isTodoItem(tokens, index) {
+    return isInline(tokens[index]) &&
+        isParagraph(tokens[index - 1]) &&
+        isListItem(tokens[index - 2]) &&
+        startsWithTodoMarkdown(tokens[index])
+}
+
+function setAttr(token, name, value) {
+    const index = token.attrIndex(name)
+    const attr = [name, value]
+
+    if (index < 0) {
+        token.attrPush(attr)
+    } else {
+        token.attrs[index] = attr
+    }
+}
+
+function parentToken(tokens, index) {
+    const targetLevel = tokens[index].level - 1
+    for (let i = index - 1; i >= 0; i--) {
+        if (tokens[i].level === targetLevel) {
+            return i
+        }
+    }
+    return -1
+}
+
+function todoify(token, TokenConstructor) {
+    token.children.unshift(createTodoItem(token, TokenConstructor))
+
+    const sliceIndex = '[ ]'.length
+    token.content = token.content.slice(sliceIndex)
+    token.children[1].content = token.children[1].content.slice(sliceIndex)
+}
+
+function createTodoItem(token, TokenConstructor) {
+    const todo = new TokenConstructor('html_inline', '', 0)
+    if (/^\[ \]/.test(token.content)) {
+        todo.content = '<input type="checkbox">'
+    } else if (/^\[(x|X)\]/.test(token.content)) {
+        todo.content = '<input type="checkbox" checked>'
+    }
+    return todo
+}
+
+// 文件管理器
+class FileManager {
+    constructor() {
+        this.rootFile = 'F:\\Users\\cjh1\\Desktop\\note'; // 根目录
+        this.selectFile = null; // 选择的文件
+        this.curFile = null; // 当前正在编辑的文件
+    }
+
+    // 刷新
+    refresh () {
+        this.openFolder(this.rootFile);
+    }
+    
+    // 打开文件夹
+    openFolder(path) {
+        this.rootFile = path;
+        this.curFile = null;
+        system.loadFiles(path, function(err, results) {
+            if (err) {
+                throw err;
+            }
+
+            var zTreeObj;
+            // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+            var setting = {
+                view: {
+                    /*showLine: false,*/
+                    dblClickExpand: false,
+                },
+                callback: {
+                    onClick: function (event, treeId, treeNode, clickFlag) {
+                        var ext = getExt(treeNode.file);
+                        var type = getType(treeNode.file);
+                        if (type === 'text') {
+                            if (!treeNode.children) {
+                                openFile(treeNode.file);
+                            }
+                        } else if (type === 'image') {
+                            system.openUri(treeNode.file);
+                        } else {
+                            ui.msg('暂不支持打开此类型的文件')
+                        }
+
+                    },
+                    onRightClick: function (e, treeId, treeNode) {
+                        if (!treeNode) {
+                            return false;
+                        }
+                        fm.selectFile = treeNode.file;
+                        ui.contextmenu($('#file-menu')[0], e.clientX, e.clientY);
+                        /*var ext = getExt(treeNode.file);
+                         var type = getType(treeNode.file);
+                         if (type === 'text') {
+                         if (treeNode.children) {
+                         fm.selectFile = treeNode.file;
+                         } else {
+                         openFile(treeNode.file);
+                         //$('#layout-file').hide();
+                         }
+                         } else if (type === 'image') {
+                         system.openUri(treeNode.file);
+                         } else {
+                         ui.msg('暂不支持打开此类型的文件')
+                         }*/
+                        return false;
+                    },
+                    beforeDrop: function(treeId, treeNodes, targetNode, moveType) {
+                        return targetNode ? targetNode.drop !== false : true;
+                    },
+                    onDrop: function(event, treeId, treeNodes, targetNode, moveType, isCopy) {
+                        if (targetNode) {
+                            treeNodes.forEach(function (node) {
+                                var fileName = getNameFromPath(node.file);
+                                var newName = targetNode.file + '\\' + fileName ;
+                                system.rename(node.file, newName);
+                                node.file = newName;
+                            });
+
+                        }
+                    }
+                },
+                edit: {
+                    enable: true,
+                    showRemoveBtn: false,
+                    showRenameBtn: false,
+                    drag: {
+                        isMove: true
+                    }
+                }
+
+
+            };
+            // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+            var zNodes = [
+                {
+                    id: '1212',
+                    name:"test1",
+                    open:true,
+                    children:[
+                        {name:"test1_1"}, {name:"test1_2"}
+                    ]
+                },
+                {
+                    id: '1aaa',
+                    name:"test2",
+                    open:true,
+                    children: [
+                        {
+                            name:"test2_1"}, {name:"test2_2"}]}
+            ];
+            zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, results);
+        });
+    }
+
+}
 
 var system = System.getInstance();
+
+var preview = document.getElementById("preview");
+
+var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
+    //theme: 'emd',
+    mode: 'gfm',
+    selectionPointer: true,
+    //lineNumbers: true,
+    matchBrackets: true,
+    indentUnit: 4,
+    indentWithTabs: true,
+    onChange: function () {
+
+    }
+});
+
+let fm = new FileManager();
+fm.openFolder(fm.rootFile);
+openFile(fm.rootFile + '\\readme.md');
+
+
 
 Array.prototype.contains = Array.prototype.contains || function(obj) {
     var i = this.length;
@@ -17,112 +207,6 @@ Array.prototype.contains = Array.prototype.contains || function(obj) {
 String.prototype.contains = String.prototype.contains || function (str) {
     return this.indexOf(str) >= 0;
 };
-
-// 上下文菜单插件
-;(function ($) {
-    UI.$curContextElem = null;
-
-    function Context(elem, option) {
-        var that = this;
-        that.opts = $.extend({}, Context.DEFAULTS, option);
-        that.elem = elem;
-        var $menu = $(that.opts.content);
-        $menu.css('zIndex', 10000001);
-
-        function pot($elem, x, y) {
-            var width = $elem.outerWidth();
-            var height = $elem.outerHeight();
-            var winWidth = $(window).width();
-            var winHeight = $(window).height();
-            var ptX = x;
-            var ptY = y;
-
-            if (ptY < winHeight - height) {
-
-            } else if (ptY > height) {
-                ptY = y - height;
-            } else {
-                ptY = winHeight - height;
-            }
-
-            if (ptX < winWidth - width) {
-
-            } else if (ptX > width) {
-                ptX = x - width;
-            } else {
-                ptX = winWidth - width;
-            }
-
-            $elem.css({
-                'left': ptX,
-                'top': ptY
-            });
-        }
-
-        function handle(elem, e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (UI.$curContextElem) {
-                UI.$curContextElem.hide();
-            }
-            UI.$curContextElem = $menu;
-
-            pot($menu, e.clientX, e.clientY);
-
-            //$overlay.show();
-            $menu.show();
-            that.opts.show && that.opts.show(elem);
-
-            $menu.addClass('context-active');
-
-            UI.$curContextElem = $menu;
-
-        }
-
-        if (that.opts.item) {
-            $(elem).on('contextmenu', that.opts.item, function (e) {
-                handle(this, e);
-                return true;
-            });
-        } else {
-            $(elem).on('contextmenu', function (e) {
-                handle(this, e);
-                return true;
-            });
-        }
-
-
-        $menu.on('contextmenu', function () {
-            return false;
-        });
-
-
-    }
-
-    Context.DEFAULTS = {
-        //content
-        show: function (ui) {},
-        hide: function (ui) {}
-    };
-
-    $.fn.contextmenu = function (option) {
-        return $(this).each(function (e) {
-            new Context(this, option);
-        });
-    }
-
-    $(document).on('click', function (e) {
-        if ($(e.target).parents(".context-active").length == 0
-            || $(e.target).is('.dropdown-menu a')) {
-            if (UI.$curContextElem) {
-                UI.$curContextElem.hide();
-                UI.$curContextElem.removeClass('context-active');
-                UI.$curContextElem = null;
-            }
-        }
-    });
-})(jQuery);
 
 ;(function () {
     function MdEditor(option) {
@@ -157,7 +241,7 @@ $('#layout-preview').contextmenu({
     content: '#image-menu'
 });
 $('#layout-file').contextmenu({
-    content: '#file-menu'
+    content: '#files-menu'
 });
 
 $('#global-menu-about').on('click', function () {
@@ -173,18 +257,7 @@ $('#global-menu-close-preview').on('click', function () {
 });
 
 
-var editor = CodeMirror.fromTextArea(document.getElementById("text-input"), {
-    //theme: 'emd',
-    mode: 'gfm',
-    selectionPointer: true,
-    //lineNumbers: true,
-    matchBrackets: true,
-    indentUnit: 4,
-    indentWithTabs: true,
-    onChange: function () {
 
-    }
-});
 editor.setOption('lineWrapping', true);
 
 function setEditorTheme(theme) {
@@ -196,20 +269,30 @@ function setEditorTheme(theme) {
 setEditorTheme('emd')
 
 $('#theme-select').on('change', function () {
-
-    console.log(this.options[this.selectedIndex].text);
     var theme = this.options[this.selectedIndex].text;
     setEditorTheme(theme);
 });
 
-var preview = document.getElementById("preview");
-editor.on("change", function (cm, event) {
-    var html = editor.getValue();
-    preview.innerHTML = marked(html, {});
 
+editor.on("change", function (cm, event) {
+    var text = editor.getValue();
+    var md = window.markdownit();
+    md.core.ruler.after('inline', 'evernote-todo', state => {
+        const tokens = state.tokens
+        for (let i = 0; i < tokens.length; i++) {
+            if (isTodoItem(tokens, i)) {
+                todoify(tokens[i], state.Token)
+                setAttr(tokens[i - 2], 'class', 'task-list-item')
+                setAttr(tokens[parentToken(tokens, i - 2)], 'class', 'task-list')
+            }
+        }
+    })
+    //md.use(require('markdown-it-enml-todo'))
+    preview.innerHTML = md.render(text);
+    
     // 字数统计
     var p = $('#preview').find('p').length;
-    $('#status').text(html.replace(/\s/g, '').length + '字符, ' + p + '段落');
+    $('#status').text(text.replace(/\s/g, '').length + '字符, ' + p + '段落');
 });
 
 editor.on("scroll", function (cm, event) {
@@ -231,11 +314,9 @@ function blobToFile(theBlob, fileName){
     return theBlob;
 }
 editor.on("paste", function (cm, e) {
-    console.log(e)
     var clipboard = e.clipboardData;
     var text, textType = 'text/plain';
     if (clipboard) { // w3c(webkit,opera...)
-        console.log(text = clipboard.getData(textType));
         if (clipboard.types && clipboard.types.contains(textType)) {
             //e.preventDefault();
             text = clipboard.getData(textType);
@@ -244,32 +325,24 @@ editor.on("paste", function (cm, e) {
 
         if ( e.clipboardData.items ) {
             // google-chrome
-            console.log('support clipboardData.items(chrome ...)');
             var ele = e.clipboardData.items
             for (var i = 0; i < ele.length; ++i) {
                 if ( ele[i].kind == 'file' && ele[i].type.indexOf('image/') !== -1 ) {
-                    console.log(ele[i]);
 
                     var blob = ele[i].getAsFile();
-                    console.log(blob);
 
                     window.URL = window.URL || window.webkitURL;
                     var blobUrl = window.URL.createObjectURL(blob);
-                    console.log(blobUrl);
 
-                    var imagePath = basePath + '\\data\\img\\123.jpg';
-                    console.log(111);
+                    var imagePath = fm.rootFile + '\\data\\img\\123.jpg';
                     var buf = new Buffer(blob, 'base64'); // decode
-                    console.log(222);
                     /*fs.writeFile(imagePath, blob, function(err) {
 
                     })*/
 
                     /*fs.writeFile(imagePath, blob, "binary", function(err){
                         if(err){
-                            console.log("down fail");
                         }
-                        console.log("down success");
                     });*/
 
 
@@ -387,7 +460,7 @@ function createDir() {
 }
 
 function openFile(path) {
-    curFile = path;
+    fm.curFile = path;
     system.readFile(path, function(err, data) {
         editor.setValue(data);
     });
@@ -407,7 +480,7 @@ var btn = document.getElementById('open-file');
 function openFolder() {
     system.selectDir(function (path) {
         if (path) {
-            showFolder(path);
+            fm.openFolder(path);
         }
     });
 }
@@ -435,9 +508,8 @@ $(document).on('keydown', function (e) {
 
     }
 });
-var curFile;
-var basePath = 'F:\\Users\\cjh1\\Desktop\\note';
-var curFolder = basePath;
+
+
 var holder = document.getElementById('layout-editor');
 holder.ondragover = function () {
     return false;
@@ -477,13 +549,11 @@ function getType(filename) {
 holder.ondrop = function (e) {
     e.preventDefault();
     var file = e.dataTransfer.files[0];
-    /*if (/image\/!*!/.test(file.type)) {
-
-
-        var imagePath = basePath + '\\data\\img';
+    if (/image*/.test(file.type)) {
+        var imagePath = fm.rootFile + '\\data\\img';
         fs.exists(imagePath, function(exists) {
             if (!exists) {
-                fs.mkdirSync(imagePath, 0777);
+                fs.mkdirSync(imagePath, 777);
             }
 
             var newImageFile = imagePath + '\\' + new Date().getTime() + '.' + getExt(file.path);
@@ -494,12 +564,12 @@ holder.ondrop = function (e) {
     } else {
         fs.stat(file.path, function(err, stat) {
             if (stat && stat.isDirectory()) {
-                showFolder(file.path);
+                fm.openFolder(file.path);
             } else {
                 openFile(file.path);
             }
         });
-    }*/
+    }
     //openFile(file.path);
     return false;
 };
@@ -530,12 +600,12 @@ $('#global-menu-toggle').on('click', function (e) {
 
 $('#files-refresh').on('click', function (e) {
     e.preventDefault();
-    showFolder(curFolder);
+    fm.openFolder(fm.rootFile);
 });
 
 function save() {
-    if (curFile) {
-        system.writeFile(curFile, editor.getValue(), function () {
+    if (fm.curFile) {
+        system.writeFile(fm.curFile, editor.getValue(), function () {
             ui.msg('保存成功');
         });
     }
@@ -545,15 +615,16 @@ $('#save').on('click', function (e) {
     save();
 });
 $('#remove-file').on('click', function () {
-    ui.confirm('删除' + curFile, function (index) {
+    let fileName = getNameFromPath(fm.selectFile);
+    ui.confirm('删除  ' + fileName, function (index) {
         ui.close(index);
-        fs.unlink(curFile, function () {
-            showFolder(basePath);
+        system.removeFile(fm.selectFile, function () {
+            fm.refresh();
         });
     });
 });
 $('#remame').on('click', function () {
-    var fileName = getNameFromPath(curFile);
+    var fileName = getNameFromPath(fm.selectFile);
     ui.prompt({
         title: '新的名称',
         value: fileName
@@ -563,7 +634,8 @@ $('#remame').on('click', function () {
             return;
         }
         ui.close(index);
-        system.rename(curFile, curFile.replace(fileName, name));
+        system.rename(fm.selectFile, fm.selectFile.replace(fileName, name));
+        fm.refresh();
     })
 });
 $('#add-file').on('click', function () {
@@ -575,9 +647,9 @@ $('#add-file').on('click', function () {
             return;
         }
         ui.close(index);
-        system.writeFile(curFolder + '\\' + name, '', function () {
+        system.writeFile(fm.selectFile + '\\' + name, '', function () {
             ui.msg('添加成功');
-            showFolder(basePath);
+            fm.openFolder(fm.rootFile);
         });
     })
 });
@@ -590,95 +662,14 @@ $('#add-folder').on('click', function () {
             return;
         }
         ui.close(index);
-        system.mkdir(curFolder + '\\' + name, function () {
+        system.mkdir(fm.selectFile + '\\' + name, function () {
             ui.msg('添加成功');
-            showFolder(basePath);
+            fm.openFolder(fm.rootFile);
         });
     })
 });
 
-showFolder(basePath);
-openFile(basePath + '\\readme.md');
 
-
-
-function showFolder(path) {
-    curFolder = path;
-    system.loadFiles(path, function(err, results) {
-
-        if (err) throw err;
-
-        var zTreeObj;
-        // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
-        var setting = {
-            view: {
-                /*showLine: false,*/
-                dblClickExpand: false,
-            },
-            callback: {
-                onClick: function (event, treeId, treeNode, clickFlag) {
-                    var ext = getExt(treeNode.file);
-                    var type = getType(treeNode.file);
-                    if (type === 'text') {
-                        if (treeNode.children) {
-                            curFolder = treeNode.file;
-                        } else {
-                            openFile(treeNode.file);
-                            //$('#layout-file').hide();
-                        }
-                    } else if (type === 'image') {
-                        system.openUri(treeNode.file);
-                    } else {
-                        ui.msg('暂不支持打开此类型的文件')
-                    }
-
-                },
-                beforeDrop: function(treeId, treeNodes, targetNode, moveType) {
-                    return targetNode ? targetNode.drop !== false : true;
-                },
-                onDrop: function(event, treeId, treeNodes, targetNode, moveType, isCopy) {
-                    if (targetNode) {
-                        console.log(treeNodes, targetNode);
-                        var fileName = getNameFromPath(treeNodes[0].file);
-                        var newName = targetNode.file + '\\' + fileName ;
-                        console.log('把' + treeNodes[0].file + '重命名' + newName);
-                        system.rename(treeNodes[0].file, newName);
-                    }
-
-                }
-            },
-            edit: {
-                enable: true,
-                showRemoveBtn: false,
-                showRenameBtn: false,
-                drag: {
-                    isMove: true
-                }
-            }
-
-
-        };
-        // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
-        var zNodes = [
-            {
-                id: '1212',
-                name:"test1",
-                open:true,
-                children:[
-                    {name:"test1_1"}, {name:"test1_2"}
-                ]
-            },
-            {
-                id: '1aaa',
-                name:"test2",
-                open:true,
-                children: [
-                    {
-                        name:"test2_1"}, {name:"test2_2"}]}
-        ];
-        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, results);
-    });
-}
 
 
 
@@ -705,14 +696,14 @@ var trayMenuTemplate = [
             {
                 label: '新建',
                 click: function () {
-                    curFile = null;
+                    fm.curFile = null;
                     editor.setValue(''); // TODO
                 }
             },
             {
                 label: '打开文件',
                 click: function () {
-                    system.selectFile(function (uri) {
+                    system.fm.selectFile(function (uri) {
                         if (uri) {
                             openFile(uri);
                         }
@@ -729,7 +720,7 @@ var trayMenuTemplate = [
                 label: '保存',
                 click: function () {
                     save();
-                    if (!curFile) {
+                    if (!fm.curFile) {
 
                     }
                 }
