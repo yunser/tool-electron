@@ -1,0 +1,13 @@
+{
+	"name": "小插件",
+	"version": "1.1",
+	"manifest_version":2,
+	"description": "这是一个功能很简单的插件。",
+	"browser_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html"
+	},
+	"permissions": [
+		"http://api.flickr.com/"
+	]
+}

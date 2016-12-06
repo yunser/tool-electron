@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>云笔记</title>
+    <link rel="stylesheet" href="asset/lib/eui/1.3/ui.min.css">
+    <link rel="stylesheet" href="asset/lib/editor/eui-editor.min.css">
+    <link rel="stylesheet" href="asset/lib/eui/iconfont.css">
+    <link rel="stylesheet" href="asset/css/index.css">
+
+</head>
+<body>
+<div class="layout-body">
+    <div class="layout-side">
+        <div>
+            <a href="app/markdown/markdown.html">markdown编辑器</a>
+        </div>
+        <ul id="file-list">
+        </ul>
+    </div>
+    <div class="layout-content">
+        <div id="editor" class="editor">
+
+        </div>
+    </div>
+</div>
+
+<h1>2</h1>
+We are using node <script>document.write(process.versions.node)</script>,
+Chrome <script>document.write(process.versions.chrome)</script>,
+and Electron <script>document.write(process.versions.electron)</script>.
+<textarea rows="10"></textarea>
+<button id="write_btn">写文件</button>
+<button id="read_btn">读文件</button>
+<a href="sb/index.html">sb</a>
+<script src="asset/lib/jquery/jquery-1.10.2.min.js"></script>
+<script>window.$ = window.jQuery = require('./asset/lib/jquery/jquery-1.10.2.min.js');</script>
+<script src="asset/lib/eui/ui.min.js"></script>
+<script src="asset/lib/editor/eui-editor.js"></script>
+<script>
+    require('./index.js');
+</script>
+</body>
+</html>

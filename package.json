@@ -1,19 +1,24 @@
 {
-  "name": "mclans",
+  "name": "note",
   "version": "1.0.0",
-  "description": "mc_login_app",
+  "description": "note app",
   "main": "app/main.js",
+  "engines": {
+    "electron": "1.4.1"
+  },
   "dependencies": {
+    "app-module-path": "^1.0.6",
     "babel-core": "^6.18.2",
     "babel-loader": "^6.2.8",
     "babel-preset-es2015": "^6.18.0",
-    "electron-prebuilt": "^0.37.3",
+    "electron": "^1.4.1",
+    "electron-builder": "^6.0.0",
+    "electron-mocha": "^1.2.1",
+    "electron-prebuilt": "^1.2.3",
+    "eslint": "^2.8.0",
+    "jquery": "^3.1.1",
     "markdown-it-enml-todo": "^1.0.2",
     "qiniu": "^6.1.13"
-  },
-  "devDependencies": {
-    "electron-packager": "^8.3.0",
-    "electron-prebuilt": "^0.37.3"
   },
   "scripts": {
     "test": "hello",
@@ -21,5 +26,10 @@
     "packager": "electron-packager ./app mclans --all --out ./OutApp --version 0.37.3 --overwrite --icon=./app/img/icon/icon.ico"
   },
   "author": "chen",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "css-loader": "^0.26.1",
+    "style-loader": "^0.13.1"
+  }
 }

@@ -1,0 +1,194 @@
+html, body {
+    width: 100%;
+    height: 100%;
+}
+body {
+    overflow: hidden;
+}
+.webview-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid #eee;
+}
+.webview {
+    width: 100%;
+    height: 100%;
+    /*    border: none;
+        height: 80vh;
+        width: 95vw;*/
+}
+.layout-header {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 70px;
+    background-color: #f2f2f2;
+}
+.layout-header .url-nav {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 120px;
+}
+.layout-header .url-nav .icon {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    color: #999;
+    font-size: 20px;
+    /* padding: 8px; */
+    text-align: center;
+    line-height: 36px;
+}
+.layout-header .url-nav .icon:hover {
+    color: #000;
+}
+.layout-header .url-input-box {
+    position: absolute;
+    top: 8px;
+    left: 120px;
+    right: 200px;
+}
+.layout-header .url-input {
+    width: 100%;
+}
+.layout-header .url-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+}
+/*.box {
+    width: 500px;
+    height: 500px;
+    border: 1px solid #09c;
+}
+webview {
+    display: block; !* iframes are inline by default *!
+    border: none; !* Reset default border *!
+    height: 80vh; !* Viewport-relative units *!
+    width: 95vw;
+}
+webview object {
+    width: 100%;
+    height: 100%;
+}
+webview.show{
+    display: block;
+}
+webview > * {
+    height: 100%;
+}*/
+
+.tab {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+.tab .nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 110px;
+    background-color: #ccc;
+    border-bottom: 1px solid #ccc;
+}
+.tab .tab-content {
+    position: absolute;
+    top: 110px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+.tab-pane {
+    height: 100%;
+}
+
+.menu-sm {
+
+}
+.menu-sm > li > a {
+    padding: 4px 8px;
+}
+.collection {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    padding: 8px;
+}
+.tab-tool {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 3;
+}
+.tab-tool a {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    color: #999;
+    font-size: 20px;
+    text-align: center;
+    line-height: 36px;
+}
+.tab-tool a:hover {
+    color: #eee;
+    background-color: #999;
+}
+.tab-tool .win-close:hover {
+    background-color: #f00;
+}
+/**/
+.nav-tab {
+
+}
+.nav-tab .nav-item {
+    float: left;
+}
+.nav-tab .nav-link {
+    display: block;
+    width: 150px;
+    padding: 8px 32px;
+    color: #666;
+    text-align: center;
+    font-size: 16px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    background-color: #cccccc;
+}
+.nav-tab .icon-close {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    display: none;
+    color: #999;
+    line-height: 38px;
+    cursor: pointer;
+}
+.nav-tab .icon-close:hover {
+    color: #f00;
+}
+.nav-tab .active .nav-link {
+    color: #666;
+    background-color: #f2f2f2;
+    border-right: 1px solid #bbb;
+}
+.nav-tab .active .icon-close {
+    display: block;
+}
+.nav-tab .nav-item:hover .nav-link {
+    background-color: #e6e6e6;
+}
+.nav-tab .nav-item:hover .icon-close {
+    display: block;
+}
