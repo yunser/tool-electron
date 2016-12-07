@@ -1,0 +1,89 @@
+{
+    "code": 0,
+    "msg": "ok",
+    "data": [
+        {
+            "name": "在线好友",
+            "nums": 36,
+            "id": 1,
+            "item": [
+                {
+                    "id": "100001",
+                    "name": "陈建杭",
+                    "image": "http://tp1.sinaimg.cn/1571889140/180/40030060651/1"
+                },
+                {
+                    "id": "1000022",
+                    "name": "温小暖儿",
+                    "image": "http://tp1.sinaimg.cn/1827469584/180/40006354283/0"
+                },
+                {
+                    "id": "10000222",
+                    "name": "Fenng",
+                    "image": "http://tp2.sinaimg.cn/1577826897/180/40035810742/1"
+                }
+            ]
+        },
+
+        {
+            "name": "大学同窗",
+            "nums": 16,
+            "id": 2,
+            "item": [
+                {
+                    "id": "100003",
+                    "name": "张三",
+                    "image": "http://tp1.sinaimg.cn/1722052204/180/5662731258/1"
+                },
+                {
+                    "id": "100004",
+                    "name": "李四",
+                    "image": "images/2.jpg"
+                },
+                {
+                    "id": "100005",
+                    "name": "王五",
+                    "image": "images/1.png"
+                }
+            ]
+        },
+
+        {
+            "name": "那些年我们泡过的妞",
+            "nums": 38,
+            "id": 3,
+            "item": [
+                {
+                    "id": "100006",
+                    "name": "许大仙",
+                    "image": "images/1.png"
+                },
+                {
+                    "id": "100007",
+                    "name": "许二仙",
+                    "image": "images/2.jpg"
+                },
+                {
+                    "id": "100008",
+                    "name": "许三仙",
+                    "image": "images/1.png"
+                },
+                {
+                    "id": "100009",
+                    "name": "许四仙",
+                    "image": "images/1.png"
+                },
+                {
+                    "id": "100010",
+                    "name": "许五仙",
+                    "image": "images/2.jpg"
+                },
+                {
+                    "id": "100011",
+                    "name": "许六仙",
+                    "image": "images/1.png"
+                }
+            ]
+        }
+    ]
+}

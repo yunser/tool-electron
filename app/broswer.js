@@ -18,7 +18,6 @@ let curTabId;
 
 chromeExtensions.load(__dirname + '/extension', function (err, extensions) {
     extensions.forEach(function (extension) {
-        console.log(extension);
         $('#exts').append(`<a href="#" title="${extension.name}">${extension.name}</a>`)
     })
 })
@@ -28,13 +27,15 @@ function initWebview(webview, id) {
         ;
     });
     webview.addEventListener('page-title-updated', function (e) {
-        console.log(webview.getTitle());
         var $link = $('#nav-link-' + id);
         $link.text(webview.getTitle());
         $link.attr('title', webview.getTitle());
     });
     webview.addEventListener('new-window', function (e) {
-        require('electron').shell.openExternal(e.url)
+        addTab(e.url);
+    });
+    webview.addEventListener('new-page-favicon-updated', function (favicons) {
+        console.log('aaa')
     });
     webview.addEventListener('dom-ready', function () {
         chromeExtensions.load(__dirname + '/extension', function (err, extensions) {
@@ -49,43 +50,52 @@ function initWebview(webview, id) {
 }
 
 $(document).on('keydown', function (e) {
-    console.log(e.keyCode);
     if (e.ctrlKey) {
+        console.log(e.keyCode);
         switch (e.keyCode) {
             case 73:
                 document.getElementById('webview-' + curTabId).openDevTools();
+                return false;
+            case 82: // r
+                let webview = document.getElementById('webview-' + curTabId);
+                webview.reload();
                 return false;
         }
     }
 });
 
+function loadUrl(url) {
+    let webview = document.getElementById('webview-' + curTabId);
+    webview.loadURL(url);
+}
+
 $('#url-input').on('keydown', function (e) {
-    console.log(e.keyCode)
     if (e.keyCode == 13) {
-        console.log(curTabId);
-        let webview = document.getElementById('webview-' + curTabId);
         if (this.value.startWith('http') || this.value.startWith('file://')
             || this.value.startWith('yunser://')) {
-            webview.loadURL(this.value);
+            loadUrl(this.value);
         } else {
-            webview.loadURL('http://' + this.value);
+            loadUrl('http://' + this.value);
         }
     }
 });
 $('#forward').on('click', function (e) {
     e.preventDefault();
+    let webview = document.getElementById('webview-' + curTabId);
     if (webview.canGoForward()) {
         webview.goForward();
     }
 });
 $('#back').on('click', function (e) {
     e.preventDefault();
+    let webview = document.getElementById('webview-' + curTabId);
     if (webview.canGoBack()) {
         webview.goBack();
     }
 });
 $('#reload').on('click', function (e) {
     e.preventDefault();
+    let webview = document.getElementById('webview-' + curTabId);
     webview.reload();
 });
 
@@ -117,7 +127,7 @@ function addTab(url) {
         title: '新标签页',
         content: `
         <div class="webview-box">
-              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration}></webview>
+              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration} preload="./preload.js"></webview>
         </div>`,
     });
 
@@ -136,15 +146,31 @@ ipc.on('new-window', function(event, message) {
     addTab(message);
 });
 
+ipc.on('will-navigate', function(event, message) {
+    loadUrl(message);
+});
+
+ipc.on('leave-full-screen', function(event, message) {
+    $('#tab-nav').show();
+    $('#layout-header').show();
+    $('#tab-tool').show();
+    $('#tab-content').css('top', '110px');
+});
+
+ipc.on('enter-full-screen', function(event, message) {
+    $('#tab-nav').hide();
+    $('#layout-header').hide();
+    $('#tab-tool').hide();
+    $('#tab-content').css('top', '0');
+});
+
 var id = addTab('yunser://blank/');
 
 
 $('a[data-toggle="tab"]').on('shown.ui.tab', function (e) {
     // 获取已激活的标签页的名称
     var activeTab = $(e.target).text();
-    console.log();
     var id = e.target.parentNode.getAttribute('data-id');
-    console.log(typeof id)
 
     $('#url-input').val(tabs[id].url);
     curTabId = id;

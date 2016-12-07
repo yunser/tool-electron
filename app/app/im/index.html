@@ -1,0 +1,48 @@
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>WebIM 16.11</title>
+    <link rel="stylesheet" href="asset/lib/eui/16.11/ui.min.css">
+    <link rel="stylesheet" href="asset/lib/eui/16.11/iconfont.css">
+    <link rel="stylesheet" href="asset/eface/src/css/jquery.eface.css">
+    <link rel="stylesheet" href="asset/im/ui-im.css">
+    <style>
+        body {
+            background-color: #d9d9d9;
+        }
+        .tuwen {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<button id="connect" class="btn btn-primary" type="button">连接</button>
+<button id="toggle" class="btn btn-primary" type="button">打开/关闭</button>
+<button id="show" class="btn btn-primary" type="button">显示</button>
+<button id="close" class="btn btn-primary" type="button">关闭</button>
+<button id="service" class="btn btn-primary" type="button">打开客服聊天窗口</button>
+<button id="inline" class="btn btn-primary" type="button">内联打开</button>
+<button id="add-message" class="btn btn-primary" type="button">添加消息</button>
+<button id="system-message" class="btn btn-primary" type="button">系统消息</button>
+
+<div class="inline-box">
+
+</div>
+<script>
+    window.nodeRequire = require;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
+</script>
+<script src="asset/lib/jquery/jquery-1.10.2.min.js"></script>
+<script src="asset/lib/eui/16.11/ui.min.js"></script>
+<script src="asset/lib/socketio/socket.io.js"></script>
+<script src="asset/eface/src/js/jquery.eface.js"></script>
+<!--<script src="http://realtime.plhwin.com/socket.io/socket.io.js"></script>-->
+<script src="asset/im/ui-im.js"></script>
+<script src="asset/im/client.js"></script>
+<script src="asset/im/index.js"></script>
+</body>
+</html>

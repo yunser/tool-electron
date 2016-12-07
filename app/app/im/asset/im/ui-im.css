@@ -1,0 +1,697 @@
+/**
+ * ui-im.css v16.11.29
+ */
+
+.loading {
+    background: url(images/loading.gif) no-repeat center center;
+}
+.layim_zero {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: dashed;
+    border-color: transparent;
+    overflow: hidden;
+}
+/* 聊天窗口 */
+.eim-chatbox {
+    position: fixed;
+    right: 1px;
+    bottom: 50px;
+    width: 260px;
+    background-color: #fff;
+    font-size: 12px;
+    box-shadow: 1px 1px 50px rgba(0, 0, 0, .5);
+    z-index: 1989;
+}
+.eim-chatbox em, .eim-chatbox i {
+    font-style: normal;
+    font-weight: 400;
+}
+
+/* 聊天窗口-头部 */
+.chatbox-header {
+    position: relative;
+    height: 80px;
+    padding: 15px;
+    background-color: #f4f4f4;
+}
+.chatbox-header .username {
+    font-size: 18px;
+}
+.chatbox-header .sign {
+    margin-top: 10px;
+}
+.chatbox-header .icon-close {
+    float: right;
+    color: #666;
+    cursor: pointer;
+}
+
+/* 搜索栏 */
+.xxim_search {
+    position: relative;
+    display: none;
+    padding-left: 40px;
+    height: 40px;
+    border-bottom: 1px solid #DCDCDC;
+    background-color: #fff;
+}
+
+.xxim_search i {
+    left: 10px;
+    top: 12px;
+    width: 16px;
+    height: 16px;
+    background-position: -175px -40px;
+}
+
+.xxim_search input {
+    border: none;
+    background: none;
+    width: 180px;
+    margin-top: 10px;
+    line-height: 20px;
+}
+
+.xxim_search span {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 2px;
+    background-color: #AFAFAF;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.xxim_search span:hover {
+    background-color: #FCBE00;
+}
+
+/* 主面板tab */
+.im-tab {
+    height: 45px;
+    border-bottom: 1px solid #DBDBDB;
+    background-color: #f4f4f4;
+    overflow: hidden; /*TODO*/
+}
+
+.im-tab .nav-item {
+    position: relative;
+    float: left;
+    width: 33.33%;
+    line-height: 45px;
+}
+.im-tab .nav-link {
+    display: block;
+    width: 100%;
+    height: 45px;
+    text-align: center;
+}
+.im-tab .active .nav-link {
+    border-bottom: 3px solid #0e9aef;
+}
+
+.im-tab .icon {
+    width: 14px;
+    margin-left: -7px;
+    font-size: 20px;
+    color: #666;
+}
+
+/* 主面板列表 */
+.chatbox-body {
+    position: relative;
+}
+.chatbox-body .tab-content{
+    position: relative;
+    height: 370px;
+    overflow: hidden;
+}
+.chatbox-body .tab-pane {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+}.chatbox-body .tab-pane:hover {
+     overflow-y: auto;
+ }
+
+.chatbox-list {
+    padding: 5px 0;
+}
+
+.chatbox-list h5 {
+    position: relative;
+    padding-left: 32px;
+    height: 26px;
+    line-height: 26px;
+    cursor: pointer;
+    color: #000;
+}
+
+.chatbox-list h5 span {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chatbox-list h5 i {
+    position: absolute;
+    background: url(images/icon.png) no-repeat;
+    left: 15px;
+    top: 10px;
+    width: 7px;
+    height: 8px;
+    background-position: -20px -5px;
+}
+
+.chatbox-list .xxim_chatlist {
+    display: none;
+}
+
+.chatbox-list .xxim_liston h5 i {
+    position: absolute;
+    background: url(images/icon.png) no-repeat;
+    width: 8px;
+    height: 7px;
+    background-position: -5px -5px;
+}
+
+.chatbox-list .xxim_liston .xxim_chatlist {
+    display: block;
+}
+
+/* 聊天面板 */
+.im-panel {
+    position: relative; /* TODO */
+    width: 800px;
+    height: 571px;
+    background-color: #f5f5f5;
+}
+.im-panel a, .im-panel a:hover {
+    color: #343434;
+    text-decoration: none;
+}
+.xxim_chatlist li {
+    position: relative;
+    height: 52px;
+    padding: 5px 15px 5px 60px;
+    line-height: 30px;
+    cursor: pointer;
+}
+.xxim_chatlist li:hover {
+    background-color: #F2F4F8
+}
+
+.eim-user-item-name {
+    display: inline-block;
+    vertical-align: top;
+    font-size: 14px;
+    padding-left: 10px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.eim-user-item-text {
+    position: absolute;
+    left: 69px;
+    top: 24px;
+    display: inline-block;
+    max-width: 120px;
+    vertical-align: top;
+    font-size: 12px;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.eim-user-item-avatar {
+    position: absolute;
+    left: 15px;
+    top: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.xxim_chatlist li .xxim_time {
+    float: right;
+    display: inline-block;
+    color: #999;
+}
+
+.chatbox-list .xxim_errormsg {
+    text-align: center;
+    margin: 50px 0;
+    color: #999;
+}
+
+.xxim_searchmain {
+    position: absolute;
+    width: 100%;
+    height: 491px;
+    left: 0;
+    top: 41px;
+    z-index: 10;
+    background-color: #fff;
+}
+
+/* 主面板底部 */
+.chatbox-footer {
+    width: 100%;
+    height: 42px;
+    padding: 5px;
+    background-color: #f4f4f4;
+}
+.chatbox-footer li {
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    float: left;
+    cursor: pointer;
+}
+.chatbox-footer .icon {
+    color: #555;
+    font-size: 18px;
+}
+.chatbox-footer .icon-dot {
+    font-size: 25px;
+}
+.chatbox-footer .xxim_online {
+    display: none;
+    width: 42px;
+    padding-left: 35px;
+}
+
+.online .icon-dot {
+    color: #008000;
+}
+
+.xxim_setonline {
+    display: none;
+    position: absolute;
+    left: -79px;
+    bottom: -1px;
+    border: 1px solid #DCDCDC;
+    background-color: #fff;
+}
+
+.xxim_setonline span {
+    position: relative;
+    display: block;
+    width: 80px;
+    padding: 10px;
+}
+
+.xxim_setonline span:hover {
+    background-color: #F2F4F8;
+}
+
+.xxim_offline .xxim_nowstate, .xxim_setoffline i {
+    position: absolute;
+    background: url(images/icon.png) no-repeat;
+    background-position: -35px -5px;
+}
+
+.xxim_mymsg i {
+    position: absolute;
+    background: url(images/icon.png) no-repeat;
+    left: 18px;
+    width: 13px;
+    height: 13px;
+    background-position: -105px -5px;
+}
+
+.xxim_mymsg a {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50px;
+    height: 32px;
+}
+
+.layim_move {
+    position: absolute;
+    height: 40px;
+    width: 620px;
+    z-index: 0;
+}
+
+.layim_face {
+    position: absolute;
+    left: 20px;
+    top: 10px;
+    width: 50px;
+    height: 50px;
+    padding: 1px;
+}
+
+.layim_face img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.im-panel-header {
+    position: relative;
+    height: 80px;
+    padding: 16px;
+    background-color: #f4f4f4;
+    overflow: hidden;
+}
+.layim_names {
+    position: absolute;
+    left: 90px;
+    top: 5px;
+    max-width: 300px;
+    line-height: 40px;
+    color: #000;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px;
+}
+
+.layim_rightbtn {
+    position: absolute;
+    right: 15px;
+    top: 12px;
+}
+
+.layim_rightbtn .icon {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    font-size: 16px;
+    color: #666;
+    cursor: pointer;
+    transition: all .3s;
+}
+.layim_rightbtn .icon-minus {
+    margin-right: 10px;
+}
+.layim_rightbtn .layim_close {
+    background-position: -5px -40px;
+}
+
+.layim_rightbtn .layim_close:hover {
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+}
+
+.layim_rightbtn .layer_setmin {
+    margin-right: 15px;
+    background-position: -275px -2px;
+}
+
+
+
+/* 聊天窗口左侧列表 */
+.layim_chatmore {
+    display: none;
+    float: left;
+    width: 200px;
+    height: 100%;
+    background-color: #eaeaea;
+}
+.layim_chatmore:hover {
+    overflow-y: auto;
+}
+
+.im-panel-user-item {
+    position: relative;
+    height: 50px;
+    line-height: 50px;
+    padding: 0 10px;
+    font-size: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.im-panel-user-item:hover {
+    background-color: #e3e4e6;
+}
+.im-panel-user-item.active,
+.im-panel-user-item.active:hover {
+    background-color: #cacdd6;
+}
+.im-panel-user-item span {
+    display: inline-block;
+    vertical-align: top;
+    width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.im-panel-user-item .icon-close {
+    display: none;
+    float: right;
+    height: 18px;
+    margin-top: 15px;
+    line-height: 18px;
+    font-size: 12px;
+}
+.im-panel-user-item:hover .icon-close {
+    display: inline-block;
+}
+
+.im-panel-body {
+    position: relative;
+    height: 300px;
+}
+
+.layim_chatview {
+    display: none;
+    height: 280px;
+    padding: 16px;
+    overflow: hidden;
+}
+
+.layim_chatview:hover {
+    overflow-y: auto;
+}
+.layim_chatview li {
+    margin-bottom: 10px;
+    clear: both;
+}
+
+.layim_chatview li:after {
+    content: '\20';
+    clear: both;
+    display: block;
+    height: 0;
+}
+
+.layim_chatthis {
+    display: block;
+}
+
+/* 聊天消息 */
+.chatmsg-avatar {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #eee;
+}
+
+.chatmsg-info {
+    max-width: 400px;
+}
+.chatmsg-name {
+    margin-bottom: 8px;
+}
+.chatmsg-content {
+    display: inline-block;
+    padding: 12px 20px;
+    line-height: 20px;
+    border-radius: 3px;
+}
+.layim_chatuser {
+    float: left;
+    padding: 15px;
+}
+.layim_chathe .chatmsg-info {
+    float: left;
+}
+.layim_chathe .chatmsg-avatar {
+    float: left;
+    margin-right: 8px;
+}
+.layim_chathe .chatmsg-content {
+    background-color: #ddd;
+}
+
+.layim_chateme .chatmsg-info {
+    float: right;
+}
+.layim_chateme .chatmsg-avatar {
+    float: right;
+    margin-left: 8px;
+}
+.layim_chateme .chatmsg-content {
+    float: right;
+    background-color: #b9ea6a;
+}
+
+.eim-message-system {
+    color: #999;
+    text-align: center;
+}
+
+/* 群员 */
+.layim_groups {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    width: 100%;
+    height: 300px;
+    border-bottom: 1px solid #D9D9D9;
+    background-color: #fff;
+    overflow: hidden;
+}
+.layim_groups:hover {
+    overflow-y: auto;
+}
+.layim_groups ul {
+    display: none;
+}
+.layim_groups ul.layim_groupthis {
+    display: block;
+}
+.layim_groups li {
+    float: left;
+    width: 16.66%;
+    height: 100px;
+    padding: 0 10px;
+    cursor: pointer;
+    display: block;
+}
+.layim_groups li:hover {
+    background-color: #f9f9f9;
+}
+.layim_groups li img {
+    display: block;
+    width: 60px;
+    height: 60px;
+    margin: 8px auto;
+}
+.layim_groups li span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.layim_groups .layim_errors {
+    text-align: center;
+    color: #999;
+}
+
+.im-panel-footer {
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+    padding: 16px;
+}
+
+/* 聊天工具栏 */
+.im-panel-tool {
+}
+.im-panel-tool .tool-item {
+    margin-right: 12px;
+}
+.im-panel-tool .icon {
+    font-size: 18px;
+}
+.im-panel-tool .chatlog {
+    float: right;
+}
+
+.im-panel-input {
+    display: block;
+    width: 100%;
+    height: 90px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    line-height: 20px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+}
+
+.im-panel-send {
+    text-align: right;
+}
+.im-panel-sendbtn {
+    width: 90px;
+}
+.im-panel-sendbtn.disabled {
+    background-color: #ffd070;
+    cursor: not-allowed;
+}
+
+.layim_enter {
+    position: absolute;
+    right: 10px;
+    width: 24px;
+    height: 26px;
+    border-left: 1px solid #FFB94F;
+}
+
+.layim_enter:hover {
+    background-color: #E68A00;
+    border-radius: 0 3px 3px 0;
+}
+
+.layim_enter .layim_zero {
+    left: 7px;
+    top: 11px;
+    border-width: 5px;
+    border-top-style: solid;
+    border-top-color: #FFE0B3;
+}
+
+.layim_min {
+    display: none;
+    position: absolute;
+    left: -190px;
+    bottom: -1px;
+    width: 160px;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px rgba(0, 0, 75, .2);
+    background-color: #FCFDFA;
+    cursor: pointer;
+}
+
+
+/**/
+.layim_chat {
+    overflow: hidden;
+}
+
+
+

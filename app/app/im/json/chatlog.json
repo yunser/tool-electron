@@ -1,0 +1,30 @@
+{
+    "code": 0,
+    "msg": "",
+    "data": [
+        {
+            "id": "1",
+            "name": "陈建杭",
+            "time": "10:23",
+            "image": "images/1.png",
+            "text": "程序猿一枚",
+            "type": "one"
+        },
+        {
+            "id": "2",
+            "name": "机器人",
+            "time": "10:23",
+            "image": "images/1.png",
+            "text": "我会自动回复哦",
+            "type": "one"
+        },
+        {
+            "id": "1",
+            "name": "我的群",
+            "time": "昨天",
+            "image": "images/2.jpg",
+            "text": "呵呵哒",
+            "type": "group"
+        }
+    ]
+}

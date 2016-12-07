@@ -84,7 +84,7 @@ $('#file-list').on('click', '.file-link', function (e) {
 function save() {
     if (curFile) {
         fs.writeFileSync(curFile, editor.txt.$txt.html(), 'utf8');
-        ui.msg('保存成功');
+        ui.msg('save success');
     }
 }
 $('#save').on('click', function (e) {

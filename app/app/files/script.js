@@ -134,6 +134,7 @@ let changeDir = function(dirname) {
                     let location = e.currentTarget.attributes[0].value
                     let type = e.currentTarget.attributes[1].value
 
+                    console.log(location);
                     if (type === "folder") {
                         changeDir(location)
                     } else if (type === "file") {
@@ -187,5 +188,11 @@ $(function() {
     else if (platform === "mac") changeDir(process.env.HOME)
     else                         changeDir(process.env.PWD)
 
-    setSidebar()
+
+    setSidebar();
+
+    $('#home').on('click', (e) => {
+        changeDir('F:\\Users\\cjh1\\Desktop\\');
+    })
+
 })
