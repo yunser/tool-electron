@@ -1,0 +1,18 @@
+{
+   "browser_action": {
+      "default_icon": "icon.gif",
+      "default_popup": "index.html",
+      "default_title": "fed_nav"
+   },
+   "content_scripts": [ {
+      "js": [ "bg.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_end"
+   } ],
+   "description": "前端设计技术导航",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiw9AKqjOUaSyRUSPy172LFZ0dNNtg0bE9J4ZWBbZGEW6OKQstcg3Q2szT+C7zMxY8aeO/TaCLwg74cJiwyWus8GGI58G7IqqprMJ+fJTbf75RV0HdMIJINShR7hrHnbg06UsNf/vie6QkBSN/op6CWtlEU79attyGyVrYcAqGe1MOIUgGkLlWNbmpxlFTXF49IRTRpinO4z3DCghTBfgxJClUJYLqTEJQWxoZLG6mDuHGKr/H7ikb0SLlNNsKSHOhechu3fDTqardim81XJGoxVE9FWrp2LvGemroys6M+qngoF+xolqn1uNgHd6Gi7VJsbByPWDSWKpuHYG/iTDDQIDAQAB",
+   "manifest_version": 2,
+   "name": "前端导航",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0.1"
+}

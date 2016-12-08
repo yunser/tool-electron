@@ -1,0 +1,21 @@
+{
+   "app": {
+      "background": {
+         "scripts": [ "background.js" ]
+      }
+   },
+   "default_locale": "zh_CN",
+   "description": "__MSG_appDescription__",
+   "icons": {
+      "128": "icon/rgb2hex-icon-128.png",
+      "16": "icon/rgb2hex-icon-16.png",
+      "32": "icon/rgb2hex-icon-32.png",
+      "48": "icon/rgb2hex-icon-48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArixO4MLi2DHTPVderdYMdF1x4LZQJHAUIy7AxZSpDSAg7AHCVEr7c04Iv9lg3cYdfiYWjHKwvY4NzJ6Vj6CdERphmzKdCnktunKZbHYD53g1H6bEKPjJ6gCxOPn/erM0ZciAtqNegc0tFtaKW4dC8+rGHwu1rsYAI3JOWe4PnNItfwThhxh4m0MnXhO1wkzoCsZ2Y36jh029qPfvd7MbMLEC5ko5UU9/rFdKFBhCmDyUP4WxzDar95Kl6LkS1tRPCgkAibB52yYO4TfRf2o33AwL3k7Q2k83yZ4iUAYQDasCGp7TiVQc4bxd2zS/IwloujWmbxeLm/BKnmH9f5qmEwIDAQAB",
+   "manifest_version": 2,
+   "name": "__MSG_appName__",
+   "offline_enabled": true,
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.2"
+}

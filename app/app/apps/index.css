@@ -1,0 +1,9 @@
+.app-list a {
+    float: left;
+    margin-right: 16px;
+}
+.app-list img {
+    display: block;
+    width: 100px;
+    height: 100px;
+}

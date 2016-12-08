@@ -192,3 +192,19 @@ webview > * {
 .nav-tab .nav-item:hover .icon-close {
     display: block;
 }
+/**/
+.exts {
+    position: absolute;
+    top: 8px;
+    right: 40px;
+}
+.exts a {
+    margin-right: 8px;
+}
+.exts a:hover {
+    background-color: #ccc;
+}
+.exts a img {
+    width: 24px;
+    height: 24px;
+}

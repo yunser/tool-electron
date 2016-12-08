@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>音乐</title>
     <link rel="stylesheet" href="asset/lib/eui/1.3/ui.min.css">
     <link rel="stylesheet" href="asset/lib/editor/eui-editor.min.css">
     <link rel="stylesheet" href="asset/lib/eui/1.3/iconfont.css">
@@ -39,12 +39,17 @@
         </span>
     </div>
     <div class="collection">
-        <a href="yunser://404">返回桌面</a>
+        <a href="app/apps/index.html">应用</a>
+        <a href="app/desktop/index.html">虚拟桌面</a>
         <a href="app/markdown/index.html">markdown编辑器</a>
         <a href="app/files/index.html">文件管理器</a>
-        <a href="app/apps/index.html">应用</a>
         <a href="app/store/index.html">应用商店</a>
-        <a href="http://www.baidu.com">百度</a>
+        <a href="app/desktop/index.html">桌面</a>
+        <a href="app/search/index.html">搜索</a>
+        <a href="app/guide/index.html">导航</a>
+        <a href="app/music/index.html">音乐</a>
+        <a href="app/downloads/index.html">下载内容</a>
+        <a href="app/rich-editor/index.html">富文本编辑器</a>
         <a href="http://sw.bos.baidu.com/sw-search-sp/software/0b57a709db50a/Baidu_Setup_4384_3.1.0.2950_10000001.exe">下载文件</a>
     </div>
 </div>
@@ -68,14 +73,10 @@
         delete window.exports;
         delete window.module;
     }
+    var $ = nodeRequire('jQuery');
 </script>
 <script src="asset/lib/jquery/jquery-1.10.2.min.js"></script>
 <script src="asset/lib/eui/1.3/ui.min.js"></script>
-<script type="text/babel">
-    const getMessage = () => "Hello World";
-    document.getElementById('output').innerHTML = getMessage();
-</script>
-<script src="component/all.js"></script>
-<script src="broswer.js"></script>
+<script src="index.js"></script>
 </body>
 </html>

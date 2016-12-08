@@ -1,0 +1,13 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "Convert RGB to Hex for Real-time，Fastcopy，All just for focus."
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "RGB to Hex"
+   },
+   "copiedTip": {
+      "message": "Has been copied"
+   }
+}

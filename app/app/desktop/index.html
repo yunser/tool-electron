@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zhcn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<title>在线工具 - yunser</title>
+<meta name="keywords" content="在线工具,在线工具大全,yunser,,工具,开发人员工具,小工具,站长工具,代码格式化、压缩、加密、解密,下载链接转换">
+<meta name="description" content="在线工具,在线工具大全,yunser,,工具,开发人员工具,小工具,站长工具,代码格式化、压缩、加密、解密,下载链接转换">
+<link rel="stylesheet" href="../../asset/lib/eui/1.3/ui.min.css">
+<link rel="stylesheet" href="common.css">
+<style>
+    .demo {
+        margin: 15px 0;
+        font-size: 24px;
+    }
+    html,
+    body {
+        height: 100%;
+    }
+
+</style>
+</head>
+<body>
+<div class="desktop">
+    <ul id="tool-list" class="tool-list">
+        <li class="list-item">
+            <a href="/draw" target="_blank">
+                <img class="img" src="img/app-draw.jpg">
+                <div class="text">在线画板</div>
+            </a>
+        </li>
+
+        <li class="list-item">
+            <a href="/qrcode" target="_blank">
+                <img class="img" src="img/app-qrcode.jpg">
+                <div class="text">二维码生成</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/ai/qiqiao.html" target="_blank">
+                <img class="img" src="img/app-qiqiao.jpg">
+                <div class="text">在线七巧板</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/ppt" target="_blank">
+                <img class="img" src="img/app-h5.jpg">
+                <div class="text">PPT在线制作</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/animation" target="_blank">
+                <img class="img" src="img/app-anim.jpg">
+                <div class="text">CSS3动画代码生成</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/h5" target="_blank">
+                <img class="img" src="img/app-h5.jpg">
+                <div class="text">H5在线制作</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="http://runcode.yunser.com/" target="_blank">
+                <img class="img" src="img/app-runcode.jpg">
+                <div class="text">RunCode</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/sandphoto" target="_blank">
+                <img class="img" src="img/app-photo.jpg">
+                <div class="text">证件照片排版在线生成</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/color" target="_blank">
+                <img class="img" src="img/app-color.jpg">
+                <div class="text">网页设计常用色彩搭配表</div>
+            </a>
+        </li>
+        <li class="list-item">
+            <a href="/bezier" target="_blank">
+                <img class="img" src="img/app-bser.jpg">
+                <div class="text">canvas贝塞尔曲代码在线生成</div>
+            </a>
+        </li>
+    </ul>
+    <div class="tastbar">
+        <ul class="tast-app-list">
+            <li><a id="start-menu" href="#"><img src="img/start-menu.jpg"></a>  </li>
+            <!--<li><a href="#"><img src="asset/img/app-color.jpg"></a>  </li>-->
+        </ul>
+        <a id="date" class="time" href="#">2016-11-30</a>
+    </div>
+</div>
+<div id="start-box" class="start-box">
+    <canvas class = "canvas" id="canvasId" width = '400px' height = '400px'></canvas>
+    <div id="time" class="time">20:38</div>
+</div>
+<!-- 全局右键菜单 -->
+<ul id="global-menu" class="dropdown-menu">
+    <li><a id="global-menu-about" href="#">关于</a></li>
+    <li><a id="global-menu-help" href="#">帮助</a></li>
+</ul>
+<!--<script color="0,0,255" opacity='0.7' zIndex="-2" count="99" src="asset/lib/canvas-nest/canvas-nest.min.js"></script>-->
+<script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+<script src="../../asset/lib/eui/1.3/ui.min.js"></script>
+<script src="contextmenu.js"></script>
+<script src="index.js"></script>
+</body>
+</html>

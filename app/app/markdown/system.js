@@ -4,66 +4,11 @@
 var require = nodeRequire;
 var remote = require('electron').remote;
 var ipc = require("electron").ipcRenderer;
-
 var http = require("http");
 var fs = require('fs');
 var path = require('path');
 var async = require("async");
-
-var Stack = function() {
-    this.init();
-};
-
-Stack.prototype={
-    init:function(){
-        this.STACKMAX = 100;
-        this.stack = new Array(this.STACKMACK);
-        this._top = -1;
-        return this.stack;
-    },
-    empty:function(){
-        if(this._top==-1){
-            return true;
-        }
-        else{
-            return false;
-        }
-    },
-    push:function(elem){
-        if(this._top==this.STACKMAX-1){
-            return "栈满";
-        }
-        else{
-            this._top++;
-            this.stack[this._top] = elem;
-        }
-    },
-    pop:function(){
-        if(this._top==-1){
-            return null;
-        }
-        else{
-            var x = this.stack[this._top];
-            this._top--;
-            return x;
-        }
-    },
-    top: function(){
-        if(this._top!=-1){
-            return this.stack[this._top];
-        }
-        else{
-            //return "空栈，顶元素无返回值！";
-            return null;
-        }
-    },
-    clear:function(){
-        this._top=-1;
-    },
-    length:function(){
-        return this._top+1;
-    }
-}
+const Stack = require('./../../node/Stack');
 
 function getExt(filename) {
     return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
@@ -238,11 +183,6 @@ System.prototype.writeFile = function (path, content, done) {
 
 System.prototype.rename = function (path, dest) {
     fs.rename(path, dest);
-};
-
-System.instance = new System();
-System.getInstance = function () {
-    return System.instance;
 };
 
 function readLines(input, func) {
@@ -683,6 +623,9 @@ System.prototype.removeFile = function (path, call) {
     });
 };
 
+let system = new System();
+
+module.exports = system;
 
 /*var url = "http://s0.hao123img.com/res/img/logo/logonew.png";
  http.get(url, function(res){

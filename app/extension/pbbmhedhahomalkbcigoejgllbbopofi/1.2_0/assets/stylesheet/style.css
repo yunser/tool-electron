@@ -1,0 +1,40 @@
+body {
+    font-family: courier, sans-serif;
+    background: #fff;
+    font-size: 20px;
+    text-align: center;
+}
+input[type=text] {
+    border: none;
+    background-color: transparent;
+}
+input[type=text]:focus {
+    outline: none;
+}
+#hex {
+    font-size: 1.2em;
+    margin-left: 10px;
+}
+.hex {
+    padding: 20px;
+    display: block;
+}
+.rgb input {
+    border-bottom: 1px dashed #000;
+}
+.light {
+	color:#222!important;
+	border-bottom-color:#666!important
+}
+::-webkit-input-placeholder {
+	color: #666;
+}
+.dark, .dark input {
+	color: #fff;
+}
+.dark input {
+	border-bottom-color: #999;
+}
+.dark::-webkit-input-placeholder {
+	color: #ffd;
+}

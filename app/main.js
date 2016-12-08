@@ -4,7 +4,6 @@ const path = require('path');
 var fs = require('fs');
 var context = require('./node/electron-context-menu.js');
 
-
 ipcMain.on('asynchronous-message', function (event, arg) {
     event.sender.send('asynchronous-reply', 'pong')
 });
@@ -41,12 +40,15 @@ function createWindow () {
         }
     });
 
+    let screen = electron.screen;
+    var size = screen.getPrimaryDisplay().workAreaSize;
+    
     // 创建浏览器窗口。
     mainWindow = new BrowserWindow({
         x: 0,
         y: 0,
-        width: 1300,
-        height: 700,
+        width: size.width,
+        height: size.height,
         icon: "icon.png",
         titleBarStyle: 'hidden',
         frame: false,
@@ -163,10 +165,15 @@ function createWindow () {
 
     //mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
     //mainWindow.loadURL(`file://${__dirname}/app/markdown/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/index.html`);
+    //.loadURL(`file://${__dirname}/app/desktop/index.html`);
     //mainWindow.loadURL('yunser://settings');
     //mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
-    mainWindow.loadURL(`file://${__dirname}/app/im/index.html`);
+    //mainWindow.loadURL(`file://${__dirname}/app/_img/index.html`);
+    //mainWindow.loadURL(`file://${__dirname}/app/im/index.html`);
+    //mainWindow.loadURL(`file://${__dirname}/app/search/index.html`);
+    //mainWindow.loadURL(`file://${__dirname}/app/apps/index.html`);
+    //mainWindow.loadURL(`file://${__dirname}/app/music/index.html`);
+    mainWindow.loadURL(`file://${__dirname}/index.html`);
 
     context({
         window: mainWindow,
@@ -234,6 +241,10 @@ function createWindow () {
 
     ipcMain.on('win-close', function (event, arg) {
         mainWindow.close();
+    });
+
+    ipcMain.on('win-reload', function (event, arg) {
+        mainWindow.reload();
     });
 
 

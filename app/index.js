@@ -1,237 +1,206 @@
-﻿var fs = require('fs');
-var ipc = require("electron").ipcRenderer;
-var remote = require('remote');
-var Tray = remote.require('tray');
-var Menu = remote.require('menu');
-var path = require('path');
+/**
+ * Created by cjh1 on 2016/12/6.
+ */
+const require = nodeRequire;
+const {remote} = require('electron');
+const ipc = require("electron").ipcRenderer;
+const chromeExtensions = nodeRequire('./node/extension');
+const tool = require('./node/tool.js');
+const TabEx = require('./node/tab-ex.js');
 
-//console.log(ipc.sendSync('synchronous-message', 'ping')) // prints "pong"
+let tabs = {};
+let curTabId;
+let tabNum = 0;
 
-function openFile(path) {
-    console.log(path)
-    curFile = path;
-    fs.readFile(path,'utf8',function(err,data){
-        editor.txt.$txt.html(data);
+chromeExtensions.load(__dirname + '/extension', (err, extensions) => {
+    extensions.forEach((extension) => {
+        console.log(extension);
+        if (!extension.browser_action) {
+            console.log(extension.name + ' plugin is not valid');
+            return;
+        }
+        $('#exts').append(`<a href="#" data-ext="${extension}" title="${extension.name}">
+            <img src="${extension.path}/${extension.browser_action.default_icon}">
+        </a>`)
+    })
+});
+
+$('#exts').on('click', '[data-ext]', () => {
+    let ext = $(this).data('ext');
+    console.log(ext);
+});
+
+function initWebview(webview, id) {
+    webview.addEventListener('did-start-loading', function (e) {
+        ;
     });
-}
-ipc.on('asynchronous-reply', function (event, arg) {
-});
-ipc.on('open-file', function (event, arg) {
-    if (arg) {
-        openFile(arg[0]);
-    }
-});
-ipc.on('open-directory', function (event, arg) {
-    if (arg) {
-        walk(arg[0], function(err, results) {
-            if (err) throw err;
-
-            console.log(results);
-            var $list = $('#file-list');
-            $list.empty();
-            var html = '';
-            for (var i = 0; i < results.length; i++) {
-                html += '<li class="file-item" data-url="' + results[i] + '"><a class="file-link" href="">' + results[i] + '</a> </li>'
-            }
-            $list[0].innerHTML = html;
-        });
-    }
-
-});
-ipc.on('open-file', function (event, arg) {
-    console.log(arg) // prints "pong"
-});
-ipc.send('asynchronous-message', 'ping')
-
-var btn = document.getElementById('open-file');
-
-function openFolder() {
-    ipc.send('open-files');
+    webview.addEventListener('page-title-updated', function (e) {
+        let $link = $('#nav-link-' + id);
+        $link.text(webview.getTitle());
+        $link.attr('title', webview.getTitle());
+    });
+    webview.addEventListener('new-window', function (e) {
+        addTab(e.url);
+    });
+    webview.addEventListener('new-page-favicon-updated', function (favicons) {
+        console.log('aaa')
+    });
+    webview.addEventListener('dom-ready', function () {
+        chromeExtensions.load(__dirname + '/extension', function (err, extensions) {
+            extensions.forEach(function (extension) {
+                //console.log(extension);
+                chromeExtensions.addToWebview(webview, extension, function (err) {
+                    //console.log(err);
+                })
+            })
+        })
+    });
 }
 
 $(document).on('keydown', function (e) {
-    console.log(e.keyCode);
     if (e.ctrlKey) {
+        console.log(e.keyCode);
         switch (e.keyCode) {
-            case 82:
-                window.location.reload(true);
-                break;
-            case 83: // s
-                save();
-                break;
+            case 73:
+                document.getElementById('webview-' + curTabId).openDevTools();
+                return false;
+            case 81: // q
+                ipc.send('win-reload');
+                return false;
+            case 82: // r
+                let webview = document.getElementById('webview-' + curTabId);
+                webview.reload();
+                return false;
         }
     }
 });
-var curFile;
-var holder = document.getElementById('editor');
-holder.ondragover = function () {
-    return false;
-};
-holder.ondragleave = holder.ondragend = function () {
-    return false;
-};
-holder.ondrop = function (e) {
-    e.preventDefault();
-    var file = e.dataTransfer.files[0];
-    openFile(file.path);
-    return false;
-};
-$('#file-list').on('click', '.file-link', function (e) {
-    e.preventDefault();
-    var url = this.parentNode.getAttribute('data-url');
-    openFile(url);
-});
-function save() {
-    if (curFile) {
-        fs.writeFileSync(curFile, editor.txt.$txt.html(), 'utf8');
-        ui.msg('save success');
-    }
+
+function loadUrl(url) {
+    let webview = document.getElementById('webview-' + curTabId);
+    webview.loadURL(url);
 }
-$('#save').on('click', function (e) {
+
+$('#url-input').on('keydown', function (e) {
+    if (e.keyCode == 13) {
+        if (this.value.startWith('http') || this.value.startWith('file://')
+            || this.value.startWith('yunser://')) {
+            loadUrl(this.value);
+        } else {
+            loadUrl('http://' + this.value);
+        }
+    }
+});
+$('#forward').on('click', function (e) {
     e.preventDefault();
-    save();
+    let webview = document.getElementById('webview-' + curTabId);
+    if (webview.canGoForward()) {
+        webview.goForward();
+    }
+});
+$('#back').on('click', function (e) {
+    e.preventDefault();
+    let webview = document.getElementById('webview-' + curTabId);
+    if (webview.canGoBack()) {
+        webview.goBack();
+    }
+});
+$('#reload').on('click', function (e) {
+    e.preventDefault();
+    let webview = document.getElementById('webview-' + curTabId);
+    webview.reload();
 });
 
-var editor = new Editor('editor');
-editor.create();
+let tab = new TabEx('#tabs', {
+    //monitor: '.topbar'
+});
 
-var dir = 'e:\\note';
+var iddd = 123;
+function getIdd() {
+    return iddd++;
+}
 
-var fs = require('fs');
-var path = require('path');
-var walk = function(dir, done) {
-    var results = [];
-    fs.readdir(dir, function(err, list) {
-        if (err) return done(err);
-        var pending = list.length;
-        if (!pending) return done(null, results);
-        list.forEach(function(file) {
-            file = path.resolve(dir, file);
-            fs.stat(file, function(err, stat) {
-                if (stat && stat.isDirectory()) {
-                    walk(file, function(err, res) {
-                        results = results.concat(res);
-                        if (!--pending) done(null, results);
-                    });
-                } else {
-                    results.push(file);
-                    if (!--pending) done(null, results);
-                }
-            });
-        });
+function addTab(url) {
+    var id = getIdd();
+
+    $('#url-input').val(url);
+
+    curTabId = id;
+    tabNum += 1;
+
+    tabs['' + id] = {
+        url: url
+    };
+
+    let nodeintegration = (url.startWith('yunser://') || url.startWith('file://')) ? ' nodeintegration' : '';
+
+    tab.add({
+        id: id,
+        title: '新标签页',
+        content: `
+        <div class="webview-box">
+              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration} preload="./preload.js"></webview>
+        </div>`,
     });
-};
+
+    initWebview(document.getElementById('webview-' + id), id);
+
+    return id;
+}
+
+$('#add-tab').on('click', function () {
+    addTab('yunser://blank/');
+});
 
 
 
-var    textarea = document.getElementsByTagName('textarea')[0],
-    read_btn = document.getElementById('read_btn'),
-    write_btn = document.getElementById('write_btn');
+ipc.on('new-window', function(event, message) {
+    addTab(message);
+});
 
-var trayMenu = null;
-var trayMenuTemplate = [
-    {
-        label: '文件',
-        /*enabled: false*/
-        submenu: [
-            {
-                label: '新建',
-                //accelerator: 'CmdOrCtrl+N',
-                click: function () {
-                    curFile = null;
-                    editor.txt.$txt.html('<p><br></p>'); // TODO
-                }
-            },
-            {
-                label: '打开文件',
-                click: function () {
-                    ipc.send('open-file');
-                }
-            },
-            {
-                label: '打开文件夹',
-                click: function () {
-                    openFolder();
-                }
-            },
-            {
-                label: '保存',
-                click: function () {
-                    save();
-                    if (!curFile) {
+ipc.on('will-navigate', function(event, message) {
+    loadUrl(message);
+});
 
-                    }
-                }
-            },
-            {
-                label: '另存为',
-                click: function () {
-                    ui.msg('暂不支持');
-                }
-            }
-        ]
-    },
-    {
-        label: '更多',
-        submenu: [
-            {
-                label: '设置',
-                click: function () {
-                    ui.frame('setting.html', {
-                        title: '关于'
-                    });
-                }
-            },
-        ]
-    },
-    {
-        label: '帮助',
-        /*click: function () {
-            ipc.send('close-main-window');
-        },*/
-        submenu: [
-            {
-                label: '查看帮助',
-                click: function () {
-                    ui.frame('help.html', {
-                        title: '帮助'
-                    });
-                }
-            },
-            {
-                label: '关于',
-                click: function () {
-                    ui.frame('about.html', {
-                        title: '关于'
-                    });
-                }
-            },
-            /*{
-                label: '查看帮助',
-                accelerator: 'CmdOrCtrl+M',
-                role: 'minimize'
-            },*/
-            /*{
-                label: 'Close',
-                accelerator: 'CmdOrCtrl+W',
-                role: 'reload',
-                //role: 'close'
-            }*/
-        ]
-    }
-];
-trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
-Menu.setApplicationMenu(trayMenu);
+ipc.on('leave-full-screen', function(event, message) {
+    $('#tab-nav').show();
+    $('#layout-header').show();
+    $('#tab-tool').show();
+    $('#tab-content').css('top', '110px');
+});
 
-/*
+ipc.on('enter-full-screen', function(event, message) {
+    $('#tab-nav').hide();
+    $('#layout-header').hide();
+    $('#tab-tool').hide();
+    $('#tab-content').css('top', '0');
+});
+
+var id = addTab('yunser://blank/');
 
 
- var menu = new Menu();
- menu.append(new MenuItem({ label: 'MenuItem1', click: function() { console.log('item 1 clicked'); } }));
- menu.append(new MenuItem({ type: 'separator' }));
- menu.append(new MenuItem({ label: 'MenuItem2', type: 'checkbox', checked: true }));
+$('a[data-toggle="tab"]').on('shown.ui.tab', function (e) {
+    // 获取已激活的标签页的名称
+    var activeTab = $(e.target).text();
+    var id = e.target.parentNode.getAttribute('data-id');
 
- window.addEventListener('contextmenu', function (e) {
- e.preventDefault();
- menu.popup(remote.getCurrentWindow());
- }, false);*/
+    $('#url-input').val(tabs[id].url);
+    console.log(id);
+    curTabId = id;
+
+    // 获取前一个激活的标签页的名称
+    var previousTab = $(e.relatedTarget).text();
+    $(".active-tab span").html(activeTab);
+    $(".previous-tab span").html(previousTab);
+});
+$('#win-min').on('click', function (e) {
+    e.preventDefault();
+    ipc.send('win-min');
+});
+$('#win-max').on('click', function (e) {
+    e.preventDefault();
+    ipc.send('win-max');
+});
+$('#win-close').on('click', function (e) {
+    e.preventDefault();
+    ipc.send('win-close');
+});
