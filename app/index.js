@@ -4,9 +4,11 @@
 const require = nodeRequire;
 const {remote} = require('electron');
 const ipc = require("electron").ipcRenderer;
-const chromeExtensions = nodeRequire('./node/extension');
+const chromeExtensions = require('./node/extension');
 const tool = require('./node/tool.js');
-const TabEx = require('./node/tab-ex.js');
+const TabEx = require('./node/TabEx.js');
+const system = require('./node/system');
+const fileUtil = require('./node/FileUtil');
 
 let tabs = {};
 let curTabId;
@@ -31,25 +33,33 @@ $('#exts').on('click', '[data-ext]', () => {
 });
 
 function initWebview(webview, id) {
-    webview.addEventListener('did-start-loading', function (e) {
+    webview.addEventListener('did-start-loading', (e) => {
         ;
     });
-    webview.addEventListener('page-title-updated', function (e) {
+    webview.addEventListener('page-title-updated', (e) => {
         let $link = $('#nav-link-' + id);
         $link.text(webview.getTitle());
         $link.attr('title', webview.getTitle());
     });
-    webview.addEventListener('new-window', function (e) {
+    webview.addEventListener('did-fail-load', (e) => {
+        let type = fileUtil.getType( webview.getURL());
+        if (type === 'audio') {
+            // 暂时使用默认播放器
+        } else {
+            webview.loadURL('yunser://404');
+        }
+    });
+    webview.addEventListener('new-window', (e) => {
         addTab(e.url);
     });
-    webview.addEventListener('new-page-favicon-updated', function (favicons) {
+    webview.addEventListener('new-page-favicon-updated', (favicons) => {
         console.log('aaa')
     });
-    webview.addEventListener('dom-ready', function () {
-        chromeExtensions.load(__dirname + '/extension', function (err, extensions) {
-            extensions.forEach(function (extension) {
+    webview.addEventListener('dom-ready', () => {
+        chromeExtensions.load(__dirname + '/extension', (err, extensions) => {
+            extensions.forEach((extension) => {
                 //console.log(extension);
-                chromeExtensions.addToWebview(webview, extension, function (err) {
+                chromeExtensions.addToWebview(webview, extension, (err) => {
                     //console.log(err);
                 })
             })
@@ -78,18 +88,25 @@ $(document).on('keydown', function (e) {
 function loadUrl(url) {
     let webview = document.getElementById('webview-' + curTabId);
     webview.loadURL(url);
+    tabs[curTabId].url = url;
+    $('#url-input').val(url);
 }
 
 $('#url-input').on('keydown', function (e) {
     if (e.keyCode == 13) {
+        let url;
         if (this.value.startWith('http') || this.value.startWith('file://')
             || this.value.startWith('yunser://')) {
-            loadUrl(this.value);
+            url = this.value;
+        } else if (this.value.contains('.')) { // TODO
+            url = 'http://' + this.value;
         } else {
-            loadUrl('http://' + this.value);
+            url = system.getSearchUrl(this.value);
         }
+        loadUrl(url);
     }
 });
+
 $('#forward').on('click', function (e) {
     e.preventDefault();
     let webview = document.getElementById('webview-' + curTabId);
@@ -111,7 +128,13 @@ $('#reload').on('click', function (e) {
 });
 
 let tab = new TabEx('#tabs', {
-    //monitor: '.topbar'
+    //monitor: '.topbar',
+    callback: function () {
+        tabNum--;
+        if (tabNum === 0) {
+            ipc.send('win-close');
+        }
+    }
 });
 
 var iddd = 123;
@@ -177,8 +200,8 @@ ipc.on('enter-full-screen', function(event, message) {
 
 var id = addTab('yunser://blank/');
 
+$(document).on('shown.ui.tab', 'a[data-toggle="tab"]', function (e) {
 
-$('a[data-toggle="tab"]').on('shown.ui.tab', function (e) {
     // 获取已激活的标签页的名称
     var activeTab = $(e.target).text();
     var id = e.target.parentNode.getAttribute('data-id');
@@ -192,6 +215,7 @@ $('a[data-toggle="tab"]').on('shown.ui.tab', function (e) {
     $(".active-tab span").html(activeTab);
     $(".previous-tab span").html(previousTab);
 });
+
 $('#win-min').on('click', function (e) {
     e.preventDefault();
     ipc.send('win-min');

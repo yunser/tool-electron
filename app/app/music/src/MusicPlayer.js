@@ -1,5 +1,275 @@
-let instances = [];
+console.log('加载')
 
+// playlist manager
+class MusicManager {
+
+    constructor(option) {
+        this.audios = [];
+        this.mode = option.mode;
+
+
+        const defaultOption = {
+            element: document.getElementsByClassName('aplayer')[0],
+            autoplay: false,
+            mode: 'circulation'
+        };
+
+        this.opts = $.extend({}, defaultOption, option);
+
+        let playOpts = $.extend(option, {
+            music: this.opts.music[0] // TODO
+        });
+
+        this.player = new MusicPlayer(playOpts);
+
+
+        this.player.on('play', function () {
+        });
+        this.player.on('play', function () {
+        });
+        this.player.on('pause', function () {
+        });
+        this.player.on('canplay', function () {
+        });
+        this.player.on('playing', function () {
+        });
+        this.player.on('ended', function () {
+            // multiple music play
+
+            console.log('ended');
+
+            if (this.multiple) {
+                if (this.isMobile) {
+                    this.ended = true;
+                    this.pause();
+                    return;
+                }
+                if (this.audio.currentTime !== 0) {
+                    if (this.mode === 'random') {
+                        this.player.setMusic(this.nextRandomNum());
+                    }
+                    else if (this.mode === 'single') {
+                        this.player.setMusic(this.playIndex);
+                    }
+                    else if (this.mode === 'order') {
+                        if (this.playIndex < this.opts.music.length - 1) {
+                            this.player.setMusic(++this.playIndex);
+                        }
+                        else {
+                            this.player.ended = true;
+                            this.player.pause();
+                            this.player.trigger('ended');
+                        }
+                    }
+                    else if (this.mode === 'circulation') {
+                        if (this.playIndex < this.opts.music.length - 1) {
+                            this.player.setMusic(++this.playIndex);
+                        }
+                        else {
+                            this.player.setMusic(0);
+                        }
+                    }
+                }
+            }
+            else {
+                if (this.mode === 'order') {
+                    this.ended = true;
+                    this.pause();
+                    this.trigger('ended');
+                }
+            }
+        });
+        this.player.on('error', function () {
+        });
+
+        // multiple music
+        this.playIndex = Object.prototype.toString.call(this.opts.music) === '[object Array]' ? 0 : -1;
+
+
+        this.multiple = this.playIndex > -1;
+        this.musics = this.multiple ? this.opts.music : [this.opts.music];
+
+        if (!this.multiple && this.mode !== 'circulation' && this.mode !== 'order') {
+            this.mode = 'circulation';
+        }
+        this.getRandomOrder();
+
+        this.initListView();
+
+        // mode control
+        /*const modeEle = this.element.getElementsByClassName('aplayer-icon-mode')[0];
+        modeEle.addEventListener('click', () => {
+            if (this.multiple) {
+                if (this.mode === 'random') {
+                    this.mode = 'single';
+                }
+                else if (this.mode === 'single') {
+                    this.mode = 'order';
+                }
+                else if (this.mode === 'order') {
+                    this.mode = 'circulation';
+                }
+                else if (this.mode === 'circulation') {
+                    this.mode = 'random';
+                }
+            }
+            else {
+                if (this.mode === 'circulation') {
+                    this.mode = 'order';
+                }
+                else {
+                    this.mode = 'circulation';
+                }
+            }
+            modeEle.innerHTML = this.getSVG(this.mode);
+            this.audio.loop = !(this.multiple || this.mode === 'order');
+        });*/
+
+        /*if (this.mode === 'random') {
+         this.setMusic(this.randomOrder[0]);
+         }
+         else {
+         this.setMusic(0);
+         }*/
+
+        // toggle menu control
+        if (this.multiple) {
+            /*const list = this.element.getElementsByClassName('aplayer-list')[0];
+             list.style.height = list.offsetHeight + 'px';
+             this.element.getElementsByClassName('aplayer-icon-menu')[0].addEventListener('click', () => {
+             if (!list.classList.contains('aplayer-list-hide')) {
+             list.classList.add('aplayer-list-hide');
+             }
+             else {
+             list.classList.remove('aplayer-list-hide');
+             }
+             });*/
+        }
+
+        this.player.playMusic(this.musics[this.playIndex]);
+    }
+
+    initListView() {
+        if (!this.multiple) {
+            return;
+        }
+
+        $('#list').html(this.getListHtml());
+
+        let that = this;
+
+        console.log('事件')
+        // click music list: change music
+        $('#list').on('click', 'li', function () {
+
+            $('.aplayer-list').find('.aplayer-list-light').removeClass('aplayer-list-light');
+            $(this).addClass('aplayer-list-light');
+
+            const musicIndex = $(this).index();
+            console.log('点击', musicIndex, that.playIndex)
+            if (musicIndex !== that.playIndex) {
+
+                that.playIndex = musicIndex;
+                that.player.playMusic(that.musics[musicIndex]);
+            }
+            else {
+                that.player.toggle();
+            }
+        });
+    }
+
+    getMusic() {
+        return this.musics[this.playIndex]; // TODO
+    }
+
+    getIndex() {
+        // get this.music
+        if (this.multiple && typeof(index) !== 'undefined') {
+            this.playIndex = index;
+        }
+        const indexMusic = this.playIndex;
+        this.music = this.multiple ? this.opts.music[indexMusic] : this.opts.music;
+        return this.music;
+    }
+
+    playMusic(music) {
+        this.player.playMusic(music);
+    }
+    
+    /**
+     * get next random number
+     */
+    nextRandomNum() {
+        if (this.multiple) {
+            let index = this.randomOrder.indexOf(this.playIndex);
+            if (index === this.randomOrder.length - 1) {
+                return this.randomOrder[0];
+            }
+            else {
+                return this.randomOrder[index + 1];
+            }
+        }
+        else {
+            return 0;
+        }
+    }
+
+    /**
+     * get random order, using Fisher–Yates shuffle
+     */
+    getRandomOrder() {
+        function random(min, max) {
+            if (max == null) {
+                max = min;
+                min = 0;
+            }
+            return min + Math.floor(Math.random() * (max - min + 1));
+        }
+
+        function shuffle(arr) {
+            var length = arr.length,
+                shuffled = new Array(length);
+            for (var index = 0, rand; index < length; index++) {
+                rand = random(0, index);
+                if (rand !== index) shuffled[index] = shuffled[rand];
+                shuffled[rand] = arr[index];
+            }
+            return shuffled;
+        }
+
+        if (this.multiple) {
+            if (!this.normalOrder) {
+                this.normalOrder = [];
+                for (let i = 0; i < this.opts.music.length; i++) {
+                    this.normalOrder[i] = i;
+                }
+            }
+            this.randomOrder = shuffle(this.normalOrder);
+        }
+    }
+
+    getListHtml() {
+        let eleHTML = '';
+        eleHTML += `
+            <div class="aplayer-list" ${this.opts.listmaxheight ? `style="max-height: ${this.opts.listmaxheight}` : ``}">
+                <ol>`;
+        for (let i = 0; i < this.opts.music.length; i++) {
+            eleHTML += `
+                    <li>
+                        <span class="aplayer-list-cur" style="background: #b7daff;"></span>
+                        <span class="aplayer-list-index">${(i + 1)}</span>
+                        <span class="aplayer-list-title">${this.opts.music[i].title}</span>
+                        <span class="aplayer-list-author">${this.opts.music[i].author}</span>
+                    </li>`
+        }
+        eleHTML += `
+                </ol>
+            </div>`;
+        return eleHTML;
+    }
+}
+
+// core music player
 class MusicPlayer {
 
     /**
@@ -43,21 +313,13 @@ class MusicPlayer {
             autoplay: false,
             mutex: true,
             showlrc: 0,
-            theme: '#b7daff',
             mode: 'circulation'
         };
-        for (let defaultKey in defaultOption) {
-            if (defaultOption.hasOwnProperty(defaultKey) && !option.hasOwnProperty(defaultKey)) {
-                option[defaultKey] = defaultOption[defaultKey];
-            }
-        }
 
-        // multiple music
-        this.playIndex = Object.prototype.toString.call(option.music) === '[object Array]' ? 0 : -1;
+        this.opts = $.extend({}, defaultOption, option);
 
-        this.option = option;
-        this.audios = [];
-        this.mode = option.mode;
+        this.music = this.opts.music;
+        this.mode = this.opts.mode;
 
         /**
          * Parse second to 00:00 format. 00:00:00 if audio is over an hour long.
@@ -77,14 +339,8 @@ class MusicPlayer {
         };
 
         // save lrc
-        this.element = this.option.element;
-        if (this.option.showlrc === 2 || this.option.showlrc === true)  {
-            this.savelrc = [];
-            for (let i = 0; i < this.element.getElementsByClassName('aplayer-lrc-content').length; i++) {
-                this.savelrc.push(this.element.getElementsByClassName('aplayer-lrc-content')[i].innerHTML);
-            }
-        }
-        this.lrcs = [];
+        this.element = this.opts.element;
+        this.$elem = $(this.opts.element);
 
         /**
          * Update progress bar, including loading progress bar and play progress bar
@@ -130,28 +386,21 @@ class MusicPlayer {
             }
         };
 
-        this.multiple = this.playIndex > -1;
-        this.music = this.multiple ? this.option.music[this.playIndex] : this.option.music;
 
         // add class aplayer-withlrc
-        if (this.option.showlrc) {
+        if (this.opts.showlrc) {
             this.element.classList.add('aplayer-withlrc');
         }
-        if (this.option.music.length > 1) {
-            this.element.classList.add('aplayer-list');
-        }
 
-        if (!this.multiple && this.mode !== 'circulation' && this.mode !== 'order') {
-            this.mode = 'circulation';
-        }
-        this.getRandomOrder();
+        // TODO
+        this.element.classList.add('aplayer-list');
 
         // fill in HTML
         let eleHTML = `
             <div class="aplayer-pic" ${(this.music.pic ? (`style="background-image: url('${this.music.pic}');"`) : ``)}>
                 <div class="aplayer-button aplayer-play">
                     <button class="aplayer-icon aplayer-icon-play">`
-            +           this.getSVG('play')
+            + this.getSVG('play')
             + `     </button>
                 </div>
             </div>
@@ -167,8 +416,8 @@ class MusicPlayer {
                     <div class="aplayer-bar-wrap">
                         <div class="aplayer-bar">
                             <div class="aplayer-loaded" style="width: 0"></div>
-                            <div class="aplayer-played" style="width: 0; background: ${this.option.theme};">
-                                <span class="aplayer-thumb" style="border: 1px solid ${this.option.theme};"></span>
+                            <div class="aplayer-played" style="width: 0; background: #b7daff;">
+                                <span class="aplayer-thumb" style="border: 1px solid #b7daff;"></span>
                             </div>
                         </div>
                     </div>
@@ -178,40 +427,27 @@ class MusicPlayer {
                         </span>
                         <div class="aplayer-volume-wrap">
                             <button class="aplayer-icon aplayer-icon-volume-down" ${this.isMobile ? 'style="display: none;"' : ''}>`
-            +                   this.getSVG('volume-down')
+            + this.getSVG('volume-down')
             + `             </button>
                             <div class="aplayer-volume-bar-wrap">
                                 <div class="aplayer-volume-bar">
-                                    <div class="aplayer-volume" style="height: 80%; background: ${this.option.theme};"></div>
+                                    <div class="aplayer-volume" style="height: 80%; background: #b7daff;"></div>
                                 </div>
                             </div>
                         </div>
                         <button class="aplayer-icon aplayer-icon-mode">`
-            +               this.getSVG(this.mode)
+            + this.getSVG(this.mode)
             + `         </button>
                         ${(this.multiple ? `<button class="aplayer-icon aplayer-icon-menu">`
-            +               this.getSVG('menu')
+            + this.getSVG('menu')
             + `         </button>` : ``)}
                     </div>
                 </div>
             </div>`;
-        if (this.multiple) {
-            eleHTML += `
-            <div class="aplayer-list" ${this.option.listmaxheight ? `style="max-height: ${this.option.listmaxheight}` : ``}">
-                <ol>`;
-            for (let i = 0; i < this.option.music.length; i++) {
-                eleHTML += `
-                    <li>
-                        <span class="aplayer-list-cur" style="background: ${this.option.theme};"></span>
-                        <span class="aplayer-list-index">${(i + 1)}</span>
-                        <span class="aplayer-list-title">${this.option.music[i].title}</span>
-                        <span class="aplayer-list-author">${this.option.music[i].author}</span>
-                    </li>`
-            }
-            eleHTML += `
-                </ol>
-            </div>`
-        }
+
+        eleHTML += `<div id="list"></div>`;
+
+
         this.element.innerHTML = eleHTML;
 
         // hide mode button in arrow container
@@ -229,7 +465,7 @@ class MusicPlayer {
         bar.barWrap = this.element.getElementsByClassName('aplayer-bar-wrap')[0];
 
         // switch to narrow style
-        if (this.option.narrow) {
+        if (this.opts.narrow) {
             this.element.classList.add('aplayer-narrow');
         }
 
@@ -238,23 +474,6 @@ class MusicPlayer {
         this.button.addEventListener('click', (e) => {
             this.toggle();
         });
-
-        // click music list: change music
-        if (this.multiple) {
-            const listItem = this.element.getElementsByClassName('aplayer-list')[0].getElementsByTagName('li');
-            for (let i = 0; i < this.option.music.length; i++) {
-                listItem[i].addEventListener('click', () => {
-                    const musicIndex = parseInt(listItem[i].getElementsByClassName('aplayer-list-index')[0].innerHTML) - 1;
-                    if (musicIndex !== this.playIndex) {
-                        this.setMusic(musicIndex);
-                        this.play();
-                    }
-                    else {
-                        this.toggle();
-                    }
-                });
-            }
-        }
 
         // control play progress
         bar.playedBar = this.element.getElementsByClassName('aplayer-played')[0];
@@ -271,7 +490,7 @@ class MusicPlayer {
         });
 
         thumb.addEventListener('mouseover', () => {
-            thumb.style.background = this.option.theme;
+            thumb.style.background = '#b7daff';
         });
         thumb.addEventListener('mouseout', () => {
             thumb.style.background = '#fff';
@@ -283,7 +502,7 @@ class MusicPlayer {
             percentage = percentage > 0 ? percentage : 0;
             percentage = percentage < 1 ? percentage : 1;
             this.updateBar('played', percentage, 'width');
-            if (this.option.showlrc) {
+            if (this.opts.showlrc) {
                 this.updateLrc(parseFloat(bar.playedBar.style.width) / 100 * this.audio.duration);
             }
             this.element.getElementsByClassName('aplayer-ptime')[0].innerHTML = this.secondToTime(percentage * this.audio.duration);
@@ -295,7 +514,7 @@ class MusicPlayer {
             this.audio.currentTime = parseFloat(bar.playedBar.style.width) / 100 * this.audio.duration;
             this.playedTime = setInterval(() => {
                 this.updateBar('played', this.audio.currentTime / this.audio.duration, 'width');
-                if (this.option.showlrc) {
+                if (this.opts.showlrc) {
                     this.updateLrc();
                 }
                 this.element.getElementsByClassName('aplayer-ptime')[0].innerHTML = this.secondToTime(this.audio.currentTime);
@@ -368,284 +587,80 @@ class MusicPlayer {
             elementScrollTop = document.body.scrollTop + document.documentElement.scrollTop;
             return actualTop - elementScrollTop;
         }
-
-        // mode control
-        const modeEle = this.element.getElementsByClassName('aplayer-icon-mode')[0];
-        modeEle.addEventListener('click', () => {
-            if (this.multiple) {
-                if (this.mode === 'random') {
-                    this.mode = 'single';
-                }
-                else if (this.mode === 'single') {
-                    this.mode = 'order';
-                }
-                else if (this.mode === 'order') {
-                    this.mode = 'circulation';
-                }
-                else if (this.mode === 'circulation') {
-                    this.mode = 'random';
-                }
-            }
-            else {
-                if (this.mode === 'circulation') {
-                    this.mode = 'order';
-                }
-                else {
-                    this.mode = 'circulation';
-                }
-            }
-            modeEle.innerHTML = this.getSVG(this.mode);
-            this.audio.loop = !(this.multiple || this.mode === 'order');
-        });
-
-        // toggle menu control
-        if (this.multiple) {
-            const list = this.element.getElementsByClassName('aplayer-list')[0];
-            list.style.height = list.offsetHeight + 'px';
-            this.element.getElementsByClassName('aplayer-icon-menu')[0].addEventListener('click', () => {
-                if (!list.classList.contains('aplayer-list-hide')) {
-                    list.classList.add('aplayer-list-hide');
-                }
-                else {
-                    list.classList.remove('aplayer-list-hide');
-                }
-            });
-        }
-
-        if (this.mode === 'random') {
-            this.setMusic(this.randomOrder[0]);
-        }
-        else {
-            this.setMusic(0);
-        }
-
-        instances.push(this);
     }
 
-    /**
-     * Set music
-     */
-    setMusic(index) {
-        // get this.music
-        if (this.multiple && typeof(index) !== 'undefined') {
-            this.playIndex = index;
-        }
-        const indexMusic = this.playIndex;
-        this.music = this.multiple ? this.option.music[indexMusic] : this.option.music;
+    playMusic(music) {
+        this.music = music;
 
         // set html
         if (this.music.pic) {
-            this.element.getElementsByClassName('aplayer-pic')[0].style.backgroundImage = `url('${this.music.pic}')`;
+            this.$elem.find('.aplayer-pic').css('background-image', `url('${this.music.pic}')`);
+        } else {
+            this.$elem.find('.aplayer-pic').css('background-image', `url('src/default.jpg')`);
         }
+
         this.element.getElementsByClassName('aplayer-title')[0].innerHTML = this.music.title;
         this.element.getElementsByClassName('aplayer-author')[0].innerHTML = ` - ${this.music.author}`;
-        if (this.multiple) {
-            if (this.element.getElementsByClassName('aplayer-list-light')[0]) {
-                this.element.getElementsByClassName('aplayer-list-light')[0].classList.remove('aplayer-list-light');
-            }
-            this.element.getElementsByClassName('aplayer-list')[0].getElementsByTagName('li')[indexMusic].classList.add('aplayer-list-light');
-        }
 
         // set the previous audio object
         if (this.audio) {
-            this.pause();
-            this.audio.currentTime = 0;
+            this.audio.pause();
+            this.audio = null;
         }
 
-        if (this.multiple) {
-            this.element.getElementsByClassName('aplayer-list')[0].scrollTop = indexMusic * 33;
-        }
+        /*if (this.multiple) {
+         this.element.getElementsByClassName('aplayer-list')[0].scrollTop = indexMusic * 33;
+         }
+         */
 
         // get this audio object
-        if ((this.multiple && !this.audios[indexMusic]) || this.playIndex === -1) {
-            this.audio = document.createElement("audio");
-            this.audio.src = this.music.url;
-            this.audio.preload = this.option.preload ? this.option.preload : 'auto';
+        this.audio = document.createElement("audio");
+        this.audio.currentTime = 0;
+        this.audio.src = this.music.url;
+        this.audio.preload = this.opts.preload ? this.opts.preload : 'auto';
+        this.audio.volume = parseInt(this.element.getElementsByClassName('aplayer-volume')[0].style.height) / 100;
+        this.audio.loop = !(this.multiple || this.mode === 'order');
 
-            // show audio time: the metadata has loaded or changed
-            this.audio.addEventListener('durationchange', () => {
-                if (this.audio.duration !== 1) {           // compatibility: Android browsers will output 1 at first
-                    this.element.getElementsByClassName('aplayer-dtime')[0].innerHTML = this.secondToTime(this.audio.duration);
-                }
-            });
-
-            // show audio loaded bar: to inform interested parties of progress downloading the media
-            this.audio.addEventListener('progress', () => {
-                const percentage = this.audio.buffered.length ? this.audio.buffered.end(this.audio.buffered.length - 1) / this.audio.duration : 0;
-                this.updateBar('loaded', percentage, 'width');
-            });
-
-            // audio download error: an error occurs
-            this.audio.addEventListener('error', () => {
-                this.element.getElementsByClassName('aplayer-author')[0].innerHTML = ` - Error happens ╥﹏╥`;
-                this.trigger('pause');
-            });
-
-            // audio can play: enough data is available that the media can be played
-            this.audio.addEventListener('canplay', () => {
-                this.trigger('canplay');
-            });
-
-            // multiple music play
-            this.ended = false;
-            if (this.multiple) {
-                this.audio.addEventListener('ended', () => {
-                    if (this.isMobile) {
-                        this.ended = true;
-                        this.pause();
-                        return;
-                    }
-                    if (this.audio.currentTime !== 0) {
-                        if (this.mode === 'random') {
-                            this.setMusic(this.nextRandomNum());
-                        }
-                        else if (this.mode === 'single') {
-                            this.setMusic(this.playIndex);
-                        }
-                        else if (this.mode === 'order') {
-                            if (this.playIndex < this.option.music.length - 1) {
-                                this.setMusic(++this.playIndex);
-                            }
-                            else {
-                                this.ended = true;
-                                this.pause();
-                                this.trigger('ended');
-                            }
-                        }
-                        else if (this.mode === 'circulation') {
-                            if (this.playIndex < this.option.music.length - 1) {
-                                this.setMusic(++this.playIndex);
-                            }
-                            else {
-                                this.setMusic(0);
-                            }
-                        }
-                    }
-                });
+        // show audio time: the metadata has loaded or changed
+        this.audio.addEventListener('durationchange', () => {
+            if (this.audio.duration !== 1) {           // compatibility: Android browsers will output 1 at first
+                this.element.getElementsByClassName('aplayer-dtime')[0].innerHTML = this.secondToTime(this.audio.duration);
             }
-            else {
-                this.audio.addEventListener('ended', () => {
-                    if (this.mode === 'order') {
-                        this.ended = true;
-                        this.pause();
-                        this.trigger('ended');
-                    }
-                });
-            }
+        });
 
-            // control volume
-            this.audio.volume = parseInt(this.element.getElementsByClassName('aplayer-volume')[0].style.height) / 100;
+        // show audio loaded bar: to inform interested parties of progress downloading the media
+        this.audio.addEventListener('progress', () => {
+            const percentage = this.audio.buffered.length ? this.audio.buffered.end(this.audio.buffered.length - 1) / this.audio.duration : 0;
+            this.updateBar('loaded', percentage, 'width');
+        });
 
-            // loop
-            this.audio.loop = !(this.multiple || this.mode === 'order');
+        // audio download error: an error occurs
+        this.audio.addEventListener('error', () => {
+            this.element.getElementsByClassName('aplayer-author')[0].innerHTML = ` - Error happens ╥﹏╥`;
+            this.trigger('pause');
+        });
 
-            if (this.multiple) {
-                this.audios[indexMusic] = this.audio;
-            }
-        }
-        else {
-            this.audio = this.audios[indexMusic];
-            this.audio.volume = parseInt(this.element.getElementsByClassName('aplayer-volume')[0].style.height) / 100;
-            this.audio.currentTime = 0;
-        }
+        // audio can play: enough data is available that the media can be played
+        this.audio.addEventListener('canplay', () => {
+            this.trigger('canplay');
+        });
 
-        /**
-         * Parse lrc, suppose multiple time tag
-         *
-         * @param {String} lrc_s - Format:
-         * [mm:ss.xx]lyric
-         * [mm:ss.xxx]lyric
-         * [mm:ss.xx][mm:ss.xx][mm:ss.xx]lyric
-         *
-         * @return {String} [[time, text], [time, text], [time, text], ...]
-         */
-        const parseLrc = (lrc_s) => {
-            const lyric = lrc_s.split('\n');
-            let lrc = [];
-            const lyricLen = lyric.length;
-            for (let i = 0; i < lyricLen; i++) {
-                // match lrc time
-                const lrcTimes = lyric[i].match(/\[(\d{2}):(\d{2})\.(\d{2,3})]/g);
-                // match lrc text
-                const lrcText = lyric[i].replace(/\[(\d{2}):(\d{2})\.(\d{2,3})]/g, '').replace(/^\s+|\s+$/g, '');
 
-                if (lrcTimes != null) {
-                    // handle multiple time tag
-                    const timeLen = lrcTimes.length;
-                    for (let j = 0; j < timeLen; j++) {
-                        const oneTime = /\[(\d{2}):(\d{2})\.(\d{2,3})]/.exec(lrcTimes[j]);
-                        const lrcTime = (oneTime[1]) * 60 + parseInt(oneTime[2]) + parseInt(oneTime[3]) / ((oneTime[3] + '').length === 2 ? 100 : 1000);
-                        lrc.push([lrcTime, lrcText]);
-                    }
-                }
-            }
-            // sort by time
-            lrc.sort((a, b) => a[0] - b[0]);
-            return lrc;
-        };
+
+        /*indexMusic = 0;// TODO
+         if (this.multiple) {
+         this.audios[indexMusic] = this.audio;
+         } else {
+         this.audio = this.audios[indexMusic];
+         this.audio.volume = parseInt(this.element.getElementsByClassName('aplayer-volume')[0].style.height) / 100;
+         this.audio.currentTime = 0;
+         }*/
 
         // fill in lrc
-        if (this.option.showlrc) {
-            const index = this.multiple ? indexMusic : 0;
+        if (this.opts.showlrc && music.lrc) {
+            this.$elem.find('.aplayer-lrc-contents').show();
 
-            if (!this.lrcs[index]) {
-                let lrcs = '';
-                if (this.option.showlrc === 1) {
-                    if (this.multiple) {
-                        lrcs = this.option.music[index].lrc;
-                    }
-                    else {
-                        lrcs = this.option.music.lrc;
-                    }
-                }
-                else if (this.option.showlrc === 2 || this.option.showlrc === true)  {
-                    lrcs = this.savelrc[index];
-                }
-                else if (this.option.showlrc === 3) {
-                    const xhr = new XMLHttpRequest();
-                    xhr.onreadystatechange = () => {
-                        if (xhr.readyState === 4) {
-                            if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
-                                lrcs = xhr.responseText;
-                                this.lrcs[index] = parseLrc(lrcs);
-                                this.lrc = this.lrcs[index];
-                                let lrcHTML = '';
-                                this.lrcContents = this.element.getElementsByClassName('aplayer-lrc-contents')[0];
-                                for (let i = 0; i < this.lrc.length; i++) {
-                                    lrcHTML += `<p>${this.lrc[i][1]}</p>`;
-                                }
-                                this.lrcContents.innerHTML = lrcHTML;
-                                if (!this.lrcIndex) {
-                                    this.lrcIndex = 0;
-                                }
-                                this.lrcContents.getElementsByTagName('p')[0].classList.add('aplayer-lrc-current');
-                                this.lrcContents.style.transform = 'translateY(0px)';
-                                this.lrcContents.style.webkitTransform = 'translateY(0px)';
-                            }
-                            else {
-                                console.log('Request was unsuccessful: ' + xhr.status);
-                            }
-                        }
-                    };
-                    let apiurl;
-                    if (this.multiple) {
-                        apiurl = this.option.music[index].lrc;
-                    }
-                    else {
-                        apiurl = this.option.music.lrc;
-                    }
-                    xhr.open('get', apiurl, true);
-                    xhr.send(null);
-                }
-                if (lrcs) {
-                    this.lrcs[index] = parseLrc(lrcs);
-                }
-                else {
-                    this.lrcs[index] = [['00:00', 'Loading']];
-                }
-            }
-
-            this.lrc = this.lrcs[index];
+            this.lrc = this.getLyric(music);
             let lrcHTML = '';
             this.lrcContents = this.element.getElementsByClassName('aplayer-lrc-contents')[0];
             for (let i = 0; i < this.lrc.length; i++) {
@@ -658,6 +673,8 @@ class MusicPlayer {
             this.lrcContents.getElementsByTagName('p')[0].classList.add('aplayer-lrc-current');
             this.lrcContents.style.transform = 'translateY(0px)';
             this.lrcContents.style.webkitTransform = 'translateY(0px)';
+        } else {
+            this.$elem.find('.aplayer-lrc-contents').hide();
         }
 
         // set duration time
@@ -665,15 +682,110 @@ class MusicPlayer {
             this.element.getElementsByClassName('aplayer-dtime')[0].innerHTML = this.audio.duration ? this.secondToTime(this.audio.duration) : '00:00';
         }
 
-        // autoplay
-        if (this.option.autoplay && !this.isMobile) {
-            this.play();
-        }
-        this.option.autoplay = true;  // autoplay next music
+        this.play();
 
+        /*this.ended = false;
         if (this.isMobile) {
             this.pause();
+        }*/
+    }
+
+    /**
+     * Parse lrc, suppose multiple time tag
+     *
+     * @param {String} lrc_s - Format:
+     * [mm:ss.xx]lyric
+     * [mm:ss.xxx]lyric
+     * [mm:ss.xx][mm:ss.xx][mm:ss.xx]lyric
+     *
+     * @return {String} [[time, text], [time, text], [time, text], ...]
+     */
+    _parseLrc(lrc_s) {
+        const lyric = lrc_s.split('\n');
+        let lrc = [];
+        const lyricLen = lyric.length;
+        for (let i = 0; i < lyricLen; i++) {
+            // match lrc time
+            const lrcTimes = lyric[i].match(/\[(\d{2}):(\d{2})\.(\d{2,3})]/g);
+            // match lrc text
+            const lrcText = lyric[i].replace(/\[(\d{2}):(\d{2})\.(\d{2,3})]/g, '').replace(/^\s+|\s+$/g, '');
+
+            if (lrcTimes != null) {
+                // handle multiple time tag
+                const timeLen = lrcTimes.length;
+                for (let j = 0; j < timeLen; j++) {
+                    const oneTime = /\[(\d{2}):(\d{2})\.(\d{2,3})]/.exec(lrcTimes[j]);
+                    const lrcTime = (oneTime[1]) * 60 + parseInt(oneTime[2]) + parseInt(oneTime[3]) / ((oneTime[3] + '').length === 2 ? 100 : 1000);
+                    lrc.push([lrcTime, lrcText]);
+                }
+            }
         }
+        // sort by time
+        lrc.sort((a, b) => a[0] - b[0]);
+        return lrc;
+    };
+
+    //
+    getLyric(music) {
+        if (!this.lrcs) {
+            this.lrcs = {};
+        }
+        const key = music.title;
+
+        if (!this.lrcs[key]) {
+            let lrcs = '';
+            if (this.opts.showlrc === 1) {
+                lrcs = music.lrc;
+            }
+            else if (this.opts.showlrc === 2 || this.opts.showlrc === true) {
+                if (!this.savelrc) {
+                    this.savelrc = [];
+                    let contents = this.element.getElementsByClassName('aplayer-lrc-content');
+                    contents.forEach((content) => {
+                        this.savelrc.push(content.innerHTML);
+                    })
+                }
+                lrcs = this.savelrc[key];
+            }
+            else if (this.opts.showlrc === 3) {
+                const xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
+                            lrcs = xhr.responseText;
+                            this.lrcs[key] = this._parseLrc(lrcs);
+                            this.lrc = this.lrcs[key];
+                            let lrcHTML = '';
+                            this.lrcContents = this.element.getElementsByClassName('aplayer-lrc-contents')[0];
+                            for (let i = 0; i < this.lrc.length; i++) {
+                                lrcHTML += `<p>${this.lrc[i][1]}</p>`;
+                            }
+                            this.lrcContents.innerHTML = lrcHTML;
+                            if (!this.lrcIndex) {
+                                this.lrcIndex = 0;
+                            }
+                            this.lrcContents.getElementsByTagName('p')[0].classList.add('aplayer-lrc-current');
+                            this.lrcContents.style.transform = 'translateY(0px)';
+                            this.lrcContents.style.webkitTransform = 'translateY(0px)';
+                        }
+                        else {
+                            console.log('Request was unsuccessful: ' + xhr.status);
+                        }
+                    }
+                };
+                let apiurl = music.lrc;
+                xhr.open('get', apiurl, true);
+                xhr.send(null);
+            }
+            if (lrcs) {
+                this.lrcs[key] = this._parseLrc(lrcs);
+            }
+            else {
+                this.lrcs[key] = [['00:00', 'Loading']];
+            }
+        }
+
+        return this.lrcs[key];
     }
 
     /**
@@ -690,32 +802,24 @@ class MusicPlayer {
             setTimeout(() => {
                 this.button.innerHTML = `
                             <button class="aplayer-icon aplayer-icon-pause">`
-                    +           this.getSVG('pause')
+                    + this.getSVG('pause')
                     + `     </button>`;
             }, 100);
-
-            // pause other players (Thanks @Aprikyblue)
-            if (this.option.mutex) {
-                for (let i = 0; i < instances.length; i++) {
-                    if (this != instances[i]) {
-                        instances[i].pause();
-                    }
-                }
-            }
-            this.audio.play();
-            if (this.playedTime) {
-                clearInterval(this.playedTime);
-            }
-            this.playedTime = setInterval(() => {
-                this.updateBar('played', this.audio.currentTime / this.audio.duration, 'width');
-                if (this.option.showlrc) {
-                    this.updateLrc();
-                }
-                this.ptime.innerHTML = this.secondToTime(this.audio.currentTime);
-                this.trigger('playing');
-            }, 100);
-            this.trigger('play');
         }
+
+        this.audio.play();
+        if (this.playedTime) {
+            clearInterval(this.playedTime);
+        }
+        this.playedTime = setInterval(() => {
+            this.updateBar('played', this.audio.currentTime / this.audio.duration, 'width');
+            if (this.opts.showlrc) {
+                this.updateLrc();
+            }
+            this.ptime.innerHTML = this.secondToTime(this.audio.currentTime);
+            this.trigger('playing');
+        }, 100);
+        this.trigger('play');
     }
 
     /**
@@ -730,7 +834,7 @@ class MusicPlayer {
             setTimeout(() => {
                 this.button.innerHTML = `
                             <button class="aplayer-icon aplayer-icon-play">`
-                    +           this.getSVG('play')
+                    + this.getSVG('play')
                     + `     </button>`;
             }, 100);
             this.audio.pause();
@@ -783,51 +887,15 @@ class MusicPlayer {
      * get random order, using Fisher–Yates shuffle
      */
     getRandomOrder() {
-        function random(min, max) {
-            if (max == null) {
-                max = min;
-                min = 0;
-            }
-            return min + Math.floor(Math.random() * (max - min + 1));
-        }
-        function shuffle(arr) {
-            var length = arr.length,
-                shuffled = new Array(length);
-            for (var index = 0, rand; index < length; index++) {
-                rand = random(0, index);
-                if (rand !== index) shuffled[index] = shuffled[rand];
-                shuffled[rand] = arr[index];
-            }
-            return shuffled;
-        }
-        if (this.multiple) {
-            if (!this.normalOrder) {
-                this.normalOrder = [];
-                for (let i = 0; i < this.option.music.length; i++) {
-                    this.normalOrder[i] = i;
-                }
-            }
-            this.randomOrder = shuffle(this.normalOrder);
-        }
+        return this.mm.getRandomOrder();
     }
 
     /**
      * get next random number
      */
     nextRandomNum() {
-        if (this.multiple) {
-            let index = this.randomOrder.indexOf(this.playIndex);
-            if (index === this.randomOrder.length - 1) {
-                return this.randomOrder[0];
-            }
-            else {
-                return this.randomOrder[index + 1];
-            }
-        }
-        else {
-            return 0;
-        }
+        return this.mm.nextRandomNum();
     }
 }
 
-module.exports = MusicPlayer;
+module.exports = MusicManager;

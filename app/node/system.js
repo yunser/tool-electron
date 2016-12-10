@@ -1,14 +1,14 @@
 /**
  * Created by cjh1 on 2016/11/26.
  */
-var require = nodeRequire;
-var remote = require('electron').remote;
-var ipc = require("electron").ipcRenderer;
-var http = require("http");
-var fs = require('fs');
-var path = require('path');
-var async = require("async");
-const Stack = require('./../../node/Stack');
+const remote = require('electron').remote;
+const ipc = require("electron").ipcRenderer;
+const http = require("http");
+const fs = require('fs');
+const path = require('path');
+const async = require("async");
+const Stack = require('./Stack');
+const File = require('./File');
 
 function getExt(filename) {
     return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
@@ -134,7 +134,11 @@ System.prototype.init = function () {
     var that = this;
     ipc.on('open-directory', function (event, arg) {
         if (arg) {
-            typeof that.selectDirCall === 'function' && that.selectDirCall(arg[0]);
+            let file = new File();
+            file.path = arg[0];
+            // TODO
+            
+            typeof that.selectDirCall === 'function' && that.selectDirCall(null, arg[0]);
         }
     });
 
@@ -174,7 +178,7 @@ System.prototype.openUri = function (uri) {
 
 
 System.prototype.mkdir = function (path, done) {
-    fs.mkdir(path, 0777, done);
+    fs.mkdir(path, 777, done);
 };
 
 System.prototype.writeFile = function (path, content, done) {
@@ -215,7 +219,7 @@ function func(data) {
 function mkdirs(p, mode, f, made) {
     if (typeof mode === 'function' || mode === undefined) {
         f = mode;
-        mode = 0777 & (~process.umask());
+        mode = 777 & (~process.umask());
     }
     if (!made)
         made = null;
@@ -579,6 +583,29 @@ System.prototype.createDoc = function (bookPath) {
 
     window.open(path.join(destPath, 'index.html'));
 };
+
+// you can config the search engine here
+let config = {
+    inputEncoding: 'UTF-8',
+    default: 'zhihu', // default search engine
+    engine: {
+        google: 'https://www.google.com/search?q=%s',
+        // some good engine in China
+        baidu: 'http://www.baidu.com/s?ie={inputEncoding}&wd=%s',
+        zhihu: 'https://www.zhihu.com/search?type=content&q=%s',
+    }
+};
+
+System.prototype.getSearchUrl = function (keyword) {
+    if (keyword.startWith('@')) {
+        let appName = keyword.substring(1);
+        return `file:///G:/install/apache2.4/htdocs/yunser/tool/note/app/app/${appName}/index.html`; // TODO
+    } else {
+        return config.engine[config.default].replace('{inputEncoding}', config.inputEncoding)
+            .replace('%s', keyword);
+    }
+
+}
 
 var deleteFolderRecursive = function(path) {
 

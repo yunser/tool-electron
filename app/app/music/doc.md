@@ -15,7 +15,10 @@ element: document.getElementById('player1'),                       // Optional, 
 narrow: false,                                                     // Optional, narrow style
 autoplay: true,                                                    // Optional, autoplay song(s), not supported by mobile browsers
 
-showlrc: 0,                                                        // Optional, show lrc, can be 0, 1, 2, see: ###With lrc
+### showlrc
+
+default: 0,
+Optional, show lrc, can be 0, 1, 2, see: ###With lrc
 
 
 mutex: true,                                                       // Optional, pause other players when this player playing

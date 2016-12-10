@@ -25,8 +25,10 @@ class TabEx {
             });
         });
 
-        that.$elem.on('click', '.tab-close', () => {
-            var id = $(this).prev("a").attr("aria-controls");
+        // TODO
+        that.$elem.on('click', '.tab-close', function () {
+            console.log(this);
+            var id = $(this).parent().data('id');
             that.close(id);
         });
 

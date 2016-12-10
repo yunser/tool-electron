@@ -7,7 +7,7 @@ const fs = require("fs")
 const os = require("os").platform()
 const _ = require("lodash")
 
-let Context = require('./../../node/contextmenu');
+let Context = require('../../node/contextmenu');
 
 let lastDir = null
 let currentDir = null

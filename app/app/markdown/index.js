@@ -1,9 +1,11 @@
 const require = nodeRequire;
-const TabEx = require('./../../node/tab-ex.js');
-const storage  = require('./../../node/storage');
-const ContextMenu = require('./../../node/contextmenu');
-const tool  = require('./../../node/tool');
-const system = require('./system.js');
+const TabEx = require('../../node/TabEx.js');
+const storage  = require('../../node/storage');
+const ContextMenu = require('../../node/contextmenu');
+const tool  = require('../../node/tool');
+const system = require('../../node/system.js');
+const path = require('path');
+const fileUtil = require('../../node/FileUtil');
 
 const isInline = token => token && token.type === 'inline';
 const isParagraph = token => token && token.type === 'paragraph_open';
@@ -90,8 +92,8 @@ class FileManager {
                 },
                 callback: {
                     onClick: function (event, treeId, treeNode, clickFlag) {
-                        var ext = getExt(treeNode.file);
-                        var type = getType(treeNode.file);
+                        var ext = fileUtil.getExt(treeNode.file);
+                        var type = fileUtil.getType(treeNode.file);
                         if (type === 'text') {
                             if (!treeNode.children) {
                                 openFile(treeNode.file);
@@ -110,8 +112,8 @@ class FileManager {
                         fm.selectedNode = treeNode;
                         fm.selectFile = treeNode.file;
                         ui.contextmenu($('#file-menu')[0], e.clientX, e.clientY);
-                        /*var ext = getExt(treeNode.file);
-                         var type = getType(treeNode.file);
+                        /*var ext = fileUtil.getExt(treeNode.file);
+                         var type = fileUtil.getType(treeNode.file);
                          if (type === 'text') {
                          if (treeNode.children) {
                          fm.selectFile = treeNode.file;
@@ -132,7 +134,7 @@ class FileManager {
                     onDrop: function(event, treeId, treeNodes, targetNode, moveType, isCopy) {
                         if (targetNode) {
                             treeNodes.forEach(function (node) {
-                                var fileName = getNameFromPath(node.file);
+                                var fileName = fileUtil.getNameFromPath(node.file);
                                 var newName = targetNode.file + '\\' + fileName ;
                                 system.rename(node.file, newName);
                                 node.file = newName;
@@ -185,7 +187,7 @@ class FileManager {
         system.writeFile(path, '', function () {
             ui.msg('添加成功');
             this.treeObj.addNodes(this.selectedNode, {
-                name: getNameFromPath(path),
+                name: fileUtil.getNameFromPath(path),
                 isParent: false
             });
             //fm.openFolder(fm.rootFile);
@@ -471,7 +473,6 @@ function openFile(path) {
         editor.setValue(data);
     });
 
-
     var html = editor.getValue();
     preview.innerHTML = markdown.toHTML(html);
     createDir();
@@ -523,35 +524,6 @@ holder.ondragover = function () {
 holder.ondragleave = holder.ondragend = function () {
     return false;
 };
-
-function getExt(filename) {
-    return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
-}
-function getNameFromPath(filename) {
-    return filename.substr(filename.lastIndexOf('\\')+1);
-}
-
-function getType(filename) {
-    var ext = getExt(filename);
-    if (!ext) {
-        return null;
-    }
-    if ('txt|css|md'.contains(ext)) {
-        return 'text';
-    } else if ('png|jpg|gif'.contains(ext)) {
-        return 'image'
-    } else if ('mp4'.contains(ext)) {
-        return 'video';
-    } else if ('mp3'.contains(ext)) {
-        return 'audio';
-    }
-
-    return 'text'; // TODO
-    //text/plain
-    //text/html
-    //application
-}
-
 holder.ondrop = function (e) {
     e.preventDefault();
     var file = e.dataTransfer.files[0];
@@ -562,7 +534,7 @@ holder.ondrop = function (e) {
                 fs.mkdirSync(imagePath, 777);
             }
 
-            var newImageFile = imagePath + '\\' + new Date().getTime() + '.' + getExt(file.path);
+            var newImageFile = imagePath + '\\' + new Date().getTime() + '.' + fileUtil.getExt(file.path);
             fs.writeFileSync(newImageFile, fs.readFileSync(file.path));
 
             editor.replaceSelection('![](' + newImageFile + ')');
@@ -579,6 +551,7 @@ holder.ondrop = function (e) {
     //openFile(file.path);
     return false;
 };
+
 $('#show-files').on('click', function (e) {
     e.preventDefault();
     $('#layout-file').show();
@@ -621,14 +594,14 @@ $('#save').on('click', function (e) {
     save();
 });
 $('#remove-file').on('click', function () {
-    let fileName = getNameFromPath(fm.selectFile);
+    let fileName = fileUtil.getNameFromPath(fm.selectFile);
     ui.confirm('删除  ' + fileName, function (index) {
         ui.close(index);
         fm.removeSelectFile();
     });
 });
 $('#remame').on('click', function () {
-    var fileName = getNameFromPath(fm.selectFile);
+    var fileName = fileUtil.getNameFromPath(fm.selectFile);
     ui.prompt({
         title: '新的名称',
         value: fileName
@@ -642,9 +615,27 @@ $('#remame').on('click', function () {
         fm.refresh();
     })
 });
-$('#add-file').on('click', function () {
+
+$('#add-file').on('click', () => {
+    // set date as filename if use want to keep a diary
+    let value = '';
+    if (fileUtil.getNameFromPath(fm.selectFile).contains('diary')) {
+        let date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        if (month < 10) {
+            month = '0' + month
+        }
+        let day = date.getDate();
+        if (day < 10) {
+            day = '0' + day;
+        }
+        value = `${year}-${month}-${day}.md`;
+    }
+
     ui.prompt({
         title: '文件名',
+        value: value
     }, function (name, index) {
         if (!name) {
             ui.msg('请输入文件名');
@@ -654,6 +645,7 @@ $('#add-file').on('click', function () {
         fm.addFile(fm.selectFile + '\\' + name);
     })
 });
+
 $('#add-folder').on('click', function () {
     ui.prompt({
         title: '文件夹名',

@@ -4,6 +4,26 @@ const path = require('path');
 var fs = require('fs');
 var context = require('./node/electron-context-menu.js');
 
+let appName = 'music';
+
+//let mainUrl = `file://${__dirname}/index.html`;
+let mainUrl = `file://${__dirname}/app/${appName}/index.html`;
+
+//mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/app/markdown/index.html`);
+//.loadURL(`file://${__dirname}/app/desktop/index.html`);
+//mainWindow.loadURL('yunser://settings');
+//mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/app/_img/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/app/im/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/app/search/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/app/apps/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/app/music/index.html`);
+//mainWindow.loadURL(`file://${__dirname}/index.html`);
+
+
+
+
 ipcMain.on('asynchronous-message', function (event, arg) {
     event.sender.send('asynchronous-reply', 'pong')
 });
@@ -163,17 +183,9 @@ function createWindow () {
         mainWindow = null
     });
 
-    //mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/app/markdown/index.html`);
-    //.loadURL(`file://${__dirname}/app/desktop/index.html`);
-    //mainWindow.loadURL('yunser://settings');
-    //mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/app/_img/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/app/im/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/app/search/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/app/apps/index.html`);
-    //mainWindow.loadURL(`file://${__dirname}/app/music/index.html`);
-    mainWindow.loadURL(`file://${__dirname}/index.html`);
+
+
+    mainWindow.loadURL(mainUrl);
 
     context({
         window: mainWindow,
