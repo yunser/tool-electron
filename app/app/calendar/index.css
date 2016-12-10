@@ -1,0 +1,40 @@
+.date-input {
+    display: none;
+}
+.date-box {
+    width: 582px;
+    height: 456px;
+    margin: 36px auto;
+    border: 1px solid #5daeff;
+}
+.date-box .info {
+    float: right;
+    width: 160px;
+    height: 100%;
+    padding: 16px;
+    color: #fff;
+    text-align: center;
+    background-color: #5daeff;
+}
+.date-box .info .date-and-week {
+    margin-bottom: 16px;
+}
+.date-box .info .date {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px auto;
+    font-size: 32px;
+    text-align: center;
+    line-height: 80px;
+    background-color: #ffb800;
+    border-radius: 4px;
+}
+.date-box .info .lunar-date {
+    margin-bottom: 16px;
+}
+.date-box .info .lunar-year {
+    margin-bottom: 16px;
+}
+.lunar-date2 {
+    margin-bottom: 16px;
+}

@@ -1,0 +1,464 @@
+﻿/**
+ * 时间选择控件 Date v1.2
+ * https://github.com/cjhgit/eui-date
+ */
+
+.ui-date {
+    color: #333;
+    width: 240px;
+    font-size: 12px;
+    z-index: 99999999;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .1);
+}
+
+.ui-date li {
+    list-style: none;
+}
+
+.ui-date .laydate_void {
+    cursor: text;
+    color: #ccc;
+}
+
+.ui-date a,
+.ui-date a:hover {
+    text-decoration: none;
+    cursor: pointer;
+    color: #333;
+}
+
+.ui-date a:hover {
+    text-decoration: none;
+    color: #666;
+}
+
+.ui-date cite,
+.ui-date label {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-width: 5px;
+    border-style: dashed;
+    border-color: transparent;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.ui-date .laydate_yms,
+.ui-date .laydate_time {
+    display: none;
+}
+.laydate_yms .laydate_chdown cite {
+    border-top-color: #999;
+}
+.ui-date .laydate_show {
+    display: block;
+}
+
+.ui-date input {
+    outline: 0;
+    font-size: 14px;
+    color: #fff;
+    background-color: #0e9aef;
+}
+
+
+/* 头部 */
+.laydate-header {
+    position: relative;
+    height: 36px;
+    padding: 5px;
+    z-index: 99;
+    background-color: #0e9aef;
+}
+
+.laydate_ym {
+    position: relative;
+    float: left;
+    width: 48%;
+    height: 24px;
+    cursor: pointer;
+}
+
+.laydate_ym input {
+    float: left;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+
+.laydate_ym .laydate_yms {
+    position: absolute;
+    left: -1px;
+    top: 24px;
+    height: 181px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .1);
+    border: 1px solid #C6C6C6;
+    background-color: #fff;
+}
+
+.laydate_y {
+    width: 121px;
+    margin-right: 6px;
+}
+
+.laydate_y input {
+    width: 64px;
+    margin-right: 15px;
+}
+
+.laydate_y .laydate_yms {
+    width: 121px;
+    text-align: center;
+}
+
+.laydate_y .laydate_yms a {
+    position: relative;
+    display: block;
+    height: 20px;
+    background-color: #F6F6F6;
+    border-bottom: 1px solid #C6C6C6;
+}
+
+.laydate_y .laydate_yms ul {
+    height: 139px;
+    padding: 0;
+}
+
+.laydate_y .laydate_yms ul li {
+    float: left;
+    width: 59px;
+    height: 20px;
+    line-height: 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.laydate_m {
+    width: 99px;
+}
+
+.laydate_m .laydate_yms {
+    width: 99px;
+    padding: 0;
+}
+
+.laydate_m input {
+    width: 42px;
+    margin-right: 15px;
+}
+
+.laydate_m .laydate_yms span {
+    display: block;
+    float: left;
+    width: 42px;
+    margin: 5px 0 0 5px;
+    line-height: 24px;
+    text-align: center;
+    _display: inline;
+}
+
+.laydate_choose {
+    display: block;
+    float: left;
+    position: relative;
+    width: 20px;
+    height: 24px;
+}
+
+.laydate_choose cite,
+.laydate_tab cite {
+    left: 50%;
+    top: 50%;
+}
+
+.laydate_chtop cite {
+    margin: -7px 0 0 -5px;
+    border-bottom-style: solid;
+    border-bottom-color: #666;
+}
+
+.laydate_chdown cite,
+.laydate_ym label {
+    top: 50%;
+    margin: -2px 0 0 -5px;
+    border-top-style: solid;
+    border-top-color: #fff;
+}
+
+.laydate_chprev cite {
+    margin: -5px 0 0 -7px;
+    border-right-style: solid;
+    border-right-color: #fff;
+}
+
+.laydate_chnext cite {
+    margin: -5px 0 0 -2px;
+    border-left-style: solid;
+    border-left-color: #fff;
+}
+
+.laydate_ym label {
+    right: 28px;
+}
+
+.date-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+.date-table td {
+    width: 31px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    border: none;
+    height: 21px;
+    line-height: 21px;
+    background-color: #fff;
+}
+.date-table td:hover {
+    background-color: #F3F3F3
+}
+
+.date-table thead {
+    height: 22px;
+    color: #999;
+    line-height: 22px;
+}
+
+.date-table thead th {
+    font-weight: 400;
+    font-size: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+}
+.date-table .date-today {
+    border: 1px solid #09c;
+}
+.date-table .date-festival {
+    color: #f00 !important; /* TODO */
+    font-size: 12px;
+}
+.date-table .laydate_nothis {
+    color: #999;
+}
+.date-table .laydate_mark {
+    color: #fff;
+    background-color: #0e9aef;
+}
+.date-table .laydate_mark:hover {
+    color: #fff;
+    background-color: #0e9aef;
+}
+
+/* 脚部 */
+.date-footer {
+    position: relative;
+    height: 32px;
+    line-height: 20px;
+    padding: 5px;
+    font-size: 12px;
+    border-bottom: 1px solid #C6C6C6;
+}
+
+.date-footer .laydate_hms {
+    position: relative;
+    z-index: 1;
+    float: left;
+    border: 1px solid #ccc;
+}
+
+.laydate_time {
+    position: absolute;
+    left: 5px;
+    bottom: 26px;
+    width: 129px;
+    height: 125px;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .1);
+    background-color: #fff;
+}
+
+.laydate_time .laydate_hmsno {
+    padding: 5px 0 0 5px;
+}
+.laydate_time .laydate_hmsno span {
+    display: block;
+    float: left;
+    width: 24px;
+    height: 19px;
+    line-height: 19px;
+    text-align: center;
+    cursor: pointer;
+}
+.laydate_time .laydate_hmsno span:hover {
+    background-color: #F3F3F3
+}
+.laydate_time1 .laydate_hmsno {
+    padding: 6px 0 0 8px;
+}
+.laydate_time1 .laydate_hmsno span {
+    width: 21px;
+    height: 20px;
+    line-height: 20px;
+}
+
+
+
+.laydate_time1 {
+    width: 230px;
+    height: 154px;
+}
+
+.laydate_msg {
+    left: 49px;
+    bottom: 67px;
+    width: 141px;
+    height: auto;
+    overflow: hidden;
+}
+
+.laydate_msg p {
+    padding: 5px 10px;
+}
+
+.date-footer li {
+    float: left;
+    height: 20px;
+    line-height: 20px;
+    border-right: none;
+    font-weight: 900;
+}
+
+.date-footer .laydate_sj {
+    width: 33px;
+    text-align: center;
+    font-weight: 400;
+    border-right: 1px solid #C6C6C6;
+    background-color: #F6F6F6;
+}
+
+.date-footer input {
+    float: left;
+    width: 21px;
+    height: 20px;
+    line-height: 20px;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 400;
+    color: #333;
+    background-color: #fff;
+}
+
+.date-footer .laydte_hsmtex {
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    background-color: #F6F6F6;
+}
+
+.date-footer .laydte_hsmtex span {
+    position: absolute;
+    width: 20px;
+    top: 0;
+    right: 0px;
+    cursor: pointer;
+}
+
+.date-footer .laydte_hsmtex span:hover {
+    font-size: 14px;
+    border-bottom: 1px solid #C6C6C6;
+}
+
+.date-footer .laydate_btn {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    border-right: 1px solid #C6C6C6;
+}
+
+.date-footer .laydate_btn a {
+    float: left;
+    height: 20px;
+    padding: 0 6px;
+    border: 1px solid #ccc;
+    border-right: none;
+    background-color: #F6F6F6;
+}
+
+.date-footer .laydate_btn a:hover {
+    color: #000;
+    background-color: #fff;
+}
+
+.date-footer .laydate_v {
+    position: absolute;
+    left: 10px;
+    top: 6px;
+    font-family: Courier;
+    z-index: 0;
+    color: #999
+}
+
+
+.ui-date .laydate_void:hover {
+    background-color: #fff;
+}
+
+.ui-date .active {
+    background-color: #eee;
+}
+
+.laydate_y .laydate_yms .laydate_chdown {
+    border-top: 1px solid #C6C6C6;
+    border-bottom: none;
+}
+
+.laydate_chprev {
+    border-left: none;
+}
+
+.laydate_choose:hover,
+.laydate_y .laydate_yms a:hover {
+    opacity: .6;
+}
+
+.laydate_m .laydate_yms span:hover,
+.laydate_y .laydate_yms ul li:hover {
+    background-color: #eee;
+}
+
+/* inline */
+.date-inline {
+    border: none;
+    box-shadow: none;
+}
+/* large date */
+.date-lg {
+    width: 420px;
+    height: 453px;
+}
+
+.date-lg td {
+    height: 60px;
+    font-size: 16px;
+}
+.date-lg  thead th {
+    font-size: 16px;
+}
+.date-lg thead {
+    line-height: 28px;
+}
+/* colorful date */
+.date-color {
+
+}

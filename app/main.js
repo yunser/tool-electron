@@ -4,10 +4,10 @@ const path = require('path');
 var fs = require('fs');
 var context = require('./node/electron-context-menu.js');
 
-let appName = 'music';
+let appName = 'calendar';
 
-//let mainUrl = `file://${__dirname}/index.html`;
-let mainUrl = `file://${__dirname}/app/${appName}/index.html`;
+let mainUrl = `file://${__dirname}/index.html`;
+//let mainUrl = `file://${__dirname}/app/${appName}/index.html`;
 
 //mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
 //mainWindow.loadURL(`file://${__dirname}/app/markdown/index.html`);
