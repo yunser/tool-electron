@@ -12,10 +12,19 @@ const fileUtil = {
         if (!filename) {
             return null;
         }
+        // TODO
+        /*if (filename.lastIndexOf(".") && filename.lastIndexOf(".")!== '.') {
+            return null;
+        }*/
+        console.log(filename.charAt(1) === '.', filename);
         return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
     },
     getNameFromPath: function (filename) {
-        return filename.substr(filename.lastIndexOf('\\')+1);
+        if (filename.contains('/')) {
+            return filename.substr(filename.lastIndexOf('/')+1);
+        } else {
+            return filename.substr(filename.lastIndexOf('\\')+1);
+        }
     },
     getType: function(filename) {
         var ext = this.getExt(filename);

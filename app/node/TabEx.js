@@ -9,8 +9,12 @@ class TabEx {
     constructor(elem, option) {
         var that = this;
 
+        this.tabNum = 0;
+
         that.elem = document.getElementById(elem);
         that.$elem = $(elem);
+        that.$nav = that.$elem.children('.nav');
+        that.$content = that.$elem.children(".tab-content");
 
         that.opts = $.extend({}, TabEx.DEFAULTS, option);
 
@@ -32,6 +36,14 @@ class TabEx {
             that.close(id);
         });
 
+        that.$elem.on('shown.ui.tab', 'a[data-toggle="tab"]', function (e) {
+            // 获取已激活的标签页的名称
+            var activeTab = $(e.target).text();
+            var id = e.target.parentNode.getAttribute('data-id');
+
+            that.curTabId = id;
+        });
+
         $(window).resize(() => {
             that.drop();
         });
@@ -42,7 +54,9 @@ class TabEx {
 
         var id = opts.id;
         that.$elem.find('.active').removeClass('active');
-        
+        that.tabNum++;
+        that.curTabId = id;
+
         //如果TAB不存在，创建一个新的TAB
         if (!$("#nav-item-" + id)[0]) {
             // 创建新TAB的title
@@ -51,16 +65,11 @@ class TabEx {
                 'role': 'presentation',
                 'id': 'nav-item-' + opts.id,
                 'data-id': id
-            }).append(
-                $('<a>', {
-                    id: 'nav-link-' + id,
-                    'class': 'nav-link',
-                    'href': '#pane-' + id,
-                    'aria-controls': id,
-                    'role': 'tab',
-                    'data-toggle': 'tab'
-                }).html(opts.title)
-            );
+            }).html(`<a id="nav-link-${id}" class="nav-link" href="#pane-${id}" aria-controls="${id}"
+                role="tab" data-toggle="tab">
+                    <i class="logo"></i>
+                    <span class="title">${opts.title}</span>
+                </a>`);
 
             // 是否允许关闭
             if (that.opts.close) {
@@ -92,8 +101,8 @@ class TabEx {
             }
             
             // 加入TABS
-            that.$elem.children('.nav').append(title);
-            that.$elem.children(".tab-content").append(content);
+            that.$nav.append(title);
+            that.$content.append(content);
         }
 
         // 激活TAB
@@ -102,13 +111,41 @@ class TabEx {
         that.drop();
     }
 
+    getCurTabId() {
+        return this.curTabId;
+    }
+    
+    next() {
+        let that = this;
+        let id = that.curTabId;
+
+        // active the next tab or first tab
+        if ($("#nav-item-" + id).next().length) {
+            $("#nav-item-" + id).next().children().tab('show');
+        } else if (that.$nav.children().length) {
+            that.$nav.children().eq(0).children().tab('show');
+        }
+
+        that.drop();
+    }
+
     close (id) {
         var that = this;
 
+        that.tabNum--;
+
         // 如果关闭的是当前激活的TAB，激活他的前一个TAB
         if (that.$elem.find("li.active").attr('id') == "nav-item-" + id) {
-            $("#nav-item-" + id).prev().addClass('active');
-            $("#pane-" + id).prev().addClass('active');
+            if ($("#nav-item-" + id).prev().length) {
+                $("#nav-item-" + id).prev().addClass('active');
+                $("#pane-" + id).prev().addClass('active');
+                that.curTabId = $("#nav-item-" + id).prev().data('id');
+            } else if ($("#nav-item-" + id).next().length) {
+                $("#nav-item-" + id).next().addClass('active');
+                $("#pane-" + id).next().addClass('active');
+                that.curTabId = $("#nav-item-" + id).next().data('id');
+            }
+
         }
 
         // 关闭TAB
@@ -116,7 +153,7 @@ class TabEx {
         $("#pane-" + id).remove();
 
         that.drop();
-        that.opts.callback();
+        that.opts.callback(id, that.curTabId);
     }
 
     drop () {

@@ -113,7 +113,6 @@ fs.readFileSync(lrcFile, 'utf8', (err, data) => {
 
     // use .text() to get the content of a node:
     xmlreader.read(xml_string2, function(err, res) {
-        console.log( res.response.List );
         res.response.List.foreach((file) => {
 
 
@@ -121,9 +120,6 @@ fs.readFileSync(lrcFile, 'utf8', (err, data) => {
     });
 
 });
-
-console.log(os.getUserPath())
-
 
 var parseString = require('xml2js').parseString;
 var xml = "<root>Hello xml2js!</root>"
@@ -147,7 +143,6 @@ let json = `
 }`;
 
 $(document).on('keydown', function (e) {
-    console.log(e.keyCode);
     //e.preventDefault();
     if (e.keyCode === 82) {
         window.location.reload(true);
@@ -173,3 +168,10 @@ holder.ondrop = function (e) {
     }
     return false;
 };
+
+if (window.location.search) {
+    let file = system.getParam(window.location.search);
+    if (file) {
+        playMusic(file);
+    }
+}

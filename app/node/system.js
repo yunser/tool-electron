@@ -1,6 +1,8 @@
 /**
+ * encapsulate electron here, you should't require electron in other Javascript file
  * Created by cjh1 on 2016/11/26.
  */
+
 const remote = require('electron').remote;
 const ipc = require("electron").ipcRenderer;
 const http = require("http");
@@ -9,6 +11,7 @@ const path = require('path');
 const async = require("async");
 const Stack = require('./Stack');
 const File = require('./File');
+const fileUtil = require('./fileUtil');
 
 function getExt(filename) {
     return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
@@ -112,82 +115,240 @@ function walk(dir, depth, done) {
     });
 }
 
-function System() {
-    this.init();
+class System {
+
+    constructor() {
+        this.init();
+    }
+
+    loadFiles(path, done) {
+        walk(path, 1, function (err, results) {
+
+            let root = {
+                open: true,
+                file: path,
+                name: getNameFromPath(path),
+                isParent: true,
+                children: results
+            };
+            done(err, [root]);
+        });
+    }
+
+    init() {
+        var that = this;
+        ipc.on('open-directory', function (event, arg) {
+            if (arg) {
+                let file = new File();
+                file.path = arg[0];
+                // TODO
+
+                typeof that.selectDirCall === 'function' && that.selectDirCall(null, arg[0]);
+            }
+        });
+
+        ipc.on('open-file', function (event, arg) {
+            if (arg) {
+                typeof that.selectFileCall === 'function' && that.selectFileCall(arg[0]);
+            }
+        });
+
+        this.filesObj = require('./files.json');
+        console.log(this.filesObj);
+
+        /*// 高级调试
+        console.log = (function(oriLogFunc){
+            return function(str)
+            {
+                ipc.send('debug', [oriLogFunc, arguments]);
+                //oriLogFunc.apply(console, arguments);
+            }
+        })(console.log);*/
+
+
+        console.log('哈哈', '呵呵')
+    }
+
+    readFile(path, call) {
+        fs.readFile(path, 'utf8', call);
+    }
+
+    selectDir(call) {
+        this.selectDirCall = call;
+        ipc.send('open-files');
+    }
+
+    selectFile(call) {
+        this.selectFileCall = call;
+        ipc.send('open-file');
+    }
+
+    dealAppProtocol() {
+        return this.getAppPath() + '/search/app.html';
+    }
+    
+    openFile(path) {
+        let ext = fileUtil.getExt(path);
+        console.log(path);
+        let appName = this.filesObj[ext];
+        if (appName === 'system') {
+            ipc.send('open-url', path);
+        } else {
+            let appPath = this.getAppPath() + '/app/' + this.filesObj[ext] + '/index.html?path='
+            + encodeURI(path);
+            console.log('打开' + appPath)
+            window.open(appPath);
+        }
+        /*ui.prompt({
+            title: '打开'+ext,
+            value: '123'
+        }, function (name, index) {
+            if (!name) {
+                ui.msg('请输入文件名');
+                return;
+            }
+            ui.close(index);
+            //system.rename(fm.selectFile, fm.selectFile.replace(fileName, name));
+            //fm.refresh();
+        })*/
+        //
+    }
+
+    getParam(search) {
+        let param = search.split('?')[1];
+        let path = param.split('&')[0];
+        console.log(path.split('='));
+        if (path.split('=')[0] === 'path') {
+            //return ;
+            return decodeURI(path.split('=')[1]);
+        } else {
+            return null;
+        }
+    }
+
+    openUri(uri) {
+        ipc.send('open-url', uri);
+    }
+
+    mkdir(path, done) {
+        fs.mkdir(path, 777, done);
+    }
+
+    writeFile(path, content, done) {
+        fs.writeFile(path, content, 'utf8', done);
+    }
+
+    rename(path, dest) {
+        fs.rename(path, dest);
+    }
+
+    createDoc(bookPath) {
+        let resPath = path.join(__dirname, 'res');
+        let tplPath = path.join(resPath, 'template.html');
+        let assetPath = path.join(resPath, 'asset');
+
+        let destPath = path.join(bookPath, '_book'); // 存放所有文件的目录
+        let summaryPath = path.join(bookPath, 'SUMMARY.md');
+
+        // 如果文件夹不存在，创建文件夹
+        if (!fs.existsSync(destPath)) {
+            fs.mkdirSync(destPath, 777);
+        }
+
+        // 复制资源文件
+        copyDir(assetPath, destPath + '\\asset', function (err) {
+            if (err) {
+                console.dir(err);
+            } else {
+
+            }
+        });
+
+        var summary = fs.readFileSync(summaryPath, 'utf-8');
+        let sObj = summaryObj(summary);
+
+        dealFiles.unshift('README.md');
+        // 遍历目录
+        dealFiles.forEach(function (file) {
+            var mdFile = path.join(bookPath, file);
+            if (!fs.existsSync(mdFile)) {
+                return;
+            }
+            let markdown = fs.readFileSync(mdFile, 'utf8');
+
+            //var htmlFile = mdFile.replace(/\.md$/, '.html');
+            var htmlFile = path.join(destPath, file).replace(/\.md$/, '.html')
+                .replace(/(README)|(readme)/, 'index');
+
+            var template = fs.readFileSync(tplPath, 'utf8');
+
+            let filePath = path.join(destPath, 'index.html');
+            let html = marked(markdown, {});
+
+            var relative = htmlFile.replace(destPath, '');
+            var pathCount = 0;
+            for (var i = 0; i < relative.length; i++) {
+                if (relative.charAt(i) === path.sep) {
+                    pathCount++;
+                }
+            }
+            var relativePath = '';
+            for (var i = 0; i < pathCount - 1; i++) {
+                relativePath += '../'
+            }
+
+            var summary = dealSummary(sObj, relativePath);
+            html = template.replace('{{title}}', '无题').replace('{{content}}', html)
+                .replace('{{summary}}', summary).replace(/\{\{path\}\}/g, relativePath)
+                .replace('{{theme}}', 'book');
+            // 如果文件夹不存在，创建文件夹
+            if (!fs.existsSync(path.dirname(htmlFile))) {
+                fs.mkdirSync(path.dirname(htmlFile), 777);
+            }
+
+
+            fs.writeFileSync(htmlFile, html, 'utf8');
+
+
+        });
+
+        window.open(path.join(destPath, 'index.html'));
+    }
+
+    getUserPath() {
+        const username = 'lucy';
+        // TODO
+        return path.resolve('G:/install/apache2.4/htdocs/yunser/tool/note/app/file/user/' + username, '.');
+    }
+
+    getSearchUrl(keyword) {
+        if (keyword.startWith('@')) {
+            let appName = keyword.substring(1);
+            return `file:///G:/install/apache2.4/htdocs/yunser/tool/note/app/app/${appName}/index.html`; // TODO
+        } else {
+            return config.engine[config.default].replace('{inputEncoding}', config.inputEncoding)
+                .replace('%s', keyword);
+        }
+    }
+
+    removeFile(path, call) {
+        if (!fs.existsSync(path)) {
+            return;
+        }
+        fs.stat(path, function(err, stat) {
+            if (stat && stat.isDirectory()) {
+                deleteFolderRecursive(path);
+                typeof call === 'function' && call();
+            } else {
+                fs.unlink(path, call);
+            }
+        });
+    }
+    
+    getAppPath() {
+        return path.resolve(__dirname, '..');
+    }
 }
-
-System.prototype.loadFiles = function (path, done) {
-    walk(path, 1, function (err, results) {
-
-        let root = {
-            open: true,
-            file: path,
-            name: getNameFromPath(path),
-            isParent: true,
-            children: results
-        };
-        done(err, [root]);
-    });
-};
-
-System.prototype.init = function () {
-    var that = this;
-    ipc.on('open-directory', function (event, arg) {
-        if (arg) {
-            let file = new File();
-            file.path = arg[0];
-            // TODO
-            
-            typeof that.selectDirCall === 'function' && that.selectDirCall(null, arg[0]);
-        }
-    });
-
-    ipc.on('open-file', function (event, arg) {
-        if (arg) {
-            typeof that.selectFileCall === 'function' && that.selectFileCall(arg[0]);
-        }
-    });
-};
-
-System.prototype.on = function () {
-
-};
-
-System.prototype.readFile = function (path, call) {
-    fs.readFile(path, 'utf8', call);
-};
-
-System.prototype.say = function () {
-
-};
-
-System.prototype.selectDir = function (call) {
-    this.selectDirCall = call;
-    ipc.send('open-files');
-};
-
-System.prototype.selectFile = function (call) {
-    this.selectFileCall = call;
-    ipc.send('open-file');
-};
-
-System.prototype.openUri = function (uri) {
-    ipc.send('open-url', uri);
-};
-
-
-
-System.prototype.mkdir = function (path, done) {
-    fs.mkdir(path, 777, done);
-};
-
-System.prototype.writeFile = function (path, content, done) {
-    fs.writeFile(path, content, 'utf8', done);
-};
-
-System.prototype.rename = function (path, dest) {
-    fs.rename(path, dest);
-};
 
 function readLines(input, func) {
     var remaining = '';
@@ -511,101 +672,20 @@ function dealSummary(htmlObj, relativePath) {
     return html;
 }
 
-System.prototype.createDoc = function (bookPath) {
-    let resPath = path.join(__dirname, 'res');
-    let tplPath = path.join(resPath, 'template.html');
-    let assetPath = path.join(resPath, 'asset');
-
-    let destPath = path.join(bookPath, '_book'); // 存放所有文件的目录
-    let summaryPath = path.join(bookPath, 'SUMMARY.md');
-
-    // 如果文件夹不存在，创建文件夹
-    if (!fs.existsSync(destPath)) {
-        fs.mkdirSync(destPath, 777);
-    }
-
-    // 复制资源文件
-    copyDir(assetPath, destPath + '\\asset', function (err) {
-        if (err) {
-            console.dir(err);
-        } else {
-
-        }
-    });
-
-    var summary = fs.readFileSync(summaryPath, 'utf-8');
-    let sObj = summaryObj(summary);
-
-    dealFiles.unshift('README.md');
-    // 遍历目录
-    dealFiles.forEach(function (file) {
-        var mdFile = path.join(bookPath, file);
-        if (!fs.existsSync(mdFile)) {
-            return;
-        }
-        let markdown = fs.readFileSync(mdFile, 'utf8');
-
-        //var htmlFile = mdFile.replace(/\.md$/, '.html');
-        var htmlFile = path.join(destPath, file).replace(/\.md$/, '.html')
-            .replace(/(README)|(readme)/, 'index');
-
-        var template = fs.readFileSync(tplPath, 'utf8');
-
-        let filePath = path.join(destPath, 'index.html');
-        let html = marked(markdown, {});
-
-        var relative = htmlFile.replace(destPath, '');
-        var pathCount = 0;
-        for (var i = 0; i < relative.length; i++) {
-            if (relative.charAt(i) === path.sep) {
-                pathCount++;
-            }
-        }
-        var relativePath = '';
-        for (var i = 0; i < pathCount - 1; i++) {
-            relativePath += '../'
-        }
-
-        var summary = dealSummary(sObj, relativePath);
-        html = template.replace('{{title}}', '无题').replace('{{content}}', html)
-            .replace('{{summary}}', summary).replace(/\{\{path\}\}/g, relativePath)
-            .replace('{{theme}}', 'book');
-        // 如果文件夹不存在，创建文件夹
-        if (!fs.existsSync(path.dirname(htmlFile))) {
-            fs.mkdirSync(path.dirname(htmlFile), 777);
-        }
-
-
-        fs.writeFileSync(htmlFile, html, 'utf8');
-
-
-    });
-
-    window.open(path.join(destPath, 'index.html'));
-};
-
 // you can config the search engine here
 let config = {
     inputEncoding: 'UTF-8',
-    default: 'zhihu', // default search engine
+    default: 'baidu', // default search engine
     engine: {
         google: 'https://www.google.com/search?q=%s',
         // some good engine in China
         baidu: 'http://www.baidu.com/s?ie={inputEncoding}&wd=%s',
         zhihu: 'https://www.zhihu.com/search?type=content&q=%s',
+        sogou: 'https://www.sogou.com/web?query=%s',
     }
 };
 
-System.prototype.getSearchUrl = function (keyword) {
-    if (keyword.startWith('@')) {
-        let appName = keyword.substring(1);
-        return `file:///G:/install/apache2.4/htdocs/yunser/tool/note/app/app/${appName}/index.html`; // TODO
-    } else {
-        return config.engine[config.default].replace('{inputEncoding}', config.inputEncoding)
-            .replace('%s', keyword);
-    }
 
-}
 
 var deleteFolderRecursive = function(path) {
 
@@ -636,19 +716,8 @@ var deleteFolderRecursive = function(path) {
     }
 
 };
-System.prototype.removeFile = function (path, call) {
-    if (!fs.existsSync(path)) {
-        return;
-    }
-    fs.stat(path, function(err, stat) {
-        if (stat && stat.isDirectory()) {
-            deleteFolderRecursive(path);
-            typeof call === 'function' && call();
-        } else {
-            fs.unlink(path, call);
-        }
-    });
-};
+
+
 
 let system = new System();
 

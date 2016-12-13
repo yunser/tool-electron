@@ -1,11 +1,13 @@
 require = window.nodeRequire;
-window.$ = window.jQuery = require("jquery")
-const { remote, shell } = require("electron")
-const moment = require("moment")
-const path = require("path")
-const fs = require("fs")
-const os = require("os").platform()
-const _ = require("lodash")
+window.$ = window.jQuery = require("jquery");
+const { remote, shell } = require("electron");
+const moment = require("moment");
+const path = require("path");
+const fs = require("fs");
+const os = require("os").platform();
+const _ = require("lodash");
+const system = require('../../node/system');
+
 
 let Context = require('../../node/contextmenu');
 
@@ -50,30 +52,44 @@ let normalizeSize = function(bytes) {
 }
 
 let openFile = function(filedir) {
-
+    system.openFile(filedir);
     //shell.openItem(filedir)
 }
 
 let upDir = function(dirname) {
-    if (dirname === path.join(dirname, "../")) return
-    changeDir(path.join(dirname, "../"))
+    if (dirname === path.join(dirname, "..")) {
+        return;
+    }
+    console.log(path.join(dirname, ".."))
+    changeDir(path.join(dirname, ".."))
 }
 
 let changeDir = function(dirname) {
     currentDir = dirname
     //lastDir = !lastDir ? dirname : ""
 
+
     fs.readdir(dirname, (error, files) => {
-        if (error) throw error
+        if (error) {
+            console.log('readdir error');
+            ui.msg('can not open the directory');
+            //throw error;
+            return;
+        }
 
         console.log(1);
         let $title = $("#path").val(dirname)
         let $parent = $("#files")
+        $("#files").empty();
+        let fileNum = 0;
 
         _.forEach(files.sort(), (files) => {
             let name = files
-            let file = dirname + "/" + files
+            let file = dirname + path.sep + files;
+            console.log(file);
             let home = os.platform === "win32" ? process.env.USERPROFILE : process.env.HOME
+
+            fileNum++;
 
             fs.stat(file, function(err, stats) {
                 let type = function() {
@@ -92,6 +108,7 @@ let changeDir = function(dirname) {
                         return undefined
                     }
                 }
+
 
                 let location = file
                 let size = type() == "folder" ? "—" : normalizeSize(stats.size)
@@ -151,10 +168,16 @@ let changeDir = function(dirname) {
                 $contain.append($modif)
                 $parent.append($contain)
             })
-        })
+        });
 
-        $("#files").empty()
-    })
+        if (fileNum === 0) {
+            $('#content-empty').show();
+        } else {
+            $('#content-empty').hide();
+        }
+    });
+
+
 }
 
 let setSidebar = function(object) {
@@ -168,53 +191,99 @@ let setSidebar = function(object) {
     //$container.append(`<span class="file_icon"><img src="res/${icon}.svg"></span>${title}`)
 }
 
-$(function() {
-    $("#path").on('keydown', (e) => {
-        if (e.keyCode === 73) {
-            alert(1);
-        }
-    });
+$("#path").on('keydown', (e) => {
+    if (e.keyCode === 73) {
+        alert(1);
+    }
+});
 
-    $('#files').contextmenu({
-        item: 'li',
-        content: '#file-menu'
-    });
+$('#files').contextmenu({
+    item: 'li',
+    content: '#file-menu',
+    show(ui) {
+        console.log(ui)
+    }
+});
 
-    $("#control_updir").on("click", (e) => {
-        upDir(currentDir)
-    })
-
-    $("#window_minimize").on("click", (e) => {
-        let window = remote.getCurrentWindow()
-        let minimize = window.minimize()
-    })
-
-    $("#window_maximize").on("click", (e) => {
-        let window = remote.getCurrentWindow()
-        let maximize = !window.isMaximized() ? window.maximize() : window.unmaximize()
-    })
-
-    $("#window_close").on("click", (e) => {
-        let window = remote.getCurrentWindow()
-        let close = window.close()
-    })
-
-    if      (platform === "win") changeDir(process.env.USERPROFILE)
-    else if (platform === "mac") changeDir(process.env.HOME)
-    else                         changeDir(process.env.PWD)
-
-
-    //setSidebar();
-
-    $('#home').on('click', (e) => {
-        changeDir('F:/Users/cjh1/Desktop/');
-    });
-
-    $('#download').on('click', (e) => {
-        changeDir('G:/install/apache2.4/htdocs/yunser/tool/note/app/file/root/download');
-    });
-
+$("#control_updir").on("click", (e) => {
+    upDir(currentDir)
 })
+
+$("#window_minimize").on("click", (e) => {
+    let window = remote.getCurrentWindow()
+    let minimize = window.minimize()
+})
+
+$("#window_maximize").on("click", (e) => {
+    let window = remote.getCurrentWindow()
+    let maximize = !window.isMaximized() ? window.maximize() : window.unmaximize()
+})
+
+let isHome = true;
+
+$("#window_close").on("click", (e) => {
+    let window = remote.getCurrentWindow()
+    let close = window.close()
+})
+
+
+$('#path').on('focus', function (e) {
+    this.select();
+});
+
+$('#path').on('keydown', function (e) {
+    if (e.keyCode === 13) {
+        let file = this.value;
+        if (file.startWith('home://')) {
+            file = path.resolve(system.getUserPath(), file.substring(8));
+            console.log(file);
+        }
+        fs.stat(file, function (err, stat) {
+            if (err) {
+                ui.msg('input error');
+                return;
+            }
+
+            if (stat.isDirectory()) {
+                changeDir(file);
+            } else {
+                //
+                ui.msg('暂未实现打开功能');
+            }
+        })
+    }
+
+});
+
+//setSidebar();
+
+$('#home').on('click', (e) => {
+    let userPath = system.getUserPath();
+    changeDir(userPath);
+});
+
+$('#download').on('click', (e) => {
+    let userPath = system.getUserPath();
+    changeDir(path.resolve(userPath, 'Downloads'));
+});
+
+// if the url has parameter path, open the path TODO
+if (window.location.search) {
+    let param = window.location.search.split('?')[1];
+    let path = param.split('&')[0];
+    path = path.split('=')[1];
+    changeDir(path);
+} else {
+    if (platform === "win") {
+        changeDir(process.env.USERPROFILE);
+    }
+    else if (platform === "mac") {
+        changeDir(process.env.HOME)
+    }
+    else {
+        changeDir(process.env.PWD)
+    }
+}
 
 $(".waves").mousedown(function(e) {
 
@@ -248,4 +317,8 @@ $(".waves").mousedown(function(e) {
         left: nX,
         top: nY
     }).addClass("waves-effect-animation");//播放动画
+});
+
+$('#add').on('click', function (e) {
+    
 });

@@ -1,28 +1,16 @@
 const electron = require('electron');
 const {app, protocol, BrowserWindow, dialog, remote, ipcMain, shell} = require('electron');
 const path = require('path');
-var fs = require('fs');
+const fs = require('fs');
+
 var context = require('./node/electron-context-menu.js');
 
-let appName = 'calendar';
+// default App should require default-app.js
+let defaultApp = 'browser';
 
-let mainUrl = `file://${__dirname}/index.html`;
-//let mainUrl = `file://${__dirname}/app/${appName}/index.html`;
-
-//mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/app/markdown/index.html`);
-//.loadURL(`file://${__dirname}/app/desktop/index.html`);
-//mainWindow.loadURL('yunser://settings');
-//mainWindow.loadURL(`file://${__dirname}/app/files/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/app/_img/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/app/im/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/app/search/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/app/apps/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/app/music/index.html`);
-//mainWindow.loadURL(`file://${__dirname}/index.html`);
-
-
-
+let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
+//let mainUrl = `yunser://404`;
+//let mainUrl = 'http://localhost:3000/?2324';
 
 ipcMain.on('asynchronous-message', function (event, arg) {
     event.sender.send('asynchronous-reply', 'pong')
@@ -36,9 +24,37 @@ ipcMain.on('synchronous-message', function (event, arg) {
 let mainWindow;
 // 注册私有协议
 
+// add custom protocol
+/*protocol.registerHttpProtocol('mist', function(request, callback) {
+
+    request.url = request.url.replace('mist:','http:');
+
+    // if(request.url.indexOf('sockjs') !== -1) {
+
+    //   if(request.url.indexOf('ws:') !== -1)
+    //     request.url = request.url.replace('ws://','ws://localhost:4000');
+    //   else
+    //     request.url = request.url.replace('http://','http://localhost:4000');
+
+    // }
+
+    console.log(request.url);
+
+    callback(request);
+
+}, function (error) {
+    if (error)
+        console.error('Failed to register protocol', error)
+});*/
+
+// doesn't work either:
+protocol.registerStandardSchemes(['mist']);
 
 function createWindow () {
+    // custom protocol yunser
     protocol.registerFileProtocol('yunser', (request, callback) => {
+        //request.url = 'http://www.baidu.com';
+        //return;
         console.log('================')
         console.log(request.url);
         const url = request.url.substr(9);
@@ -60,15 +76,45 @@ function createWindow () {
         }
     });
 
+    // custom protocol app
+    protocol.registerStringProtocol('yunser', (request, callback) => {
+        console.log('================***')
+        console.log(request.url);
+        const url = request.url.substr(9);
+        var resPath;
+        if (url.indexOf('resources') !== -1) {
+            resPath = path.normalize(`${__dirname}/${url}`.replace('resources/', ''));
+        } else if (url.indexOf('.') !== -1) { // TODO
+            resPath = path.normalize(`${__dirname}/chrome/${url}`);
+        } else {
+            resPath = path.normalize(`${__dirname}/chrome/${url}/index.html`);
+        }
+        console.log(resPath);
+        callback({
+            path: resPath
+        });
+    }, (error) => {
+        if (error) {
+            console.error('Failed to register protocol');
+        }
+    });
+
+    
+
+    
+
+
+
     let screen = electron.screen;
     var size = screen.getPrimaryDisplay().workAreaSize;
     
     // 创建浏览器窗口。
     mainWindow = new BrowserWindow({
         x: 0,
-        y: 0,
-        width: size.width,
-        height: size.height,
+        y: -5, // TODO,
+        //resizable: false,
+        width: size.width ,
+        height: size.height + 10,
         icon: "icon.png",
         titleBarStyle: 'hidden',
         frame: false,
@@ -77,7 +123,7 @@ function createWindow () {
         }*/
         //fullscreen: true isFullScreen()
     }/*{width: 800, height: 600}*/);
-
+    mainWindow.maximize();
     console.log('呵呵')
     
     
@@ -128,6 +174,12 @@ function createWindow () {
         console.log('已结发送')
         e.preventDefault();    
     });
+
+    mainWindow.webContents.on('will-navigate2', function (e, url) {
+        mainWindow.webContents.send('will-navigate', url);
+        console.log('已结发送2')
+        e.preventDefault();
+    });
     
     mainWindow.on('leave-full-screen', function () {
         mainWindow.webContents.send('leave-full-screen');
@@ -145,6 +197,7 @@ function createWindow () {
 
     mainWindow.webContents.session.on('will-download', (e, item) => {
         //获取文件的总大小
+        console.log(item);
         const totalBytes = item.getTotalBytes();
         console.log('总大小',totalBytes);
         //设置文件的保存路径，此时默认弹出的 save dialog 将被覆盖

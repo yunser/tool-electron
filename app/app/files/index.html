@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="../../asset/lib/eui/1.3/iconfont.css">
     <link rel="stylesheet" href="../../asset/lib/eui/1.3/md.css">
     <link rel="stylesheet" href="index.css">
+    <title>File Manager</title>
 </head>
 <body>
 <div class="window_menubar">
@@ -18,7 +19,7 @@
 
     <div class="menubar_align_right menubar_buttons">
         <ul>
-            <li><img src="res/new.svg"></li>
+            <li id="add"><img src="res/new.svg"></li>
             <li class="dropdown">
                 <img src="res/menu.svg">
                 <ul>
@@ -36,7 +37,11 @@
             <li><span class="file_icon"><img src="res/google_drive.svg"></span>Google Drive</li>
             <li><span class="file_icon"><img src="res/dropbox.svg"></span>Dropbox</li>
             <li id="download"><span class="file_icon"><img src="res/download.svg"></span>Downloads</li>
+            <li><span class="file_icon"><img src="res/dropbox.svg"></span>Shared</li>
+            <li><span class="file_icon"><img src="res/dropbox.svg"></span>Recycle bin</li>
+            <li><span class="file_icon"><img src="res/dropbox.svg"></span>Secret</li>
         </ul>
+        <div>8.78GB/40.67TB</div>
         <ul id="sidebar_bottom">
             <li class="separator"></li>
             <li><span class="file_icon"><img src="res/cloud.svg"></span>Network</li>
@@ -50,6 +55,10 @@
             <span class="size">Size</span>
             <span>Last Modified</span>
         </li>
+        <div id="content-empty" class="content-empty">
+            <img class="img" src="img/empty.jpg">
+            <div class="tip">empty</div>
+        </div>
         <ul id="files" class="file-list">
 
         </ul>
@@ -57,10 +66,10 @@
 </div>
 
 <ul id="file-menu" class="dropdown-menu">
-    <li><a id="remove-file" href="#">删除</a></li>
-    <li><a id="remame" href="#">重命名</a></li>
-    <li><a id="add-file" href="#">添加文件</a></li>
-    <li><a id="add-folder" href="#">添加文件夹</a></li>
+    <li><a id="remove-file" href="#">Delete</a></li>
+    <li><a id="remame" href="#">Rename</a></li>
+    <li><a id="add-file" href="#">Add File</a></li>
+    <li><a id="add-folder" href="#">Add Folder</a></li>
 </ul>
 
 <script>

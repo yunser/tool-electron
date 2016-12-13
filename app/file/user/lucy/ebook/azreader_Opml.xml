@@ -1,0 +1,9 @@
+<opml version="2.0">
+  <head>
+    <docs>http://www.opml.org/spec2</docs>
+  </head>
+  <body>
+    <outline text="学而时嘻之" type="feed" xmlUrl="http://www.geekonomics10000.com/feed" htmlUrl="http://www.geekonomics10000.com/" title="学而时嘻之" description="用理工科思维理解世界" />
+    <outline text="阮一峰的网络日志" type="feed" xmlUrl="http://www.ruanyifeng.com/blog/atom.xml" htmlUrl="tag:www.ruanyifeng.com,2010-04-11:/blog//1" title="阮一峰的网络日志" description="Ruan YiFeng's Blog" />
+  </body>
+</opml>

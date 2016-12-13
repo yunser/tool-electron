@@ -236,13 +236,30 @@ body {
 
 /**/
 .path {
+    width: 600px;
     color: #000;
     background-color: transparent;
     border: 1px solid transparent;
     outline: none;
 }
-.path:hover {
+.path:hover,
+.path:focus {
     color: #999;
     background-color: #fff;
     border: 1px solid #fff
+}
+
+/* content empty */
+.content-empty {
+    display: none;
+}
+.content-empty .img {
+    display: block;
+    width: 300px;
+    height: 200px;
+    margin: 100px auto 36px auto;
+}
+.content-empty .tip {
+    text-align: center;
+    font-size: 20px;
 }

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Demo1</title>
+    <link rel="stylesheet" href="asset/lib/eui/eui.min.css">
+    <link rel="stylesheet" href="../src/eui-date.css">
+</head>
+<body>
+    <div class="container"></div>
+    <div>
+        <span>demo:</span>
+        <input id="demo">
+        <div>
+            <button id="modify-time" type="button">修改时间</button>
+
+        </div>
+    </div>
+
+    <div class="demo1">
+        显示节日：<input id="festival" value="2016-10-01" type="text">
+    </div>
+    <div class="demo1">
+        点击事件：<input id="click" type="text">
+    </div>
+    <div class="demo1">
+        不初始化：<input id="init" type="text">
+    </div>
+    <div class="demo1">
+        特殊标记：<input id="mark" type="text">
+    </div>
+    <div class="demo1">
+        范围限制：<input id="minmax" type="text">
+    </div>
+    <div class="demo1">
+        时间格式：<input id="format" type="text">
+    </div>
+
+    <div class="demo1">
+        按钮触发：<input type="text" id="J-xl-2"><input type="button" id="J-xl-2-btn" value="打开">
+    </div>
+
+
+    <div class="demo1">
+        <label for="label">Label触发：</label><input type="text" id="label" >
+    </div>
+
+    <div class="demo1">
+        <label for="label">清空按钮：</label><input type="text" id="clear" >
+    </div>
+
+    <div class="demo1">
+        直接传dom：<input type="text" id="J-xl-4" >
+    </div>
+
+    <div>
+        <div><span>开始时间：</span><input id="start"></div>
+        <div><span>结束时间：</span><input id="end"></div>
+    </div>
+
+    <a href="#">测试</a>
+    <table>
+        <tr>
+            <th>参数</th>
+            <th>类型</th>
+            <th>默认值</th>
+            <th>说明</th>
+        </tr>
+        <tr>
+            <td>format</td>
+            <td>string</td>
+            <td>'YYYY-MM-DD'</td>
+            <td>日期格式</td>
+        </tr>
+        <tr>
+            <td>min</td>
+            <td>string</td>
+            <td>'1900-01-01 00:00:00'</td>
+            <td>最小时间</td>
+        </tr>
+        <tr>
+            <td>max</td>
+            <td>string</td>
+            <td>'2099-12-31 23:59:59'</td>
+            <td>最大时间</td>
+        </tr>
+        <tr>
+            <td>fixed</td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>是否固定在可视区域</td>
+        </tr>
+        <tr>
+            <td>istime</td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>是否显示时间选择</td>
+        </tr>
+        <tr>
+            <td>isclear</td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>是否显示清空按钮</td>
+        </tr>
+        <tr>
+            <td>issure</td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>是否显示确认按钮</td>
+        </tr>
+        <tr>
+            <td>istoday</td>
+            <td>boolean</td>
+            <td>true</td>
+            <td>是否显示今天按钮</td>
+        </tr>
+        <tr>
+            <td>zIndex</td>
+            <td>number</td>
+            <td>auto</td>
+            <td>css z-index</td>
+        </tr>
+        <tr>
+            <td>festival</td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>是否显示节日</td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <th>方法</th>
+            <th>说明</th>
+        </tr>
+        <tr>
+            <td>date(options)</td>
+            <td>主方法，参数见上面</td>
+        </tr>
+        <tr>
+            <td>eui.Date.now(timestamp, format)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>laydate.reset()</td>
+            <td>重设日历控件坐标，一般用于页面dom结构改变时。</td>
+        </tr>
+    </table>
+    <script src="../jquery-1.10.2.min.js"></script>
+    <script src="asset/lib/eui/eui.min.js"></script>
+    <script type="text/javascript" src="../src/eui-date.js"></script>
+    <script type="text/javascript">
+
+        $.extend(eui.Date.DEFAULTS, {
+            //container: '#content .econtent-body'
+        });
+
+        $('#demo').date({
+            istime: true,
+            format: 'YYYY-MM-DD hh:mm:ss',
+            start: '2012-04-04 00:00:00',
+        });
+
+        $('#modify-time').on('click', function () {
+            start.min = eui.Date.now(3);
+            $('#start').date({
+                min: eui.Date.now(3),
+            });
+
+        });
+
+        $('#format').date({
+            format: 'YYYY/MM/DD'
+        });
+
+        $('#festival').date({
+            festival: true
+        });
+
+        $('#label').date({
+            event: 'focus'
+        });
+
+        $('#clear').date({
+            isclear: true
+        });
+
+        $('#mark').date({
+            mark: function (YY, MM, DD) {
+                if (YY === 2016 && MM === 8 && (DD === 14 || DD === 16)) {
+                    return true;
+                }
+            }
+        });
+
+        $('#init').date({
+            init: false
+        });
+
+        $('#minmax').date({
+            min: eui.Date.now(-1), //-1代表昨天，-2代表前天，以此类推
+            max: eui.Date.now(+1), //+1代表明天，+2代表后天，以此类推
+        });
+
+        $('#click').date({
+            choose: function(datas) {
+                eui.msg('选择了' + datas);
+            }
+        });
+
+        var start = {
+            init: false,
+            min: eui.Date.now(),
+            choose: function(datas){
+                end.min = datas; // 开始日选好后，重置结束日的最小日期
+                end.start = datas // 将结束日的初始值设定为开始日
+                $('#end').date('reload');
+            }
+        };
+        var end = {
+            init: false,
+            min: eui.Date.now(),
+            //start: '2012-04-04 00:00:00',
+            choose: function(datas){
+                start.max = datas; // 开始日选好后，重置结束日的最小日期
+                start.start = datas // 将结束日的初始值设定为开始日
+                $('#start').date('reload');
+            }
+        };
+
+        $('#start').date(start);
+        $('#end').date(end);
+
+    </script>
+</body>
+</html>

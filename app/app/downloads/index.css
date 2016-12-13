@@ -3,6 +3,7 @@
 }
 .search-box {
     width: 500px;
+    padding: 100px;
     margin: 100px auto;
 }
 .search-box .search-logo {

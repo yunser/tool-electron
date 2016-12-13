@@ -58,8 +58,6 @@ function createTodoItem(token, TokenConstructor) {
     return todo
 }
 
-
-// 文件管理器
 class FileManager {
     constructor() {
         this.rootFile = 'F:\\Users\\cjh1\\Desktop\\note'; // 根目录
@@ -68,12 +66,10 @@ class FileManager {
         this.treeObj = null;
     }
 
-    // 刷新
     refresh () {
         this.openFolder(this.rootFile);
     }
 
-    // 打开文件夹
     openFolder(path) {
         let that = this;
         this.rootFile = path;
@@ -101,7 +97,7 @@ class FileManager {
                         } else if (type === 'image') {
                             system.openUri(treeNode.file);
                         } else {
-                            ui.msg('暂不支持打开此类型的文件')
+                            ui.msg('unsupported format')
                         }
 
                     },
@@ -109,6 +105,7 @@ class FileManager {
                         if (!treeNode) {
                             return false;
                         }
+
                         fm.selectedNode = treeNode;
                         fm.selectFile = treeNode.file;
                         ui.contextmenu($('#file-menu')[0], e.clientX, e.clientY);
@@ -177,18 +174,18 @@ class FileManager {
     }
 
     removeSelectFile() {
-        fm.removeSelectFile();
-        system.removeFile(this.selectFile, function () {
+        system.removeFile(this.selectFile, () => {
             this.treeObj.removeNode(this.selectedNode);
         });
     }
 
     addFile(path) {
-        system.writeFile(path, '', function () {
+        system.writeFile(path, '', () => {
             ui.msg('添加成功');
             this.treeObj.addNodes(this.selectedNode, {
                 name: fileUtil.getNameFromPath(path),
-                isParent: false
+                isParent: false,
+                file: path
             });
             //fm.openFolder(fm.rootFile);
         });
@@ -603,7 +600,7 @@ $('#remove-file').on('click', function () {
 $('#remame').on('click', function () {
     var fileName = fileUtil.getNameFromPath(fm.selectFile);
     ui.prompt({
-        title: '新的名称',
+        title: 'New Filename',
         value: fileName
     }, function (name, index) {
         if (!name) {
@@ -662,10 +659,6 @@ $('#add-folder').on('click', function () {
     })
 });
 
-
-
-
-
 function help() {
     ui.frame('help.html', {
         title: '帮助'
@@ -683,18 +676,18 @@ $('#preview').on('click', 'a', function (e) {
 
 var trayMenuTemplate = [
     {
-        label: '文件',
+        label: 'File',
         //enabled: false
         submenu: [
             {
-                label: '新建',
+                label: 'New',
                 click: function () {
                     fm.curFile = null;
                     editor.setValue(''); // TODO
                 }
             },
             {
-                label: '打开文件',
+                label: 'Open File',
                 click: function () {
                     system.fm.selectFile(function (uri) {
                         if (uri) {
@@ -704,13 +697,13 @@ var trayMenuTemplate = [
                 }
             },
             {
-                label: '打开文件夹',
+                label: 'Open Folder',
                 click: function () {
                     openFolder();
                 }
             },
             {
-                label: '保存',
+                label: 'Save',
                 click: function () {
                     save();
                     if (!fm.curFile) {
@@ -719,7 +712,7 @@ var trayMenuTemplate = [
                 }
             },
             {
-                label: '另存为',
+                label: 'Save As...',
                 click: function () {
                     ui.msg('暂不支持');
                 }
@@ -727,24 +720,24 @@ var trayMenuTemplate = [
         ]
     },
     {
-        label: '更多',
+        label: 'More',
         submenu: [
             {
-                label: '设置',
+                label: 'Setting',
                 click: function () {
                     ui.frame('setting.html', {
-                        title: '关于'
+                        title: 'About'
                     });
                 }
             },
             {
-                label: 'html转markdown',
+                label: 'Html To Markdown',
                 click: function () {
                     window.open('html2md.html');
                 }
             },
             {
-                label: '导出为网页',
+                label: 'Export As Webpage',
                 click: function () {
 
                 }
@@ -752,10 +745,10 @@ var trayMenuTemplate = [
         ]
     },
     {
-        label: '工具',
+        label: 'Tools',
         submenu: [
             {
-                label: '生成文档',
+                label: 'Generate Document',
                 click: function () {
                     system.selectDir(function (path) {
                         system.createDoc(path);
@@ -765,21 +758,21 @@ var trayMenuTemplate = [
         ]
     },
     {
-        label: '帮助',
+        label: 'Help',
         submenu: [
             {
-                label: '查看帮助',
+                label: 'View Help',
                 click: function () {
                     help();
                 }
             },
             {
-                label: '关于',
+                label: 'About',
                 //accelerator: 'CmdOrCtrl+M',
                 //role: 'reload', minimize minimize
                 click: function () {
                     ui.frame('about.html', {
-                        title: '关于'
+                        title: 'About'
                     });
                 }
             },
