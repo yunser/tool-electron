@@ -1,1 +1,2 @@
-document.body.style.backgroundColor="red"
+document.body.style.backgroundColor="#f1f1f1";
+console.log('asd');

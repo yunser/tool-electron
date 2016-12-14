@@ -20,7 +20,7 @@
         <input id="url-input" class="url-input form-control" value="asd://404">
     </div>
     <div class="url-right">
-        <div id="exts" class="exts">
+        <div id="ext-list" class="exts">
         </div>
         <span class="dropdown">
             <a data-toggle="dropdown" data-target="#" href="#"><i class="icon icon-message"></i> </a>
@@ -61,6 +61,13 @@
     <a id="find-next" class="find-btn" href="#"><i class="icon icon-right"></i> </a>
     <a id="find-close" class="find-btn" href="#"><i class="icon icon-close"></i> </a>
 </div>
+
+<ul id="extension-menu" class="dropdown-menu">
+    <li><a id="content-menu-add-file" href="#">New File</a></li>
+    <li><a id="content-menu-add-folder" href="#">New Folder</a></li>
+    <li><a id="content-menu-refresh" href="#">Refresh</a></li>
+</ul>
+
 <script>
     if (window.require) {
         window.nodeRequire = require;

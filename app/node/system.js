@@ -154,7 +154,6 @@ class System {
         });
 
         this.filesObj = require('./files.json');
-        console.log(this.filesObj);
 
         /*// 高级调试
         console.log = (function(oriLogFunc){
@@ -164,9 +163,6 @@ class System {
                 //oriLogFunc.apply(console, arguments);
             }
         })(console.log);*/
-
-
-        console.log('哈哈', '呵呵')
     }
 
     readFile(path, call) {
@@ -189,14 +185,12 @@ class System {
     
     openFile(path) {
         let ext = fileUtil.getExt(path);
-        console.log(path);
         let appName = this.filesObj[ext];
         if (appName === 'system') {
             ipc.send('open-url', path);
         } else {
             let appPath = this.getAppPath() + '/app/' + this.filesObj[ext] + '/index.html?url='
             + encodeURI(path);
-            console.log('打开' + appPath)
             window.open(appPath);
         }
         /*ui.prompt({

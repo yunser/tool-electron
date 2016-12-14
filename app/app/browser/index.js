@@ -2,9 +2,9 @@
  * Created by cjh1 on 2016/12/6.
  */
 const require = nodeRequire;
-//const electron = require('electron');
+const electron = require('electron');
 const {remote, ipcRenderer, webFrame} = require('electron');
-const chromeExtensions = require('../../node/extension');
+const chromeExtensions = require('../../node/extension/extension');
 const path = require('path');
 const tool = require('../../node/tool.js');
 const TabEx = require('../../node/TabEx.js');
@@ -12,6 +12,10 @@ const system = require('../../node/system');
 const fileUtil = require('../../node/FileUtil');
 const {download} = require('electron-dl');
 const isDev = require('electron-is-dev');
+const run = require('./chrome/run');
+//const newTabUrl = 'yunser://blank/';
+//const newTabUrl = 'app://search';
+const newTabUrl = 'app://extensions';
 
 //webFrame.setZoomFactor(2)
 //webFrame.setZoomLevelLimits(0.25, 5);
@@ -34,20 +38,68 @@ function delUnusedElements(menuTpl) {
 
 const appPath = system.getAppPath();
 
-chromeExtensions.load(appPath + '/extension', (err, extensions) => {
-    extensions.forEach((extension) => {
-        if (!extension.browser_action) {
-            return;
+
+let globalExtensions;
+
+function getExtensionById(id) {
+    for (let i = 0; i < globalExtensions.length; i++) {
+        if (globalExtensions[i].id === id) {
+            return globalExtensions[i];
         }
-        $('#exts').append(`<a href="#" data-ext="${extension}" title="${extension.name}">
-            <img src="${extension.path}/${extension.browser_action.default_icon}">
-        </a>`)
+    }
+    return null;
+}
+
+// load all extension
+chromeExtensions.load(appPath + '/extension', (err, extensions) => {
+    globalExtensions = extensions;
+    extensions.forEach((extension) => {
+        // Browser Actions popup
+        if (extension.browser_action) {
+            $('#ext-list').append(`<a class="ext-item" href="#" data-ext="${extension.id}" title="${extension.name}">
+                <img src="${extension.path}/${extension.browser_action.default_icon}"></a>`);
+        }
+
+        // background script
+        if (extension.background && extension.background.scripts) {
+            let scripts = extension.background.scripts;
+
+            console.log('啦啦啦')
+            scripts.forEach((script) => {
+                let scriptPath = path.resolve(extension.path, script);
+
+                var myScript= document.createElement("script");
+                myScript.type = "text/javascript";
+                myScript.src=scriptPath;
+                document.body.appendChild(myScript);
+
+                /*let $script = $(`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));
+                $(document.body).append($script);
+                $(document.head).append('<script src="G:/install/apache2.4/htdocs/yunser/tool/note/app/extension/test/1.1_0/sample.js"></script>');
+                console.log('添加脚本'+`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));*/
+            });
+            /*getAllScriptCode(extension, scripts, (err, code) => {
+                if (err) {
+                    return;
+                    //return callback(err);
+                }
+                console.log('executeJavaScript');
+                webContents.executeJavaScript(code, false, (result) => {
+                    console.log('Loaded extension', extension.name);
+                    //callback(null);
+                })
+            });*/
+        }
     })
 });
 
-$('#exts').on('click', '[data-ext]', () => {
-    let ext = $(this).data('ext');
-});
+
+function simpleText(text) {
+    if (text.length > 20) {
+        return text.substring(0, 20) + '...';
+    }
+    return text;
+}
 
 function initWebview(webview, id) {
     webview.addEventListener('did-finish-load', (e) => {
@@ -92,17 +144,16 @@ function initWebview(webview, id) {
             e.preventDefault();
         });
 
-        chromeExtensions.load(appPath + '/extension', (err, extensions) => {
-            extensions.forEach((extension) => {
-                console.log(extension);
-                chromeExtensions.addToWebview(webview, extension, (err) => {
-                    console.log(err);
-                })
+        globalExtensions.forEach((extension) => {
+            console.log(extension);
+            chromeExtensions.addToWebview(webview, extension, (err) => {
+                console.log(err);
             })
         });
 
         webview.getWebContents().on('context-menu', (e, props) => {
 
+            console.log('邮件')
             var opts = {};
             const editFlags = props.editFlags;
             const hasText = props.selectionText.trim().length > 0;
@@ -154,7 +205,7 @@ function initWebview(webview, id) {
                 },
                 {
                     id: 'searchText',
-                    label: 'Search',
+                    label: `Search "${simpleText(props.selectionText)}"`,
                     click() {
                         let url = system.getSearchUrl(props.selectionText);
                         window.open(url);
@@ -174,17 +225,43 @@ function initWebview(webview, id) {
             ];
 
             if (props.mediaType === 'image') {
-                menuTpl = [{
-                    type: 'separator'
-                }, {
-                    id: 'save',
-                    label: 'Save Image',
-                    click(item, win) {
-                        download(win, props.srcURL);
+                menuTpl = [
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        id: 'open-img',
+                        label: 'Open Image in new tab',
+                        click(item, win) {
+                            window.open(props.srcURL);
+                        }
+                    },
+                    {
+                        id: 'save',
+                        label: 'Save Image As...',
+                        click(item, win) {
+                            download(win, props.srcURL); // TODO
+                        }
+                    },
+                    {
+                        id: 'copy-image',
+                        label: 'Copy Image',
+                        click(item, win) {
+                            // TODO
+                            ui.msg('the function is not achieve');
+                        }
+                    },
+                    {
+                        id: 'copy-image',
+                        label: 'Copy image address',
+                        click(item, win) {
+                            electron.clipboard.writeText(props.srcURL);
+                        }
+                    },
+                    {
+                        type: 'separator'
                     }
-                }, {
-                    type: 'separator'
-                }];
+                ];
             }
 
             if (props.linkURL && props.mediaType === 'none') {
@@ -193,8 +270,15 @@ function initWebview(webview, id) {
                         type: 'separator'
                     },
                     {
+                        id: 'open-link',
+                        label: 'Open link in new tab',
+                        click() {
+                            window.open(props.linkURL);
+                        }
+                    },
+                    {
                         id: 'copyLink',
-                        label: 'Copy Link',
+                        label: 'Copy link address',
                         click() {
                             if (process.platform === 'darwin') {
                                 electron.clipboard.writeBookmark(props.linkText, props.linkURL);
@@ -492,9 +576,6 @@ function addTab(url) {
 }
 
 $('#add-tab').on('click', function () {
-    //const newTabUrl = 'yunser://blank/';
-    const newTabUrl = 'app://search';
-
     addTab(newTabUrl);
 });
 
@@ -526,7 +607,7 @@ ipcRenderer.on('enter-full-screen', function(event, message) {
     $('#tab-content').css('top', '0');
 });
 
-var id = addTab('yunser://blank/');
+var id = addTab(newTabUrl);
 
 $(document).on('shown.ui.tab', 'a[data-toggle="tab"]', function (e) {
 
@@ -610,6 +691,10 @@ $('#win-close').on('click', function (e) {
 
 // collection
 let bookmark = [
+    {
+        text: 'extensions',
+        url: 'app://extensions'
+    },
     {
         text: 'chat',
         url: 'app://chat'
@@ -742,7 +827,7 @@ $.ajax({
         console.log('error', a, b, c)
     }
 })*/
-$.ajax({
+/*$.ajax({
     url:"123.json",
     dataType: 'html',
     success:function(result){
@@ -752,3 +837,36 @@ $.ajax({
         console.log('error', a, b, c)
     }
 });
+ */
+// TODO 菜单不起作用
+$('#ext-list').on('click', '[data-ext]', () => {
+    let ext = $(this).data('ext');
+});
+/*
+插件名称
+ 选项
+从Chrome中移除
+从 Chrome 菜单中隐藏
+管理拓展程序
+
+* */
+/*$('#ext-list').contextmenu({
+    item: '.ext-item',
+    content: '#extension-menu'
+});*/
+$('#ext-list').on('click', '[data-ext]', function (e) {
+    e.preventDefault();
+    let extId = $(this).attr('data-ext');
+    let ext = getExtensionById(extId);
+    let popupPgaeUrl = path.resolve(ext.path, ext.browser_action.default_popup);
+    // TODO 改进
+    ui.frame(popupPgaeUrl, {
+        size: ['500px', '600px']
+    });
+
+
+});
+/*$(document).contextmenu({
+    content: '#extension-menu'
+});*/
+

@@ -4,7 +4,7 @@
     {
       "exclude_globs": [],
       "include_globs": [
-        "*://element.eleme.io/*"
+        "*://*.com/*"
       ],
       "js": [
         "script.js"
