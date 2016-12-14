@@ -7,13 +7,19 @@ const fs = require("fs");
 const os = require("os").platform();
 const _ = require("lodash");
 const system = require('../../node/system');
+const fileUtil = require('../../node/fileUtil');
+const LocalDevice = require('./LocalDevice');
+const QiniuDevice = require('./QiniuDevice');
+const Context = require('../../node/contextmenu');
 
-
-let Context = require('../../node/contextmenu');
+let localDevice = new LocalDevice(); // local file device
+let qiniuDevice = new QiniuDevice(); // Qiniu Device
+let curDevice = localDevice; // current device
 
 let lastDir = null
 let currentDir = null
 let config = require("./config.json")
+let selectedFile = null;
 
 let platform =
     os === "darwin" ? "mac" :
@@ -52,132 +58,59 @@ let normalizeSize = function(bytes) {
 }
 
 let openFile = function(filedir) {
+    //path.resolve(system.getUserPath(),
     system.openFile(filedir);
-    //shell.openItem(filedir)
 }
 
 let upDir = function(dirname) {
     if (dirname === path.join(dirname, "..")) {
         return;
     }
-    console.log(path.join(dirname, ".."))
-    changeDir(path.join(dirname, ".."))
+    openDir(path.join(dirname, "..").replace(/\\/, '/'));
 }
 
-let changeDir = function(dirname) {
+let openDir = function(dirname) {
     currentDir = dirname
-    //lastDir = !lastDir ? dirname : ""
-
-
-    fs.readdir(dirname, (error, files) => {
-        if (error) {
-            console.log('readdir error');
+    curDevice.list(dirname, (err, list) => {
+        if (err) {
             ui.msg('can not open the directory');
-            //throw error;
             return;
+            //throw error;
         }
 
-        console.log(1);
-        let $title = $("#path").val(dirname)
-        let $parent = $("#files")
-        $("#files").empty();
-        let fileNum = 0;
+        let $title = $("#path").val(dirname);
+        let $list = $("#file-list");
+        $list.empty();
 
-        _.forEach(files.sort(), (files) => {
-            let name = files
-            let file = dirname + path.sep + files;
-            console.log(file);
-            let home = os.platform === "win32" ? process.env.USERPROFILE : process.env.HOME
+        list.forEach((file) => {
+            let $contain = $("<li></li>")
+            let $name = $("<span class='file-name'></span>")
+            let $size = $("<span class='file-size'></span>")
+            let $modif = $("<span class='file-time'></span>")
 
-            fileNum++;
+            if (file.invisible) {
+                $name.addClass("invisible")
+                $size.addClass("invisible")
+                $modif.addClass("invisible")
+                $name.html(`<span class="file_icon"><img src="res/${file.icon}_invisible.svg"></span>${file.name}`)
+            } else {
+                $name.html(`<span class="file_icon"><img src="res/${file.icon}.svg"></span>${file.name}`)
+            }
 
-            fs.stat(file, function(err, stats) {
-                let type = function() {
-                    if (stats.isFile()) {
-                        return "file"
-                    } else if (stats.isDirectory()) {
-                        let split = name.toLowerCase().split(".")
-                        let last = split[split.length - 1]
+            $size.text(file.size)
+            $modif.text(file.modified)
 
-                        if (last === "app") {
-                            return "file"
-                        } else {
-                            return "folder"
-                        }
-                    } else {
-                        return undefined
-                    }
-                }
+            $contain.attr("data-location", file.location);
+            $contain.attr("data-url", file.url);
+            $contain.attr("data-type", file.type);
+            $contain.append($name)
+            $contain.append($size)
+            $contain.append($modif)
+            $list.append($contain)
 
-
-                let location = file
-                let size = type() == "folder" ? "—" : normalizeSize(stats.size)
-                let modified = moment(stats.mtime).format("MMM D, YYYY")
-                let invisible = isHidden(name)
-                let check = type() == "file" ? fileType(name) : null
-                let icon = function() {
-                    if (type() === "file" && !invisible) {
-                        return `${fileType(name)}`
-                    } else if (type() === "folder") {
-                        if (dirname === home && name === "Google Drive") {
-                            return "folder_google_drive"
-                        } else {
-                            return "folder"
-                        }
-                    } else {
-                        return "file"
-                    }
-                }
-
-                if (!config.showHiddenFiles && invisible) return
-
-                let $contain = $("<li></li>")
-                let $name = $("<span class='file-name'></span>")
-                let $size = $("<span class='file-size'></span>")
-                let $modif = $("<span class='file-time'></span>")
-
-                if (invisible) {
-                    $name.addClass("invisible")
-                    $size.addClass("invisible")
-                    $modif.addClass("invisible")
-                    $name.html(`<span class="file_icon"><img src="res/${icon()}_invisible.svg"></span>${name}`)
-                } else {
-                    $name.html(`<span class="file_icon"><img src="res/${icon()}.svg"></span>${name}`)
-                }
-
-                $size.text(size)
-                $modif.text(modified)
-
-                $contain.attr("data-location", location)
-                $contain.attr("data-type", type)
-
-                $contain.on("click", function(e) {
-                    let location = e.currentTarget.attributes[0].value
-                    let type = e.currentTarget.attributes[1].value
-
-                    console.log(location);
-                    if (type === "folder") {
-                        changeDir(location)
-                    } else if (type === "file") {
-                        openFile(location)
-                    }
-                })
-
-                $contain.append($name)
-                $contain.append($size)
-                $contain.append($modif)
-                $parent.append($contain)
-            })
         });
 
-        if (fileNum === 0) {
-            $('#content-empty').show();
-        } else {
-            $('#content-empty').hide();
-        }
     });
-
-
 }
 
 let setSidebar = function(object) {
@@ -191,17 +124,29 @@ let setSidebar = function(object) {
     //$container.append(`<span class="file_icon"><img src="res/${icon}.svg"></span>${title}`)
 }
 
-$("#path").on('keydown', (e) => {
-    if (e.keyCode === 73) {
-        alert(1);
+$('#file-list').on('click', 'li', function(e) {
+    let $this = $(this);
+    let type = $this.data('type');
+
+    if (type === "folder") {
+        openDir($this.data('location'))
+    } else if (type === "file") {
+        openFile($this.data('url'));
     }
 });
 
-$('#files').contextmenu({
+$('#file-list').contextmenu({
     item: 'li',
     content: '#file-menu',
     show(ui) {
-        console.log(ui)
+        selectedFile = $(ui).data('location');
+    }
+});
+
+$('#file-content').contextmenu({
+    content: '#content-menu',
+    show(ui) {
+
     }
 });
 
@@ -234,10 +179,6 @@ $('#path').on('focus', function (e) {
 $('#path').on('keydown', function (e) {
     if (e.keyCode === 13) {
         let file = this.value;
-        if (file.startWith('home://')) {
-            file = path.resolve(system.getUserPath(), file.substring(8));
-            console.log(file);
-        }
         fs.stat(file, function (err, stat) {
             if (err) {
                 ui.msg('input error');
@@ -245,7 +186,7 @@ $('#path').on('keydown', function (e) {
             }
 
             if (stat.isDirectory()) {
-                changeDir(file);
+                openDir(file);
             } else {
                 //
                 ui.msg('暂未实现打开功能');
@@ -259,12 +200,19 @@ $('#path').on('keydown', function (e) {
 
 $('#home').on('click', (e) => {
     let userPath = system.getUserPath();
-    changeDir(userPath);
+    curDevice = localDevice;
+    openDir('/');
 });
 
 $('#download').on('click', (e) => {
     let userPath = system.getUserPath();
-    changeDir(path.resolve(userPath, 'Downloads'));
+    openDir('/Downloads');
+});
+
+$('#network').on('click', (e) => {
+    let userPath = system.getUserPath();
+    curDevice = qiniuDevice;
+    openDir('/qiniu');
 });
 
 // if the url has parameter path, open the path TODO
@@ -272,9 +220,9 @@ if (window.location.search) {
     let param = window.location.search.split('?')[1];
     let path = param.split('&')[0];
     path = path.split('=')[1];
-    changeDir(path);
+    openDir(path);
 } else {
-    if (platform === "win") {
+    /*if (platform === "win") {
         changeDir(process.env.USERPROFILE);
     }
     else if (platform === "mac") {
@@ -282,43 +230,82 @@ if (window.location.search) {
     }
     else {
         changeDir(process.env.PWD)
-    }
+    }*/
+    openDir('/');
 }
 
-$(".waves").mousedown(function(e) {
+$('#add').on('click', function (e) {
 
-    var box = $(this);
-
-
-    var wavesDiv = box.find("div");
-
-    //第一次没有涟漪div，动态生成
-    if(wavesDiv[0] == null){
-        var div = "<div class='waves-effect'></div>";
-        box.append(div);
-        wavesDiv = box.find("div");
-    }
-
-
-    //设置按钮样式为’waves-effect‘即去掉动画样式’waves-effect-animation‘
-    wavesDiv[0].className = 'waves-effect';
-
-    //计算涟漪坐标（折算成左上角坐标而非中心点），涟漪大小（取外标签最长边）
-    var wH = box.width() > box.height() ? box.width() : box.height();
-    var iX = e.pageX - box.offset().left;
-    var iY = e.pageY - box.offset().top;
-    var nX = iX - wH/2;
-    var nY = iY - wH/2;
-
-    //设置涟漪div样式，准备播放动画
-    wavesDiv.css({
-        width: wH,
-        height: wH,
-        left: nX,
-        top: nY
-    }).addClass("waves-effect-animation");//播放动画
 });
 
-$('#add').on('click', function (e) {
-    
+$('#content-menu-add-file').on('click', function (e) {
+    ui.prompt({
+        title: 'Filename',
+    }, function (name, index) {
+        if (!name) {
+            ui.msg('Please input filename');
+            return;
+        }
+
+        if (/\/|\\|:|\*|\?|\"|<|>\|/.test(name)) {
+            ui.msg('文件名不能包含下列任何字符：/\\:*?"<>|');
+            return;
+        }
+
+        ui.close(index);
+        curDevice.addFile(currentDir + '/' + name);
+        openDir(currentDir);
+    })
+});
+
+$('#content-menu-add-folder').on('click', function (e) {
+    ui.prompt({
+        title: 'Folder Name',
+    }, function (name, index) {
+        if (!name) {
+            ui.msg('Please input folder name');
+            return;
+        }
+        if (/\/|\\|:|\*|\?|\"|<|>\|/.test(name)) {
+            ui.msg('文件夹名不能包含下列任何字符：/\\:*?"<>|');
+            return;
+        }
+        ui.close(index);
+        curDevice.addFolder(currentDir + '/' + name);
+        openDir(currentDir);
+    })
+});
+
+$('#content-menu-refresh').on('click', function (e) {
+    console.log(currentDir)
+    openDir(currentDir);
+});
+
+$('#file-menu-remove').on('click', function (e) {
+    let fileName = fileUtil.getNameFromPath(selectedFile);
+    ui.confirm('Remove  ' + fileName, function (index) {
+        ui.close(index);
+        curDevice.removeFile(selectedFile, () => {
+            openDir(currentDir);
+        });
+    });
+});
+
+$('#file-menu-rename').on('click', function (e) {
+    let fileName = fileUtil.getNameFromPath(selectedFile);
+    ui.prompt({
+        title: 'New Name',
+    }, function (name, index) {
+        if (!name) {
+            ui.msg('Please input new name');
+            return;
+        }
+        if (/\/|\\|:|\*|\?|\"|<|>\|/.test(name)) {
+            ui.msg('文件夹名不能包含下列任何字符：/\\:*?"<>|');
+            return;
+        }
+        ui.close(index);
+        curDevice.renameFile(selectedFile, currentDir + '/' + name);
+        openDir(currentDir);
+    })
 });

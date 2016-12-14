@@ -41,11 +41,39 @@ function toggleButtons(mode) {
 
 
 
-let image = system.getParam(window.location.search);
-if (image) {
+let url = system.getParam(window.location.search, 'url');
+if (url) {
     $images.empty();
 
-    $images.html(`<li><img data-original="${image}" src="${image}" alt=""></li>`);
+    $images.html(`<li><img data-original="${url}" src="${url}" alt=""></li>`);
+    $images.on({
+        'build.viewer': function (e) {
+            console.log(e.type);
+        },
+        'built.viewer': function (e) {
+            console.log(e.type);
+        },
+        'show.viewer': function (e) {
+            console.log(e.type);
+        },
+        'shown.viewer': function (e) {
+            console.log(e.type);
+        },
+        'hide.viewer': function (e) {
+            console.log(e.type);
+        },
+        'hidden.viewer': function (e) {
+            console.log(e.type);
+        },
+        'view.viewer': function (e) {
+            console.log(e.type);
+        },
+        'viewed.viewer': function (e) {
+            console.log(e.type);
+        }
+    }).viewer(options);
+    $images.viewer('show');
+} else {
     $images.on({
         'build.viewer': function (e) {
             console.log(e.type);

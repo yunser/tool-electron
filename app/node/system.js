@@ -194,7 +194,7 @@ class System {
         if (appName === 'system') {
             ipc.send('open-url', path);
         } else {
-            let appPath = this.getAppPath() + '/app/' + this.filesObj[ext] + '/index.html?path='
+            let appPath = this.getAppPath() + '/app/' + this.filesObj[ext] + '/index.html?url='
             + encodeURI(path);
             console.log('打开' + appPath)
             window.open(appPath);
@@ -214,11 +214,13 @@ class System {
         //
     }
 
-    getParam(search) {
+    getParam(search, name) {
+        if (!search) {
+            return null;
+        }
         let param = search.split('?')[1];
         let path = param.split('&')[0];
-        console.log(path.split('='));
-        if (path.split('=')[0] === 'path') {
+        if (path.split('=')[0] === 'url') {
             //return ;
             return decodeURI(path.split('=')[1]);
         } else {

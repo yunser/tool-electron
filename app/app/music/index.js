@@ -69,6 +69,7 @@ function playMusic(file) {
         title = arr[0].trim();
         author = arr[1].trim();
     }
+    console.log(title, author)
     player.playMusic({
         title: title,
         author: author,
@@ -170,8 +171,8 @@ holder.ondrop = function (e) {
 };
 
 if (window.location.search) {
-    let file = system.getParam(window.location.search);
-    if (file) {
-        playMusic(file);
+    let url = system.getParam(window.location.search, 'url');
+    if (url) {
+        playMusic(url);
     }
 }

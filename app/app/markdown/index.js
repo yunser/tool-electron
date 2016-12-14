@@ -639,7 +639,7 @@ $('#add-file').on('click', () => {
             return;
         }
         ui.close(index);
-        fm.addFile(fm.selectFile + '\\' + name);
+        fm.addFile(fm.selectFile + path.sep + name);
     })
 });
 

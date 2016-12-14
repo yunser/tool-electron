@@ -9,6 +9,7 @@ var context = require('./node/electron-context-menu.js');
 let defaultApp = 'browser';
 
 let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
+
 //let mainUrl = `yunser://404`;
 //let mainUrl = 'http://localhost:3000/?2324';
 

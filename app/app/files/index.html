@@ -44,12 +44,12 @@
         <div>8.78GB/40.67TB</div>
         <ul id="sidebar_bottom">
             <li class="separator"></li>
-            <li><span class="file_icon"><img src="res/cloud.svg"></span>Network</li>
+            <li id="network"><span class="file_icon"><img src="res/cloud.svg"></span>Network</li>
             <li><span class="file_icon"><img src="res/disk.svg"></span>Computer</li>
         </ul>
     </div>
 
-    <div class="content_explorer">
+    <div id="file-content" class="content_explorer">
         <li class="file-header">
             <span class="title">Title</span>
             <span class="size">Size</span>
@@ -59,17 +59,20 @@
             <img class="img" src="img/empty.jpg">
             <div class="tip">empty</div>
         </div>
-        <ul id="files" class="file-list">
+        <ul id="file-list" class="file-list">
 
         </ul>
     </div>
 </div>
 
 <ul id="file-menu" class="dropdown-menu">
-    <li><a id="remove-file" href="#">Delete</a></li>
-    <li><a id="remame" href="#">Rename</a></li>
-    <li><a id="add-file" href="#">Add File</a></li>
-    <li><a id="add-folder" href="#">Add Folder</a></li>
+    <li><a id="file-menu-rename" href="#">Rename</a></li>
+    <li><a id="file-menu-remove" href="#">Remove</a></li>
+</ul>
+<ul id="content-menu" class="dropdown-menu">
+    <li><a id="content-menu-add-file" href="#">New File</a></li>
+    <li><a id="content-menu-add-folder" href="#">New Folder</a></li>
+    <li><a id="content-menu-refresh" href="#">Refresh</a></li>
 </ul>
 
 <script>

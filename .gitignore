@@ -5,3 +5,4 @@ dist/
 node_modules/
 /tmp
 todo.md
+qiniu.config.json

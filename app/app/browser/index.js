@@ -2,9 +2,8 @@
  * Created by cjh1 on 2016/12/6.
  */
 const require = nodeRequire;
-const electron = require('electron');
-const {remote} = require('electron');
-const ipc = require("electron").ipcRenderer;
+//const electron = require('electron');
+const {remote, ipcRenderer, webFrame} = require('electron');
 const chromeExtensions = require('../../node/extension');
 const path = require('path');
 const tool = require('../../node/tool.js');
@@ -14,11 +13,14 @@ const fileUtil = require('../../node/FileUtil');
 const {download} = require('electron-dl');
 const isDev = require('electron-is-dev');
 
+//webFrame.setZoomFactor(2)
+//webFrame.setZoomLevelLimits(0.25, 5);
+
 let tabs = {};
 let curTabId;
 let tabNum = 0;
 
-console.log(process.versions.electron);
+console.log('electron version: ' + process.versions.electron);
 
 
 function delUnusedElements(menuTpl) {
@@ -48,8 +50,6 @@ $('#exts').on('click', '[data-ext]', () => {
 });
 
 function initWebview(webview, id) {
-
-
     webview.addEventListener('did-finish-load', (e) => {
         updateNavIcon();
     });
@@ -94,9 +94,9 @@ function initWebview(webview, id) {
 
         chromeExtensions.load(appPath + '/extension', (err, extensions) => {
             extensions.forEach((extension) => {
-                //console.log(extension);
+                console.log(extension);
                 chromeExtensions.addToWebview(webview, extension, (err) => {
-                    //console.log(err);
+                    console.log(err);
                 })
             })
         });
@@ -288,8 +288,6 @@ function initWebview(webview, id) {
                 menu.popup(electron.remote ? electron.remote.getCurrentWindow() : win);
             }
         });
-
-
     });
 
     webview.addEventListener('contextmenu', (e) => {
@@ -300,6 +298,7 @@ function initWebview(webview, id) {
 
 $(document).on('keydown', function (e) {
     if (e.ctrlKey) {
+        console.log(e.keyCode)
         switch (e.keyCode) {
             case 9: // tab
                 tab.next();
@@ -312,7 +311,7 @@ $(document).on('keydown', function (e) {
                 document.getElementById('webview-' + curTabId).openDevTools();
                 return false;
             case 81: // q
-                ipc.send('win-reload');
+                ipcRenderer.send('win-reload');
                 return false;
             case 82: // r
                 let webview = document.getElementById('webview-' + curTabId);
@@ -320,6 +319,12 @@ $(document).on('keydown', function (e) {
                 return false;
             case 87: // w
                 tab.close(curTabId);
+                return false;
+            case 187: // +
+                zoomIn();
+                return false;
+            case 189: // -
+                zoomOut();
                 return false;
         }
     }
@@ -446,7 +451,7 @@ let tab = new TabEx('#tabs', {
         console.log(newId, '===')
         tabNum--;
         if (tabNum === 0) {
-            ipc.send('win-close');
+            ipcRenderer.send('win-close');
         }
     }
 });
@@ -493,28 +498,28 @@ $('#add-tab').on('click', function () {
     addTab(newTabUrl);
 });
 
-ipc.on('new-window', function(event, message) {
+ipcRenderer.on('new-window', function(event, message) {
     addTab(message);
 });
 
-ipc.on('debug', function(event, message) {
+ipcRenderer.on('debug', function(event, message) {
     alert(message);
     message[0].apply(console, message[1]);
     //addTab(message);
 });
 
-ipc.on('will-navigate', function(event, message) {
+ipcRenderer.on('will-navigate', function(event, message) {
     loadUrl(message);
 });
 
-ipc.on('leave-full-screen', function(event, message) {
+ipcRenderer.on('leave-full-screen', function(event, message) {
     $('#tab-nav').show();
     $('#layout-header').show();
     $('#tab-tool').show();
     $('#tab-content').css('top', '110px');
 });
 
-ipc.on('enter-full-screen', function(event, message) {
+ipcRenderer.on('enter-full-screen', function(event, message) {
     $('#tab-nav').hide();
     $('#layout-header').hide();
     $('#tab-tool').hide();
@@ -552,28 +557,55 @@ function updateNavIcon() {
         $('#forward').addClass('disabled');
     }
 }
-$(document).on('mousewheel', function (e, delta) {
-    if (e.ctrlKey) {
-        let curWebview = document.getElementById('webview-' + curTabId);
-        if (delta > 0) {
 
-        } else {
-            curWebview
+let curScale = 1;
+let scales = [0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5];
+
+function zoomIn() {
+    for (let i = 0; i < scales.length; i++) {
+        if (scales[i] === curScale && i !== scales.length - 1) {
+            curScale = scales[i + 1];
+            let curWebview = document.getElementById('webview-' + curTabId);
+            curWebview.setZoomFactor(curScale);
+            ui.msg(Math.floor(curScale * 100) + '%');
+            return;
         }
     }
+}
 
+function zoomOut() {
+    for (let i = scales.length - 1; i >= 0; i--) {
+        if (scales[i] === curScale && i !== 0) {
+            curScale = scales[i - 1];
+            let curWebview = document.getElementById('webview-' + curTabId);
+            curWebview.setZoomFactor(curScale);
+            ui.msg(Math.floor(curScale * 100) + '%');
+            return;
+        }
+    }
+}
+
+$(document).on('mousewheel', function (e, delta) {
+    if (e.ctrlKey) {
+
+        if (delta > 0) {
+            zoomIn();
+        } else {
+            zoomOut();
+        }
+    }
 });
 $('#win-min').on('click', function (e) {
     e.preventDefault();
-    ipc.send('win-min');
+    ipcRenderer.send('win-min');
 });
 $('#win-max').on('click', function (e) {
     e.preventDefault();
-    ipc.send('win-max');
+    ipcRenderer.send('win-max');
 });
 $('#win-close').on('click', function (e) {
     e.preventDefault();
-    ipc.send('win-close');
+    ipcRenderer.send('win-close');
 });
 
 // collection
@@ -720,46 +752,3 @@ $.ajax({
         console.log('error', a, b, c)
     }
 });
-
-// 7niu
-var qiniu = require("qiniu");
-let config = require('./qiniu.config.json');
-
-qiniu.conf.ACCESS_KEY = config.access_key;
-qiniu.conf.SECRET_KEY = config.secreet_key;
-
-//构建私有空间的链接
-url = 'http://7xvw9d.com1.z0.glb.clouddn.com/123.jpg';
-var policy = new qiniu.rs.GetPolicy();
-
-//生成下载链接url
-var downloadUrl = policy.makeRequest(url);
-
-//打印下载的url
-console.log(downloadUrl);
-
-
-//构建bucketmanager对象
-var client = new qiniu.rs.Client();
-
-//你要测试的空间， 并且这个key在你空间中存在
-bucket = 'chen';
-key = '123.jpg';
-
-//获取文件信息
-client.stat(bucket, key, function(err, ret) {
-    if (!err) {
-        console.log(ret.hash, ret.fsize, ret.putTime, ret.mimeType);
-    } else {
-        console.log(err);
-    }
-});
-
-
-// 获取文件列表
-qiniu.rsf.listPrefix('chen', '', '', 100, '/', function (a, b) {
-    console.log(a, b);
-})
-
-
-console.log()

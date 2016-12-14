@@ -22,22 +22,3 @@ $('#search-btn').on('click', (e) => {
     let keyword = $input.val();
     doSearch(keyword);
 });
-
-// open text file
-function openFile(path) {
-    system.readFile(path, (err, data) => {
-        if (data === '') {
-            $('#empty').show();
-        } else {
-            $('#empty').hide();
-            $('#article').html(data);
-        }
-    });
-}
-
-if (window.location.search) {
-    let file = system.getParam(window.location.search, 'path');
-    if (file) {
-        openFile(file);
-    }
-}
