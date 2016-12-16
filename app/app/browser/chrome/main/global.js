@@ -79,6 +79,7 @@ function safeCallback(w, f) {
 }
 
 const {makeEvent} = require(path.join('..', 'event.js'));
+console.log(makeEvent, 'mei')
 
 function safeWrapEvent(w, e) {
   var addListener = e.addListener;

@@ -3,8 +3,6 @@
  */
 const require = nodeRequire;
 const electron = require('electron');
-const {remote, ipcRenderer, webFrame} = require('electron');
-const chromeExtensions = require('../../node/extension/extension');
 const path = require('path');
 const tool = require('../../node/tool.js');
 const TabEx = require('../../node/TabEx.js');
@@ -12,10 +10,34 @@ const system = require('../../node/system');
 const fileUtil = require('../../node/FileUtil');
 const {download} = require('electron-dl');
 const isDev = require('electron-is-dev');
-const run = require('./chrome/run');
+const {
+    remote,
+    ipcRenderer,
+    webFrame} = require('electron');
+const chromeExtensions = require('./chrome/extension');
+
+//window.chrome = require('./chrome/api/chrome');
+webFrame.registerURLSchemeAsSecure('chrome-extension');
+webFrame.registerURLSchemeAsBypassingCSP('chrome-extension');
+webFrame.registerURLSchemeAsPrivileged('chrome-extension');
+
+webFrame.registerURLSchemeAsSecure('yunser');
+webFrame.registerURLSchemeAsBypassingCSP('yunser');
+webFrame.registerURLSchemeAsPrivileged('yunser');
+
+const selfBrowserWindow = remote.getCurrentWindow();
+const selfId = selfBrowserWindow.id;
+console.log(selfId);
+
+console.log('chrome');
+console.log(window.chrome);
+//const run = require('./chrome/run');
 //const newTabUrl = 'yunser://blank/';
-//const newTabUrl = 'app://search';
-const newTabUrl = 'app://extensions';
+const newTabUrl = 'http://www.baidu.com';
+//const newTabUrl = 'app://extensions';
+
+
+
 
 //webFrame.setZoomFactor(2)
 //webFrame.setZoomLevelLimits(0.25, 5);
@@ -24,8 +46,9 @@ let tabs = {};
 let curTabId;
 let tabNum = 0;
 
+console.log('node version: ' + process.versions.node);
+console.log('chrome version: ' + process.versions.chrome);
 console.log('electron version: ' + process.versions.electron);
-
 
 function delUnusedElements(menuTpl) {
     let notDeletedPrevEl;
@@ -54,6 +77,9 @@ function getExtensionById(id) {
 chromeExtensions.load(appPath + '/extension', (err, extensions) => {
     globalExtensions = extensions;
     extensions.forEach((extension) => {
+        console.log(extension);
+        //chrome.curExt = extension;
+        //console.log(chrome.curExt.id + '=============')
         // Browser Actions popup
         if (extension.browser_action) {
             $('#ext-list').append(`<a class="ext-item" href="#" data-ext="${extension.id}" title="${extension.name}">
@@ -65,29 +91,19 @@ chromeExtensions.load(appPath + '/extension', (err, extensions) => {
             let scripts = extension.background.scripts;
 
             console.log('啦啦啦')
-            scripts.forEach((script) => {
+            /*scripts.forEach((script) => {
                 let scriptPath = path.resolve(extension.path, script);
+
 
                 var myScript= document.createElement("script");
                 myScript.type = "text/javascript";
                 myScript.src=scriptPath;
                 document.body.appendChild(myScript);
 
-                /*let $script = $(`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));
+                /!*let $script = $(`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));
                 $(document.body).append($script);
                 $(document.head).append('<script src="G:/install/apache2.4/htdocs/yunser/tool/note/app/extension/test/1.1_0/sample.js"></script>');
-                console.log('添加脚本'+`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));*/
-            });
-            /*getAllScriptCode(extension, scripts, (err, code) => {
-                if (err) {
-                    return;
-                    //return callback(err);
-                }
-                console.log('executeJavaScript');
-                webContents.executeJavaScript(code, false, (result) => {
-                    console.log('Loaded extension', extension.name);
-                    //callback(null);
-                })
+                console.log('添加脚本'+`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));*!/
             });*/
         }
     })
@@ -101,7 +117,7 @@ function simpleText(text) {
     return text;
 }
 
-function initWebview(webview, id) {
+function initWebview(webview, id, isExt) {
     webview.addEventListener('did-finish-load', (e) => {
         updateNavIcon();
     });
@@ -144,12 +160,18 @@ function initWebview(webview, id) {
             e.preventDefault();
         });
 
-        globalExtensions.forEach((extension) => {
-            console.log(extension);
-            chromeExtensions.addToWebview(webview, extension, (err) => {
-                console.log(err);
-            })
-        });
+        if (isExt) {
+            
+        } else {
+            globalExtensions.forEach((extension) => {
+                chromeExtensions.addToWebview(webview, extension, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                })
+            });
+        }
+        
 
         webview.getWebContents().on('context-menu', (e, props) => {
 
@@ -159,7 +181,25 @@ function initWebview(webview, id) {
             const hasText = props.selectionText.trim().length > 0;
             const can = type => editFlags[`can${type}`] && hasText;
 
+
             let curWebview = document.getElementById('webview-' + curTabId);
+            // current context
+            let curContext;
+            if (props.mediaType === 'image') {
+                curContext = 'image';
+            } else if (props.linkURL) {
+                curContext = 'link';
+            } else if (hasText) {
+                curContext = 'selection';
+            } else if (props.isEditable) {
+                curContext = 'editable';
+            }/* else {
+                curContext = 'page';
+            }*/
+
+            //"all", "page", "frame", "video", "audio", "launcher", "browser_action", or "page_action"
+            console.log(curContext);
+
             let menuTpl = [
                 {
                     id: 'back',
@@ -308,6 +348,28 @@ function initWebview(webview, id) {
                 }
             }
 
+            //console.log(chrome.contextMenus.menus);
+
+            // extension context menu
+            /*console.log(chrome.contextMenus.menus)
+            if (chrome.contextMenus.menus.length) {
+
+                chrome.contextMenus.menus.forEach(function (menu) {
+
+                    let item = createMenuItem(menu, curContext);
+                    if (item) {
+                        menuTpl.push(item);
+                    }
+                });
+
+                menuTpl.push(
+                    {
+                        type: 'separator'
+                    }
+                );
+            }*/
+
+
             if (opts.showInspectElement || (opts.showInspectElement !== false && isDev)) {
                 menuTpl.push(
                     {
@@ -373,16 +435,54 @@ function initWebview(webview, id) {
             }
         });
     });
-
-    webview.addEventListener('contextmenu', (e) => {
-    });
-
-
 }
+
+function createMenuItem(menu, curContext) {
+    function dealChildren(children) {
+        let arr = [];
+        children.forEach((submenu) => {
+
+            if (submenu.contexts && (submenu.contexts.contains(curContext)
+                || submenu.contexts.contains('all'))) {
+                let iii = {
+                    id: new Date().getTime(), // TODO
+                    label: submenu.title,
+                    click() {
+                        typeof submenu.onclick === 'function' && submenu.onclick();
+                    }
+                };
+                if (submenu.children) {
+                    let ret = dealChildren(submenu.children);
+                    iii.submenu = ret;
+                }
+                arr.push(iii);
+            }
+
+        });
+        return arr;
+    }
+
+    if (menu.contexts && (menu.contexts.contains(curContext) || menu.contexts.contains('all'))) {
+        let item = {
+            id: menu.id,
+            label: menu.title,
+            click() {
+                typeof menu.onclick === 'function' && menu.onclick();
+            }
+        };
+        if (menu.children) {
+            let c = dealChildren(menu.children);
+            item.submenu = c;
+        }
+
+        return item;
+    }
+    return null;
+}
+
 
 $(document).on('keydown', function (e) {
     if (e.ctrlKey) {
-        console.log(e.keyCode)
         switch (e.keyCode) {
             case 9: // tab
                 tab.next();
@@ -392,7 +492,9 @@ $(document).on('keydown', function (e) {
                 $('#find-input')[0].select();
                 return false;
             case 73: // i
-                document.getElementById('webview-' + curTabId).openDevTools();
+                let wv = document.getElementById('webview-' + curTabId);
+                wv.openDevTools({mode: 'right'})
+                //webContents.openDevTools({mode: 'detach'});
                 return false;
             case 81: // q
                 ipcRenderer.send('win-reload');
@@ -455,7 +557,8 @@ $('#url-input').on('focus', function (e) {
 $('#url-input').on('keydown', function (e) {
     if (e.keyCode == 13) {
         if (this.value.startWith('http') || this.value.startWith('file://')
-            || this.value.startWith('yunser://')) {
+            || this.value.startWith('yunser://') || this.value.startWith('chrome-extension://')
+            || this.value.startWith('atom://')) {
             let url = this.value;
             loadUrl(url);
         } else {
@@ -532,7 +635,6 @@ let tab = new TabEx('#tabs', {
     //monitor: '.topbar',
     callback: function (id, newId) {
         curTabId = newId;
-        console.log(newId, '===')
         tabNum--;
         if (tabNum === 0) {
             ipcRenderer.send('win-close');
@@ -545,7 +647,7 @@ function getIdd() {
     return iddd++;
 }
 
-function addTab(url) {
+function addTab(url, isExt) {
     url = dealUrl(url);
     
     var id = getIdd();
@@ -561,16 +663,19 @@ function addTab(url) {
 
     let nodeintegration = (url.startWith('yunser://') || url.startWith('file://')) ? ' nodeintegration' : '';
 
+    console.log('这里')
+
     tab.add({
         id: id,
         title: '新标签页',
         content: `
         <div class="webview-box">
-              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration} preload="./preload.js"></webview>
+              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration} preload="./chrome/preload/preload.js"></webview>
         </div>`,
     });
 
-    initWebview(document.getElementById('webview-' + id), id);
+
+    initWebview(document.getElementById('webview-' + id), id, isExt);
 
     return id;
 }
@@ -666,7 +771,7 @@ function zoomOut() {
     }
 }
 
-$(document).on('mousewheel', function (e, delta) {
+/*$(document).on('mousewheel', function (e, delta) {
     if (e.ctrlKey) {
 
         if (delta > 0) {
@@ -675,143 +780,19 @@ $(document).on('mousewheel', function (e, delta) {
             zoomOut();
         }
     }
-});
-$('#win-min').on('click', function (e) {
-    e.preventDefault();
-    ipcRenderer.send('win-min');
-});
-$('#win-max').on('click', function (e) {
-    e.preventDefault();
-    ipcRenderer.send('win-max');
-});
-$('#win-close').on('click', function (e) {
-    e.preventDefault();
-    ipcRenderer.send('win-close');
+});*/
+
+
+$(document).on('click', function (e, delta) {
+    // TODO there is a bug in electron when user click a webview element, this code wouldn't be run
+    console.log('click');
 });
 
-// collection
-let bookmark = [
-    {
-        text: 'extensions',
-        url: 'app://extensions'
-    },
-    {
-        text: 'chat',
-        url: 'app://chat'
-    },
-    {
-        text: 'Mail',
-        url: 'app://mail'
-    },
-    {
-        text: 'Collections',
-        url: 'app://apps'
-    },
-    {
-        text: 'Apps',
-        url: 'app://apps'
-    },
-    {
-        text: 'Markdown Editor',
-        url: 'app://markdown'
-    },
-    {
-        text: 'File Manager',
-        url: 'app://files'
-    },
-    {
-        text: 'App Store',
-        url: 'app://store'
-    },
-    {
-        text: 'Desktop',
-        url: 'app://desktop'
-    },
-    {
-        text: 'Baidu',
-        url: 'http://www.baidu.com'
-    },
-    {
-        text: 'Search',
-        url: 'app://search'
-    },
-    {
-        text: 'Photos',
-        url: 'app://photos'
-    },
-    {
-        text: 'Guide',
-        url: 'app://guide'
-    },
-    {
-        text: 'Music',
-        url: 'app://music'
-    },
-    {
-        text: 'Downloads',
-        url: 'app://downloads'
-    },
-    {
-        text: 'Cnlendar',
-        url: 'app://calendar',
-    },
-    {
-        text: 'Editor',
-        url: 'app://editor'
-    },
-    {
-        text: 'download file',
-        url: 'http://sw.bos.baidu.com/sw-search-sp/software/0b57a709db50a/Baidu_Setup_4384_3.1.0.2950_10000001.exe'
-    },
-    {
-        text: 'Todo',
-        url: 'app://todo'
-    },
-    {
-        text: 'Reader',
-        url: 'app://reader',
-    }
-];
 
-let html = [];
-bookmark.forEach((item) => {
-    html.push(`<a href="${item.url}">${item.text}</a>`);
-});
-$('#collection').html(html.join(''));
 
-// find in page
-let findId;
-$('#find-input').on('input', function () {
-    let curWebview = document.getElementById('webview-' + curTabId);
-    if (this.value) {
-        findId = curWebview.getWebContents().findInPage(this.value);
-    } else {
-        curWebview.getWebContents().stopFindInPage('clearSelection');
-    }
-});
-$('#find-close').on('click', function (e) {
-    e.preventDefault();
-    $('#find-box').hide();
-});
-$('#find-prev').on('click', function (e) {
-    e.preventDefault();
-    let curWebview = document.getElementById('webview-' + curTabId);
-    findId = curWebview.getWebContents().findInPage($('#find-input').val(), {
-        forward: false,
-        //findNext: true
-    });
-});
-$('#find-next').on('click', function (e) {
-    e.preventDefault();
-    let curWebview = document.getElementById('webview-' + curTabId);
-    findId = curWebview.getWebContents().findInPage($('#find-input').val(), {
-        findNext: true
-    });
-});
-$('#find-close').on('click', function (e) {
-    e.preventDefault();
-    $('#find-box').hide();
-});
+
+
+
 
 
 // ajax test
@@ -838,10 +819,7 @@ $.ajax({
     }
 });
  */
-// TODO 菜单不起作用
-$('#ext-list').on('click', '[data-ext]', () => {
-    let ext = $(this).data('ext');
-});
+
 /*
 插件名称
  选项
@@ -854,19 +832,180 @@ $('#ext-list').on('click', '[data-ext]', () => {
     item: '.ext-item',
     content: '#extension-menu'
 });*/
+// TODO 菜单不起作用
+$('#ext-list').on('click', '[data-ext]', () => {
+    let ext = $(this).data('ext');
+});
 $('#ext-list').on('click', '[data-ext]', function (e) {
     e.preventDefault();
     let extId = $(this).attr('data-ext');
     let ext = getExtensionById(extId);
     let popupPgaeUrl = path.resolve(ext.path, ext.browser_action.default_popup);
+
+    //loadUrl(popupPgaeUrl); TODO loadUrl 无法注入插件代码
+    addTab(popupPgaeUrl, true);
     // TODO 改进
-    ui.frame(popupPgaeUrl, {
-        size: ['500px', '600px']
+    /*$('#popup').dialog({
     });
+    $('#popup').html(`
+    <webview id="webview-popup" class="webview" autosize="on" src="${popupPgaeUrl}" style="height: 100%" nodeintegration="" preload="./preload.js" tabindex="-1" guestinstance="39"></webview>
+    `)
+    let popup = document.getElementById('webview-popup');
+    popup.addEventListener('did-fail-load', (e) => {
+       console.log('失败了')
+    });*/
 
+    //popup.loadURL(popupPgaeUrl);
 
+    /*ui.frame(popupPgaeUrl, {
+        size: ['500px', '600px']
+    });*/
 });
 /*$(document).contextmenu({
     content: '#extension-menu'
 });*/
 
+initHeader();
+
+function initHeader() {
+    // find in page
+    let findId;
+    $('#find-input').on('input', function () {
+        let curWebview = document.getElementById('webview-' + curTabId);
+        if (this.value) {
+            findId = curWebview.getWebContents().findInPage(this.value);
+        } else {
+            curWebview.getWebContents().stopFindInPage('clearSelection');
+        }
+    });
+    $('#find-close').on('click', function (e) {
+        e.preventDefault();
+        $('#find-box').hide();
+    });
+    $('#find-prev').on('click', function (e) {
+        e.preventDefault();
+        let curWebview = document.getElementById('webview-' + curTabId);
+        findId = curWebview.getWebContents().findInPage($('#find-input').val(), {
+            forward: false,
+            //findNext: true
+        });
+    });
+    $('#find-next').on('click', function (e) {
+        e.preventDefault();
+        let curWebview = document.getElementById('webview-' + curTabId);
+        findId = curWebview.getWebContents().findInPage($('#find-input').val(), {
+            findNext: true
+        });
+    });
+    $('#find-close').on('click', function (e) {
+        e.preventDefault();
+        $('#find-box').hide();
+    });
+
+    // collection
+    let bookmark = [
+        {
+            text: '404',
+            url: 'yunser://404'
+        },
+        {
+            text: 'extensions',
+            url: 'app://extensions'
+        },
+        {
+            text: 'chat',
+            url: 'app://chat'
+        },
+        {
+            text: 'Mail',
+            url: 'app://mail'
+        },
+        {
+            text: 'Collections',
+            url: 'app://apps'
+        },
+        {
+            text: 'Apps',
+            url: 'app://apps'
+        },
+        {
+            text: 'Markdown Editor',
+            url: 'app://markdown'
+        },
+        {
+            text: 'File Manager',
+            url: 'app://files'
+        },
+        {
+            text: 'App Store',
+            url: 'app://store'
+        },
+        {
+            text: 'Desktop',
+            url: 'app://desktop'
+        },
+        {
+            text: 'Baidu',
+            url: 'http://www.baidu.com'
+        },
+        {
+            text: 'Search',
+            url: 'app://search'
+        },
+        {
+            text: 'Photos',
+            url: 'app://photos'
+        },
+        {
+            text: 'Guide',
+            url: 'app://guide'
+        },
+        {
+            text: 'Music',
+            url: 'app://music'
+        },
+        {
+            text: 'Downloads',
+            url: 'app://downloads'
+        },
+        {
+            text: 'Cnlendar',
+            url: 'app://calendar',
+        },
+        {
+            text: 'Editor',
+            url: 'app://editor'
+        },
+        {
+            text: 'download file',
+            url: 'http://sw.bos.baidu.com/sw-search-sp/software/0b57a709db50a/Baidu_Setup_4384_3.1.0.2950_10000001.exe'
+        },
+        {
+            text: 'Todo',
+            url: 'app://todo'
+        },
+        {
+            text: 'Reader',
+            url: 'app://reader',
+        }
+    ];
+    let html = [];
+    bookmark.forEach((item) => {
+        html.push(`<a href="${item.url}">${item.text}</a>`);
+    });
+    $('#collection').html(html.join(''));
+
+    // topbar
+    $('#win-min').on('click', function (e) {
+        e.preventDefault();
+        ipcRenderer.send('win-min');
+    });
+    $('#win-max').on('click', function (e) {
+        e.preventDefault();
+        ipcRenderer.send('win-max');
+    });
+    $('#win-close').on('click', function (e) {
+        e.preventDefault();
+        ipcRenderer.send('win-close');
+    });
+}

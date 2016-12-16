@@ -1,0 +1,13 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "This is a simple Extension"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "RGB to Hex"
+   },
+   "copiedTip": {
+      "message": "Has been copied"
+   }
+}

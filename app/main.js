@@ -5,12 +5,15 @@ const fs = require('fs');
 
 var context = require('./node/electron-context-menu.js');
 
+let filter = false;
 // default App should require default-app.js
 let defaultApp = 'browser';
 
-let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
+//let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
 //let mainUrl = 'http://tool.yun.com/slides/';
 //let mainUrl = `yunser://404`;
+//let mainUrl = `atom://www.baidu.com`; // http protocol
+let mainUrl = `chrome://errorpage`; // file protocol
 //let mainUrl = 'http://localhost:3000/?2324';
 
 ipcMain.on('asynchronous-message', function (event, arg) {
@@ -26,34 +29,20 @@ let mainWindow;
 // 注册私有协议
 
 // add custom protocol
-/*protocol.registerHttpProtocol('mist', function(request, callback) {
 
-    request.url = request.url.replace('mist:','http:');
 
-    // if(request.url.indexOf('sockjs') !== -1) {
 
-    //   if(request.url.indexOf('ws:') !== -1)
-    //     request.url = request.url.replace('ws://','ws://localhost:4000');
-    //   else
-    //     request.url = request.url.replace('http://','http://localhost:4000');
-
-    // }
-
-    console.log(request.url);
-
-    callback(request);
-
-}, function (error) {
-    if (error)
-        console.error('Failed to register protocol', error)
-});*/
-
-// doesn't work either:
-protocol.registerStandardSchemes(['mist']);
+;
+protocol.registerStandardSchemes(['chrome', 'chrome-extension'])
 
 function createWindow () {
-    // custom protocol yunser
-    protocol.registerFileProtocol('yunser', (request, callback) => {
+    protocol.unregisterProtocol('chrome');
+    protocol.isProtocolHandled('chrome', function () {
+        console.log('是')
+    })
+    
+    // custom protocol chrome
+    protocol.registerFileProtocol('chrome', (request, callback) => {
         //request.url = 'http://www.baidu.com';
         //return;
         console.log('================')
@@ -77,9 +66,10 @@ function createWindow () {
         }
     });
 
-    // custom protocol app
-    protocol.registerStringProtocol('yunser', (request, callback) => {
-        console.log('================***')
+    protocol.registerFileProtocol('chrome', (request, callback) => {
+        //request.url = 'http://www.baidu.com';
+        //return;
+        console.log('================')
         console.log(request.url);
         const url = request.url.substr(9);
         var resPath;
@@ -99,13 +89,7 @@ function createWindow () {
             console.error('Failed to register protocol');
         }
     });
-
     
-
-    
-
-
-
     let screen = electron.screen;
     var size = screen.getPrimaryDisplay().workAreaSize;
     
@@ -125,13 +109,10 @@ function createWindow () {
         //fullscreen: true isFullScreen()
     }/*{width: 800, height: 600}*/);
     mainWindow.maximize();
-    console.log('呵呵')
-    
-    
+
     mainWindow.setMenuBarVisibility(false);
     mainWindow.webContents.openDevTools();
 
-    console.log('122');
     mainWindow.webContents.on('new-window', function (event,url,fname,disposition,options) {
         var exec = require('child_process').exec; //加载node模块  url是将要跳转的地址
 
@@ -165,22 +146,22 @@ function createWindow () {
             win.loadURL(url); // 新窗口
             win.show();
         }*/
-        console.log('拦截')
         mainWindow.webContents.send('new-window', url);
 
         event.preventDefault();
     });
-    mainWindow.webContents.on('will-navigate', function (e, url) {
-        mainWindow.webContents.send('will-navigate', url);
-        console.log('已结发送')
-        e.preventDefault();    
-    });
+    if (filter) {
+        mainWindow.webContents.on('will-navigate', function (e, url) {
+            mainWindow.webContents.send('will-navigate', url);
+            e.preventDefault();
+        });
 
-    mainWindow.webContents.on('will-navigate2', function (e, url) {
-        mainWindow.webContents.send('will-navigate', url);
-        console.log('已结发送2')
-        e.preventDefault();
-    });
+        mainWindow.webContents.on('will-navigate2', function (e, url) {
+            mainWindow.webContents.send('will-navigate', url);
+            e.preventDefault();
+        });
+    }
+    
     
     mainWindow.on('leave-full-screen', function () {
         mainWindow.webContents.send('leave-full-screen');

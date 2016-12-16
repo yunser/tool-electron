@@ -260,6 +260,7 @@ webview > * {
     width: 306px;
     height: 44px;
     padding: 12px;
+    background-color: #fff;
     box-shadow: 1px 1px 6px rgba(0, 0, 0, .2);
 }
 .find-box input {
@@ -277,4 +278,11 @@ webview > * {
     color: #999;
     padding-right: 8px;
     border-right: 1px solid #ccc;
+}
+/* popup */
+.popup {
+    display: none;
+    width: 600px;
+    height: 500px;
+    background-color: #f00;
 }

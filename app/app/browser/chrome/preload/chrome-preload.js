@@ -1,5 +1,5 @@
-if (navigator.userAgent.indexOf('Electron') == -1)
-  return;
+/*if (navigator.userAgent.indexOf('Electron') == -1)
+  return;*/
 
 const {remote, desktopCapturer, webFrame, shell, ipcRenderer} = require('electron')
 const {Menu, MenuItem, BrowserWindow} = remote;
@@ -15,10 +15,6 @@ const {
 } = require(path.join(__dirname, '..', 'main', 'global.js'));
 
 const {Port} = require('./chrome-runtime-port.js');
-
-webFrame.registerURLSchemeAsSecure('chrome-extension')
-webFrame.registerURLSchemeAsBypassingCSP('chrome-extension')
-webFrame.registerURLSchemeAsPrivileged('chrome-extension')
 
 const selfBrowserWindow = remote.getCurrentWindow();
 const selfId = selfBrowserWindow.id;
@@ -57,14 +53,6 @@ function deepCopy(o, t) {
 }
 
 chrome = deepCopy(chrome, {});
-
-chrome.i18n = {
-  getMessage: function(key) {
-    return key;
-  }
-}
-
-chrome.desktopCapture = require('./chrome-desktopcapture.js');
 
 function unremote(v) {
   return JSON.parse(JSON.stringify(v))
@@ -246,9 +234,3 @@ chrome.runtime.connect = function() {
 chrome.runtime.getAppDirectory = function() {
   return remote.getGlobal('chromeAppDir');
 }
-
-window.chrome = chrome;
-window.require = require;
-
-// allow jquery to load
-delete window.module;

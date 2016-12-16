@@ -2,13 +2,29 @@
 	"name": "测试插件",
 	"version": "1.0",
 	"manifest_version": 2,
-	"description": "这是一个功能很简单的插件。",
+	"default_locale": "en",
+	"description": "__MSG_appDescription__",
 	"browser_action": {
 		"default_icon": "icon.png",
 		"default_popup": "popup.html"
 	},
+	"content_scripts": [
+		{
+			"exclude_globs": [],
+			"include_globs": [
+				"*://*.com/*"
+			],
+			"js": [
+				"script.js"
+			],
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			]
+		}
+	],
 	"background": {
-		"scripts": ["sample.js"]
+		"scripts": ["background.js"]
 	},
 	"homepage_url": "https://www.baidu.com/",
 	"permissions": [

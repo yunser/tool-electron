@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-dark" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐</title>
+    <style>
+        webview {
+            width: 600px !important;
+            height: 500px !important;
+            background-color: #f00;
+        }
+    </style>
+</head>
+<body>
+<webview  class="webview" autosize="on" src="http://www.baidu.com" style="height: 100%" nodeintegration="" preload="./preload.js" tabindex="-1" guestinstance="78"></webview>
+
+<script>
+    if (window.require) {
+        window.nodeRequire = require;
+        delete window.require;
+        delete window.exports;
+        delete window.module;
+    }
+</script>
+<script src="../../asset/lib/jquery/jquery-1.10.2.min.js"></script>
+<script>
+    $(document).on('click', function (e, delta) {
+        // TODO impotent
+        console.log('click');
+    });
+</script>
+</body>
+</html>

@@ -1,7 +1,5 @@
-const {
-  makeEvent,
-} = require('../main/global.js');
-
+const {makeEvent} = require('../main/global.js');
+console.log(makeEvent, 'me');
 var alarms = {
   onAlarm: makeEvent(),
   create: function() {

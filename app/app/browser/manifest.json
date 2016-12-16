@@ -41,7 +41,6 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "default_locale": "en",
   "converted_from_user_script": true,
   "description": "Make Google search have a red background",
   "key": "YDbAyByO/wxqo08K7RepyCrwIqdqH6snB9cU/YMGfME=",
