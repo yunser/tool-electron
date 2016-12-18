@@ -1,0 +1,19 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "这是一个功能很简单的插件啊啊"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "RGB转Hex"
+   },
+   "copiedTip": {
+      "message": "已复制"
+   },
+   "blankPage": {
+      "message": "新标签页"
+   },
+   "title": {
+      "message": "新标签页"
+   }
+}

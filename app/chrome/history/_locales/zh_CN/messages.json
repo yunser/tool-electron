@@ -1,0 +1,13 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "这是一个功能很简单的插件啊啊"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "RGB转Hex"
+   },
+   "title": {
+      "message": "历史记录"
+   }
+}

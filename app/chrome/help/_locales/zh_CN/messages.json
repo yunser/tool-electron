@@ -1,0 +1,16 @@
+{
+  "appDescription": {
+    "description": "Application description",
+    "message": "关于"
+  },
+  "appName": {
+    "description": "Application name",
+    "message": "关于"
+  },
+  "title": {
+    "message": "关于"
+  },
+  "version": {
+    "message": "版本"
+  }
+}

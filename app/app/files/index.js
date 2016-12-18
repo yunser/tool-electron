@@ -1,16 +1,17 @@
-require = window.nodeRequire;
-window.$ = window.jQuery = require("jquery");
+let require = window.nodeRequire;
+
 const { remote, shell } = require("electron");
 const moment = require("moment");
 const path = require("path");
 const fs = require("fs");
 const os = require("os").platform();
 const _ = require("lodash");
-const system = require('../../node/system');
-const fileUtil = require('../../node/fileUtil');
-const LocalDevice = require('./LocalDevice');
-const QiniuDevice = require('./QiniuDevice');
+
+const system = chrome.ex.system;
+const fileUtil = chrome.ex.fileUtil;
 const Context = require('../../node/contextmenu');
+const QiniuDevice = require('./QiniuDevice');
+const LocalDevice = require('./LocalDevice.js');
 
 let localDevice = new LocalDevice(); // local file device
 let qiniuDevice = new QiniuDevice(); // Qiniu Device

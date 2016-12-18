@@ -14,7 +14,14 @@ const File = require('./File');
 const fileUtil = require('./fileUtil');
 
 function getExt(filename) {
-    return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
+    if (!filename) {
+        return null;
+    }
+    if (filename.lastIndexOf(".") !== -1) {
+        let ext = filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
+        return ext;
+    }
+    return null;
 }
 function getNameFromPath(filename) {
     return filename.substr(filename.lastIndexOf('\\')+1);

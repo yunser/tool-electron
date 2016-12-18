@@ -44,7 +44,14 @@ var Allpersissions = ['background', 'bookmarks', 'clipboardRead', 'clipboardWrit
     'webRequestBlocking', 'storage', 'activeTab'
 ];
 
+function getIdByPath(path) {
+    let arr = path.replace(/\\/g, '/').split('/');
+    return arr[arr.length - 2];
+}
+
 function loadExtension(path, callback) {
+    path = path.replace(/\\/g, '/');
+
     fs.readFile(path + '/manifest.json', (err, contents) => {
         if (err) {
             return callback(null, {
@@ -55,28 +62,30 @@ function loadExtension(path, callback) {
 
         var manifest = JSON.parse(contents);
 
+        if (!manifest) {
+            return callback({
+                name: 'default_locale error',
+                description: '清单文件缺失或不可读。'
+            });
+        }
         //console.log('load extension ' + manifest.name);
 
+        console.log(manifest.name);
         checkManifest(manifest);
 
-        // TODO 这里可以化简
-        var extension = {
-            id: '' + new Date().getTime(),
-            path: path,
-            name: manifest.name,
-            description: manifest.description,
-            version: manifest.version,
-            browser_action: manifest.browser_action,
-            permissions: manifest.permissions,
-            homepage_url: manifest.homepage_url
-        };
-        if (manifest.content_scripts) {
-            extension.content_scripts = manifest.content_scripts;
-        }
-        if (manifest.background) {
-            extension.background = manifest.background;
+        if (fs.existsSync(path + '/_locales')) {
+            console.log('存在'+manifest.default_locale)
+            if (!manifest.default_locale) {
+                return callback(null, {
+                    name: 'default_locale error',
+                    description: '已使用本地化功能，但未在清单中指定 default_locale。'
+                });
+            }
         }
 
+        let extension = manifest;
+        extension.id = getIdByPath(path);
+        extension.path = path;
 
         localizeStrings(extension, callback);
     })
@@ -97,7 +106,7 @@ function checkManifest(manifest) {
         console.error("Required value 'name' is missing or invalid.");
         return false;
     }
-    if (manifest.version !== 2) {
+    if (manifest.manifest_version !== 2) {
         console.error("The 'manifest_version' key must be present and set to 2 (without quotes). See developer.chrome.com/extensions/manifestVersion.html for details.");
         return false;
     }
@@ -127,18 +136,14 @@ function localizeStrings(extension, callback) {
 
 function addToWebview(webview, extension, callback) {
     // handle content_scripts
-    console.log('添加了1');
     let scripts = extension.content_scripts || [];
     let url = webview.src || webview.getURL();
     scripts = getMatchingContentScripts(scripts, url);
     scripts = getIncludedContentScripts(scripts, url);
     // ToDo: check exclude_globs
     if (scripts.length === 0) {
-        console.log('添加了2');
         return callback(null);
     }
-    console.log(scripts);
-    console.log('添加了');
 
     let jsPath = [];
     for (let i = 0; i < scripts.length; i++) {
@@ -206,8 +211,6 @@ function getContentScriptCode(extension, content_script_js, callback) {
 
         // 把插件的代码放到闭包里面执行
         console.log(`"${extension.path}"`);
-
-        gl.asd.efg = 'efg';
 
         let code = `
         (function (chrome) {

@@ -1,0 +1,10 @@
+{
+   "appName": {
+      "description": "Application name",
+      "message": "日历"
+   },
+   "appDesc": {
+      "description": "Application description",
+      "message": "日历、万年历"
+   }
+}

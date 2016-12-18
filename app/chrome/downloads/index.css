@@ -1,0 +1,31 @@
+.title {
+    color: #f00;
+}
+.search-box {
+    width: 500px;
+    padding: 100px;
+    margin: 100px auto;
+}
+.search-box .search-logo {
+    width: 320px;
+    height: 120px;
+    margin: 0 auto 36px auto;
+    background-image: url(img/googlelogo.png);
+    background-size: 100% 100%;
+}
+.search-box .search-input {
+    height: auto;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 20px;
+    box-shadow: 0 2px 1px rgba(0,0,0,.1);
+}
+.search-box .search-input:hover,
+.search-box .search-input:active {
+    border-color: #ccc;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+.search-box .search-btn {
+    background-color: #fff;
+    border-color: #ccc;
+}

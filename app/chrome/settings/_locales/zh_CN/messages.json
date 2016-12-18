@@ -1,0 +1,22 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "设置"
+   },
+   "appearance": {
+      "message": "外观"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "设置"
+   },
+   "start": {
+      "message": "启动时"
+   },
+   "title": {
+      "message": "设置"
+   },
+   "user": {
+      "message": "用户"
+   }
+}

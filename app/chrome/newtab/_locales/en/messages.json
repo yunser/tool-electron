@@ -1,0 +1,19 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "This is a simple Extension"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "RGB to Hex"
+   },
+   "blankPage": {
+      "message": "new Tab"
+   },
+   "copiedTip": {
+      "message": "Has been copied"
+   },
+   "title": {
+      "message": "New Tab"
+   }
+}

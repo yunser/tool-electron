@@ -1,0 +1,17 @@
+{
+   "name": "__MSG_appName__",
+   "app": {
+      "launch": {
+         "local_path": "index.html"
+      }
+   },
+   "default_locale": "zh_CN",
+   "description": "__MSG_appDesc__",
+   "icons": {
+      "128": "icons/logo_calendar_256.png",
+      "16": "icons/logo_calendar_32.png"
+   },
+   "manifest_version": 2,
+   "offline_enabled": true,
+   "version": "16.12"
+}

@@ -3,18 +3,17 @@ const {app, protocol, BrowserWindow, dialog, remote, ipcMain, shell} = require('
 const path = require('path');
 const fs = require('fs');
 
+
 var context = require('./node/electron-context-menu.js');
 
-let filter = false;
+let filter = true;
 // default App should require default-app.js
 let defaultApp = 'browser';
 
-//let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
+let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
 //let mainUrl = 'http://tool.yun.com/slides/';
 //let mainUrl = `yunser://404`;
-//let mainUrl = `atom://www.baidu.com`; // http protocol
-let mainUrl = `chrome://errorpage`; // file protocol
-//let mainUrl = 'http://localhost:3000/?2324';
+//let mainUrl = `chrome://errorpage`; // file protocol
 
 ipcMain.on('asynchronous-message', function (event, arg) {
     event.sender.send('asynchronous-reply', 'pong')
@@ -26,37 +25,68 @@ ipcMain.on('synchronous-message', function (event, arg) {
 // 保持一个对于 window 对象的全局引用，如果你不这样做，
 // 当 JavaScript 对象被垃圾回收， window 会被自动地关闭
 let mainWindow;
-// 注册私有协议
 
-// add custom protocol
+global['global'] = {
+    exts: []
+};
+let remoteGlobal = global['global'];
 
+function log(arg) {
+    mainWindow.webContents.send('debug', arg);
+}
 
+// custom protocol
+protocol.registerStandardSchemes(['chrome', 'chrome-extension', 'app']);
 
-;
-protocol.registerStandardSchemes(['chrome', 'chrome-extension'])
+function getExt(filename) {
+    if (!filename) {
+        return null;
+    }
+    if (filename.lastIndexOf(".") !== -1) {
+        let ext = filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
+        return ext;
+    }
+    return null;
+}
 
 function createWindow () {
     protocol.unregisterProtocol('chrome');
-    protocol.isProtocolHandled('chrome', function () {
-        console.log('是')
-    })
-    
-    // custom protocol chrome
+    protocol.unregisterProtocol('chrome-extension');
+
     protocol.registerFileProtocol('chrome', (request, callback) => {
-        //request.url = 'http://www.baidu.com';
-        //return;
-        console.log('================')
-        console.log(request.url);
         const url = request.url.substr(9);
+        var resPath;
+        let ext = getExt(url);
+        if (ext) {
+            resPath = `${__dirname}/chrome/${url}`;
+        } else {
+            let lastChar = url.charAt(url.length - 1);
+            if (lastChar === '/' || lastChar === '\\') {
+                resPath = `${__dirname}/chrome/${url}index.html`;
+            } else {
+                resPath = `${__dirname}/chrome/${url}/index.html`;
+            }
+        }
+
+        callback({
+            path: resPath.replace(/\\/g, '/')
+        });
+    }, (error) => {
+        if (error) {
+            console.error('Failed to register protocol');
+        }
+    });
+
+    protocol.registerFileProtocol('app', (request, callback) => {
+        const url = request.url.substr(6);
         var resPath;
         if (url.indexOf('resources') !== -1) {
             resPath = path.normalize(`${__dirname}/${url}`.replace('resources/', ''));
         } else if (url.indexOf('.') !== -1) { // TODO
-            resPath = path.normalize(`${__dirname}/chrome/${url}`);
+            resPath = path.normalize(`${__dirname}/app/${url}`);
         } else {
-            resPath = path.normalize(`${__dirname}/chrome/${url}/index.html`);
+            resPath = path.normalize(`${__dirname}/app/${url}/index.html`);
         }
-        console.log(resPath);
         callback({
             path: resPath
         });
@@ -66,21 +96,42 @@ function createWindow () {
         }
     });
 
-    protocol.registerFileProtocol('chrome', (request, callback) => {
-        //request.url = 'http://www.baidu.com';
-        //return;
-        console.log('================')
-        console.log(request.url);
-        const url = request.url.substr(9);
+    protocol.registerFileProtocol('chrome-extension', (request, callback) => {
+        const url = request.url.substr(19);
         var resPath;
-        if (url.indexOf('resources') !== -1) {
+        
+        function getExtId(extPath) {
+            let idx = extPath.indexOf('/');
+            if (idx === -1) {
+                return extPath;
+            }
+            return extPath.substring(0, idx);
+        }
+        
+        let extId = getExtId(url);
+        if (remoteGlobal.exts.length) {
+            for (let i = 0; i < remoteGlobal.exts.length; i++) {
+            //for (let ext in remoteGlobal.exts) {
+                let ext = remoteGlobal.exts[i];
+                if (ext.path.indexOf(extId) !== -1) {
+                    if (/\/&/.test(ext.path)) {
+
+                    }
+                    resPath = ext.path + url.replace(extId, '');
+                    resPath = resPath.replace(/\\/g, '/');
+                    break;
+                }
+
+            }
+        }
+        
+        /*if (url.indexOf('resources') !== -1) {
             resPath = path.normalize(`${__dirname}/${url}`.replace('resources/', ''));
         } else if (url.indexOf('.') !== -1) { // TODO
-            resPath = path.normalize(`${__dirname}/chrome/${url}`);
+            resPath = path.normalize(`${__dirname}/extension/${url}`);
         } else {
-            resPath = path.normalize(`${__dirname}/chrome/${url}/index.html`);
-        }
-        console.log(resPath);
+            resPath = path.normalize(`${__dirname}/extension/${url}/index.html`);
+        }*/
         callback({
             path: resPath
         });

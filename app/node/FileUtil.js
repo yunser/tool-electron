@@ -16,8 +16,8 @@ const fileUtil = {
         /*if (filename.lastIndexOf(".") && filename.lastIndexOf(".")!== '.') {
             return null;
         }*/
-        console.log(filename.charAt(1) === '.', filename);
-        return filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
+        let ext = filename.toLowerCase().substr(filename.lastIndexOf(".") + 1);
+        return ext;
     },
     getNameFromPath: function (filename) {
         if (filename.contains('/')) {

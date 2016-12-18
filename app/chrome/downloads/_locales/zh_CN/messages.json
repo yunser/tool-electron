@@ -1,0 +1,13 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": ""
+   },
+   "appName": {
+      "description": "Application name",
+      "message": ""
+   },
+   "title": {
+      "message": "下载内容"
+   }
+}

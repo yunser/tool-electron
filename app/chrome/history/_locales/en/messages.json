@@ -1,0 +1,16 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "This is a simple Extension"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "RGB to Hex"
+   },
+   "history": {
+      "message": "History"
+   },
+   "title": {
+      "message": "History"
+   }
+}

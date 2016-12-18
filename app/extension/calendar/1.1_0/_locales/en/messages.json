@@ -1,0 +1,10 @@
+{
+   "appName": {
+      "description": "Application name",
+      "message": "Calendar"
+   },
+   "appDesc": {
+      "description": "Application description",
+      "message": "Calendar"
+   }
+}

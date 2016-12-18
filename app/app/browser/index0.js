@@ -13,7 +13,7 @@ const fileUtil = require('../../node/FileUtil');
 const {download} = require('electron-dl');
 const isDev = require('electron-is-dev');
 //const run = require('./chrome/run');
-//const newTabUrl = 'yunser://blank/';
+//const newTabUrl = 'chrome://blank/';
 //const newTabUrl = 'app://search';
 const newTabUrl = 'app://extensions';
 
@@ -102,7 +102,7 @@ function addTab(url) {
         url: url
     };
 
-    let nodeintegration = (url.startWith('yunser://') || url.startWith('file://')) ? ' nodeintegration' : '';
+    let nodeintegration = (url.startWith('chrome://') || url.startWith('file://')) ? ' nodeintegration' : '';
 
     tab.add({
         id: id,

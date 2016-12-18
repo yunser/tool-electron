@@ -4,12 +4,27 @@
 const require = nodeRequire;
 const electron = require('electron');
 const path = require('path');
+const {download} = require('electron-dl');
+const isDev = require('electron-is-dev');
+
 const tool = require('../../node/tool.js');
 const TabEx = require('../../node/TabEx.js');
 const system = require('../../node/system');
 const fileUtil = require('../../node/FileUtil');
-const {download} = require('electron-dl');
-const isDev = require('electron-is-dev');
+
+const {calculateId} = require('./chrome/main/chrome-app-id');
+console.log(calculateId);
+
+const mm = require('./chrome/ExtManager');
+
+calculateId('first').then(function(value) {
+    console.log('success')
+    //
+}, function(value) {
+    console.log('failure')
+    //
+});
+
 const {
     remote,
     ipcRenderer,
@@ -27,17 +42,9 @@ webFrame.registerURLSchemeAsPrivileged('yunser');
 
 const selfBrowserWindow = remote.getCurrentWindow();
 const selfId = selfBrowserWindow.id;
-console.log(selfId);
 
 console.log('chrome');
 console.log(window.chrome);
-//const run = require('./chrome/run');
-//const newTabUrl = 'yunser://blank/';
-const newTabUrl = 'http://www.baidu.com';
-//const newTabUrl = 'app://extensions';
-
-
-
 
 //webFrame.setZoomFactor(2)
 //webFrame.setZoomLevelLimits(0.25, 5);
@@ -73,25 +80,32 @@ function getExtensionById(id) {
     return null;
 }
 
+let remoteGlobal = remote.getGlobal('global');
+
 // load all extension
 chromeExtensions.load(appPath + '/extension', (err, extensions) => {
     globalExtensions = extensions;
+    remoteGlobal.exts = extensions
+
     extensions.forEach((extension) => {
-        console.log(extension);
-        //chrome.curExt = extension;
-        //console.log(chrome.curExt.id + '=============')
         // Browser Actions popup
         if (extension.browser_action) {
             $('#ext-list').append(`<a class="ext-item" href="#" data-ext="${extension.id}" title="${extension.name}">
                 <img src="${extension.path}/${extension.browser_action.default_icon}"></a>`);
         }
 
+        if (extension.app) {
+            console.log(extension.app)
+        }
+        if (extension.app && extension.app.launch && extension.app.launch.local_path) {
+            $('#ext-list').append(`<a class="ext-item" href="#" data-ext="${extension.id}" title="${extension.name}">
+                <img src="${extension.path}/${extension.icons['16']}"></a>`);
+        }
+
         // background script
         if (extension.background && extension.background.scripts) {
             let scripts = extension.background.scripts;
-
-            console.log('啦啦啦')
-            /*scripts.forEach((script) => {
+            scripts.forEach((script) => {
                 let scriptPath = path.resolve(extension.path, script);
 
 
@@ -100,15 +114,21 @@ chromeExtensions.load(appPath + '/extension', (err, extensions) => {
                 myScript.src=scriptPath;
                 document.body.appendChild(myScript);
 
-                /!*let $script = $(`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));
+                /*let $script = $(`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));
                 $(document.body).append($script);
                 $(document.head).append('<script src="G:/install/apache2.4/htdocs/yunser/tool/note/app/extension/test/1.1_0/sample.js"></script>');
-                console.log('添加脚本'+`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));*!/
-            });*/
+                console.log('添加脚本'+`<script src="${scriptPath}"></script>`.replace(/\\/g, '/'));*/
+            });
+        }
+        
+        // chrome_url_overrides
+        if (extension.chrome_url_overrides) {
+            if (extension.chrome_url_overrides.newtab) {
+                mm.newtab = 'chrome-extension://' + extension.id + '/' + extension.chrome_url_overrides.newtab;
+            }
         }
     })
 });
-
 
 function simpleText(text) {
     if (text.length > 20) {
@@ -138,11 +158,12 @@ function initWebview(webview, id, isExt) {
     });
 
     webview.addEventListener('did-fail-load', (e) => {
+        console.log('fail')
         let type = fileUtil.getType( webview.getURL());
         if (type === 'audio') {
             // 暂时使用默认播放器
         } else {
-            webview.loadURL('yunser://404');
+            //webview.loadURL('chrome://errorpage');
         }
     });
     webview.addEventListener('new-window', (e) => {
@@ -171,11 +192,8 @@ function initWebview(webview, id, isExt) {
                 })
             });
         }
-        
 
         webview.getWebContents().on('context-menu', (e, props) => {
-
-            console.log('邮件')
             var opts = {};
             const editFlags = props.editFlags;
             const hasText = props.selectionText.trim().length > 0;
@@ -518,12 +536,20 @@ $(document).on('keydown', function (e) {
 
 function dealUrl(url) {
     // TODO
-    if (url.startWith('app://')) {
+    /*if (url.startWith('app://')) {
         let appName = url.substring(6);
         url =  'file:///' + path.resolve(system.getAppPath(), `app/${appName}/index.html`);
-    }
+    }*/
 
     return url;
+}
+
+function setInputUrl(url) {
+    if (url === mm.newtab) {
+        $('#url-input').val('');
+    } else {
+        $('#url-input').val(url);
+    }
 }
 
 function loadUrl(url) {
@@ -532,7 +558,7 @@ function loadUrl(url) {
     let webview = document.getElementById('webview-' + curTabId);
     webview.loadURL(url);
     tabs[curTabId].url = url;
-    $('#url-input').val(url);
+    setInputUrl(url);
 
     updateNavIcon();
 }
@@ -557,8 +583,7 @@ $('#url-input').on('focus', function (e) {
 $('#url-input').on('keydown', function (e) {
     if (e.keyCode == 13) {
         if (this.value.startWith('http') || this.value.startWith('file://')
-            || this.value.startWith('yunser://') || this.value.startWith('chrome-extension://')
-            || this.value.startWith('atom://')) {
+            || this.value.startWith('chrome://') || this.value.startWith('chrome-extension://')) {
             let url = this.value;
             loadUrl(url);
         } else {
@@ -578,12 +603,12 @@ $('#url-input').on('keydown', function (e) {
                 /*if (fs.existsSync(keyword)) {
 
                  } */
-            } else if (this.value.startWith('app://')) {
+            } /*else if (this.value.startWith('app://')) {
                 let appName = this.value.substring(6);
                 let url =  'file:///' + path.resolve(system.getAppPath(), `app/${appName}/index.html`);
                 loadUrl(url);
                 //
-            } else if (this.value.contains('.')) { // TODO
+            }*/ else if (this.value.contains('.')) { // TODO
                     let url = 'http://' + this.value;
                     loadUrl(url);
             } else {
@@ -647,12 +672,12 @@ function getIdd() {
     return iddd++;
 }
 
-function addTab(url, isExt) {
+function addTab(url, ext) {
     url = dealUrl(url);
     
     var id = getIdd();
 
-    $('#url-input').val(url);
+    setInputUrl(url);
 
     curTabId = id;
     tabNum += 1;
@@ -661,27 +686,30 @@ function addTab(url, isExt) {
         url: url
     };
 
-    let nodeintegration = (url.startWith('yunser://') || url.startWith('file://')) ? ' nodeintegration' : '';
+    let nodeintegration = (url.startWith('chrome://') || url.startWith('file://')) ? ' nodeintegration' : '';
 
-    console.log('这里')
-
+    if (ext) {
+        
+    }
+    nodeintegration = '';
+    let preload = ext ? './chrome/preload/preload.js' : './chrome/preload/preload.js';
+   
     tab.add({
         id: id,
         title: '新标签页',
         content: `
         <div class="webview-box">
-              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration} preload="./chrome/preload/preload.js"></webview>
+              <webview id="webview-${id}" class="webview" autosize="on"  src="${url}" style="height: 100%" ${nodeintegration} preload="${preload}"></webview>
         </div>`,
     });
 
-
-    initWebview(document.getElementById('webview-' + id), id, isExt);
+    initWebview(document.getElementById('webview-' + id), id, ext);
 
     return id;
 }
 
 $('#add-tab').on('click', function () {
-    addTab(newTabUrl);
+    addTab(mm.newtab);
 });
 
 ipcRenderer.on('new-window', function(event, message) {
@@ -689,8 +717,8 @@ ipcRenderer.on('new-window', function(event, message) {
 });
 
 ipcRenderer.on('debug', function(event, message) {
-    alert(message);
-    message[0].apply(console, message[1]);
+    console.info(message);
+    //message[0].apply(console, message[1]);
     //addTab(message);
 });
 
@@ -712,7 +740,7 @@ ipcRenderer.on('enter-full-screen', function(event, message) {
     $('#tab-content').css('top', '0');
 });
 
-var id = addTab(newTabUrl);
+var id = addTab(mm.newtab); // TODO extension may not load
 
 $(document).on('shown.ui.tab', 'a[data-toggle="tab"]', function (e) {
 
@@ -720,7 +748,7 @@ $(document).on('shown.ui.tab', 'a[data-toggle="tab"]', function (e) {
     var activeTab = $(e.target).text();
     var id = e.target.parentNode.getAttribute('data-id');
 
-    $('#url-input').val(tabs[id].url);
+    setInputUrl(tabs[id].url);
     curTabId = id;
 
     // 获取前一个激活的标签页的名称
@@ -832,18 +860,25 @@ $.ajax({
     item: '.ext-item',
     content: '#extension-menu'
 });*/
-// TODO 菜单不起作用
-$('#ext-list').on('click', '[data-ext]', () => {
-    let ext = $(this).data('ext');
-});
 $('#ext-list').on('click', '[data-ext]', function (e) {
     e.preventDefault();
     let extId = $(this).attr('data-ext');
     let ext = getExtensionById(extId);
-    let popupPgaeUrl = path.resolve(ext.path, ext.browser_action.default_popup);
 
-    //loadUrl(popupPgaeUrl); TODO loadUrl 无法注入插件代码
-    addTab(popupPgaeUrl, true);
+    if (ext.app && ext.app.launch && ext.app.launch.local_path) {
+        let popupPgaeUrl = 'chrome-extension://' + extId + '/' + ext.app.launch.local_path;
+
+        //loadUrl(popupPgaeUrl); TODO loadUrl 无法注入插件代码
+        addTab(popupPgaeUrl, ext);
+    } else {
+        let popupPgaeUrl = 'chrome-extension://' + extId + '/' + ext.browser_action.default_popup;
+
+        //loadUrl(popupPgaeUrl); TODO loadUrl 无法注入插件代码
+        addTab(popupPgaeUrl, ext);
+    }
+
+
+
     // TODO 改进
     /*$('#popup').dialog({
     });
@@ -905,12 +940,12 @@ function initHeader() {
     // collection
     let bookmark = [
         {
-            text: '404',
-            url: 'yunser://404'
+            text: 'Apps',
+            url: 'chrome://apps'
         },
         {
             text: 'extensions',
-            url: 'app://extensions'
+            url: 'chrome://extensions'
         },
         {
             text: 'chat',
@@ -922,10 +957,6 @@ function initHeader() {
         },
         {
             text: 'Collections',
-            url: 'app://apps'
-        },
-        {
-            text: 'Apps',
             url: 'app://apps'
         },
         {

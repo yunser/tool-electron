@@ -1,0 +1,16 @@
+{
+  "appDescription": {
+    "description": "Application description",
+    "message": "Help"
+  },
+  "appName": {
+    "description": "Application name",
+    "message": "Help"
+  },
+  "title": {
+    "message": "Help"
+  },
+  "version": {
+    "message": "version"
+  }
+}

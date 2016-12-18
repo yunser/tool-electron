@@ -1,0 +1,22 @@
+{
+  "appDescription": {
+    "description": "Application description",
+    "message": "Settings"
+  },
+  "appearance": {
+    "message": "Appearance"
+  },
+  "appName": {
+    "description": "Application name",
+    "message": "Settings"
+  },
+  "start": {
+    "message": "Start"
+  },
+  "title": {
+    "message": "Settings"
+  },
+  "user": {
+    "message": "User"
+  }
+}

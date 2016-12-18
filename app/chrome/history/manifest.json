@@ -1,0 +1,58 @@
+{
+	"name": "History",
+	"version": "1.0",
+	"manifest_version": 2,
+	"default_locale": "en",
+	"description": "__MSG_appDescription__",
+	"browser_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"exclude_globs": [],
+			"include_globs": [
+				"*://*.com/*"
+			],
+			"js": [
+				"script.js"
+			],
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			]
+		}
+	],
+	"background": {
+		"scripts": ["background.js"]
+	},
+	"homepage_url": "https://www.baidu.com/",
+	"permissions": [
+		"http://api.flickr.com/",
+		"notifications",
+		"background",
+		"bookmarks",
+		"clipboardRead",
+		"clipboardWrite",
+		"contentSettings",
+		"contextMenus",
+		"cookies",
+		"debugger",
+		"history",
+		"idle",
+		"management",
+		"notifications",
+		"pageCapture",
+		"tabs",
+		"topSites",
+		"webNavigation",
+		"webRequest",
+		"webRequestBlocking"
+	],
+	"icons": {
+		"128": "icon/rgb2hex-icon-128.png",
+		"16": "icon/rgb2hex-icon-16.png",
+		"32": "icon/rgb2hex-icon-32.png",
+		"48": "icon/rgb2hex-icon-48.png"
+	}
+}
