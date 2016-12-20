@@ -4,7 +4,6 @@ const {download} = require('electron-dl');
 const isDev = require('electron-is-dev');
 
 function create(win, opts) {
-	console.log('创建2');
 
     win.webContents.on('context-menu', (e, props) => {
         console.log('123')

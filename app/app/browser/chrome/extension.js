@@ -4,7 +4,8 @@ var os = require('os');
 var fs = require('fs');
 var async = require('async');
 const tool = require('./tool');
-const gl = require('./main/gl');
+
+const {createChrome, getMessageFromManifest, localeManifest, getIdByPath} = require('./api/chrome');
 
 exports.defaultPath = getExtensionsPath();
 exports.load = load;
@@ -44,15 +45,10 @@ var Allpersissions = ['background', 'bookmarks', 'clipboardRead', 'clipboardWrit
     'webRequestBlocking', 'storage', 'activeTab'
 ];
 
-function getIdByPath(path) {
-    let arr = path.replace(/\\/g, '/').split('/');
-    return arr[arr.length - 2];
-}
-
 function loadExtension(path, callback) {
     path = path.replace(/\\/g, '/');
 
-    fs.readFile(path + '/manifest.json', (err, contents) => {
+    fs.readFile(path + '/manifest.json', 'utf-8', (err, contents) => {
         if (err) {
             return callback(null, {
                 name: err.name,
@@ -65,16 +61,13 @@ function loadExtension(path, callback) {
         if (!manifest) {
             return callback({
                 name: 'default_locale error',
-                description: '清单文件缺失或不可读。'
+                message: '清单文件缺失或不可读。'
             });
         }
-        //console.log('load extension ' + manifest.name);
 
-        console.log(manifest.name);
         checkManifest(manifest);
 
         if (fs.existsSync(path + '/_locales')) {
-            console.log('存在'+manifest.default_locale)
             if (!manifest.default_locale) {
                 return callback(null, {
                     name: 'default_locale error',
@@ -83,11 +76,16 @@ function loadExtension(path, callback) {
             }
         }
 
+        let message = getMessageFromManifest(manifest, path);
+        manifest = localeManifest(contents, message);
+
         let extension = manifest;
         extension.id = getIdByPath(path);
         extension.path = path;
 
-        localizeStrings(extension, callback);
+        callback(null, extension);
+        
+        //localizeStrings(extension, callback);
     })
 }
 
@@ -97,7 +95,7 @@ function checkManifest(manifest) {
     if (manifest.permissions) {
         manifest.permissions.forEach((permission) => {
             if (!Allpersissions.contains(permission) && !/^http/.test(permission)) {
-                console.error(`permission '${permission}' is unknown`);
+                console.error(`Permission '${permission}' is unknown`);
                 return false;
             }
         });
@@ -106,8 +104,8 @@ function checkManifest(manifest) {
         console.error("Required value 'name' is missing or invalid.");
         return false;
     }
-    if (manifest.manifest_version !== 2) {
-        console.error("The 'manifest_version' key must be present and set to 2 (without quotes). See developer.chrome.com/extensions/manifestVersion.html for details.");
+    if (manifest.app && manifest.manifest_version !== 2) {
+        console.error("Chrome Apps must use manifest version 2.");
         return false;
     }
     if (manifest.description && manifest.description.length > 500) {
@@ -147,7 +145,6 @@ function addToWebview(webview, extension, callback) {
 
     let jsPath = [];
     for (let i = 0; i < scripts.length; i++) {
-        console.log(scripts[i]);
         for (let j = 0; j < scripts[i].js.length; j++) {
             jsPath.push(path.resolve(extension.path, scripts[i].js[j]));
         }
@@ -160,10 +157,8 @@ function addToWebview(webview, extension, callback) {
         if (err) {
             return callback(err);
         }
-        console.log('executeJavaScript');
         window.curAppPath = new Date().getTime();
         webview.getWebContents().executeJavaScript(code, false, (result) => {
-            console.log('Loaded extension', extension.name);
             callback(null);
         })
     });
@@ -210,13 +205,11 @@ function getContentScriptCode(extension, content_script_js, callback) {
         window.extCache2[cacheId] = extension;
 
         // 把插件的代码放到闭包里面执行
-        console.log(`"${extension.path}"`);
-
         let code = `
         (function (chrome) {
         ${extScriptCode}
         })(window.createChrome("${extension.path.replace(/\\/g, '/')}"));
-        `
+        `;
         callback(err, code)
     })
 }

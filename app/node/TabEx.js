@@ -31,7 +31,6 @@ class TabEx {
 
         // TODO
         that.$elem.on('click', '.tab-close', function () {
-            console.log(this);
             var id = $(this).parent().data('id');
             that.close(id);
         });
@@ -153,7 +152,7 @@ class TabEx {
         $("#pane-" + id).remove();
 
         that.drop();
-        that.opts.callback(id, that.curTabId);
+        that.opts.onClose('' + id, '' + that.curTabId);
     }
 
     drop () {
@@ -202,7 +201,6 @@ class TabEx {
 
         //如果有超出的，显示下拉标签
         if (false) {
-            console.log('显示下拉菜单');
             dropdown.removeClass('hide');
             if (dropdown.find('.active').length == 1) {
                 dropdown.addClass('active');
@@ -226,7 +224,7 @@ TabEx.DEFAULTS = {
     iframeUse: true, // 使用iframe还是ajax
     iframeHeight: $(document).height() - 107, //固定TAB中IFRAME高度,根据需要自己修改
     method: 'init',
-    callback: () => {} // 关闭后回调函数
+    onClose: (id, newId) => {} // 关闭后回调函数
 
 };
 

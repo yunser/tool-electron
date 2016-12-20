@@ -1,0 +1,20 @@
+{
+  "name": "Marshal’s Blog",
+  "description": "A programmer’s blog.",
+  "version": "1.0",
+  "icons": {
+    "128": "128.png"
+  },
+  "app": {
+    "urls": [
+      "http://marshal.easymorse.com/marshal.crx"
+    ],
+    "launch": {
+      "web_url": "http://marshal.easymorse.com/"
+    }
+  },
+  "permissions": [
+    "unlimitedStorage",
+    "notifications"
+  ]
+}

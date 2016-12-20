@@ -7,8 +7,10 @@ const fs = require("fs");
 const os = require("os").platform();
 const _ = require("lodash");
 
-const system = chrome.ex.system;
-const fileUtil = chrome.ex.fileUtil;
+//const system = chrome.ex.system;
+//const fileUtil = chrome.ex.fileUtil;
+const system = require('../../node/system');
+const fileUtil = require('../../node/fileUtil');
 const Context = require('../../node/contextmenu');
 const QiniuDevice = require('./QiniuDevice');
 const LocalDevice = require('./LocalDevice.js');

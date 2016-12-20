@@ -1,3 +1,17 @@
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: 0;
+    margin-left: 0;
+    border-radius: 0 6px 6px;
+}
+.dropdown-menu>.disabled>a, .dropdown-menu>.disabled>a:hover, .dropdown-menu>.disabled>a:focus {
+    color: #aaa;
+}
+.dropdown-menu>li>a {
+    color: #333;
+}
+
 html, body {
     width: 100%;
     height: 100%;
@@ -57,7 +71,7 @@ body {
     position: absolute;
     top: 8px;
     left: 120px;
-    right: 200px;
+    right: 400px;
 }
 .layout-header .url-input {
     width: 100%;
@@ -66,7 +80,7 @@ body {
     position: absolute;
     top: 0;
     right: 0;
-    width: 200px;
+    width: 400px;
 }
 /*.box {
     width: 500px;
@@ -226,20 +240,26 @@ webview > * {
     overflow: hidden;
 }
 /**/
-.exts {
+.ext-list {
     position: absolute;
     top: 8px;
     right: 40px;
 }
-.exts a {
+.ext-list .ext-item {
+    display: block;
+    float: left;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
     margin-right: 8px;
+    border-radius: 4px;
 }
-.exts a:hover {
-    background-color: #ccc;
+.ext-list .ext-item:hover {
+    background-color: rgba(0, 0, 0, .1);
 }
-.exts a img {
-    width: 24px;
-    height: 24px;
+.ext-list .ext-item img {
+    width: 100%;
+    height: 100%;
 }
 
 /* dark theme */

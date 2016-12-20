@@ -1,0 +1,58 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": "This is a simple Browser"
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "Browser"
+   },
+   "back": {
+      "message": "Back"
+   },
+   "copy": {
+      "message": "Copy"
+   },
+   "copyImage": {
+      "message": "Copy Image"
+   },
+   "copyImageAddress": {
+      "message": "Copy image address"
+   },
+   "copyLinkAddress": {
+      "message": "Copy link address"
+   },
+   "cut": {
+      "message": "Cut"
+   },
+   "forward": {
+      "message": "Forward"
+   },
+   "inspectElement": {
+      "message": "Inspect Element"
+   },
+   "openImageInNewTab": {
+      "message": "Open Image in new tab"
+   },
+   "openLinkInNewTab": {
+      "message": "Open link in new tab"
+   },
+   "paste": {
+      "message": "Paste"
+   },
+   "reload": {
+      "message": "Reload"
+   },
+   "saveImageAs": {
+      "message": "Save Image As..."
+   },
+   "search": {
+      "message": "Search"
+   },
+   "title": {
+      "message": "Bookmarks"
+   },
+   "viewSource": {
+      "message": "View source"
+   }
+}

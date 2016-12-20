@@ -1,0 +1,58 @@
+{
+   "appDescription": {
+      "description": "Application description",
+      "message": ""
+   },
+   "appName": {
+      "description": "Application name",
+      "message": "浏览器"
+   },
+   "back": {
+      "message": "返回"
+   },
+   "copy": {
+      "message": "复制"
+   },
+   "copyImage": {
+      "message": "复制图片"
+   },
+   "copyImageAddress": {
+      "message": "复制图片地址"
+   },
+   "copyLinkAddress": {
+      "message": "复制链接地址"
+   },
+   "cut": {
+      "message": "剪切"
+   },
+   "forward": {
+      "message": "前进"
+   },
+   "inspectElement": {
+      "message": "审查元素"
+   },
+   "openImageInNewTab": {
+      "message": "在新标签页中打开图片"
+   },
+   "openLinkInNewTab": {
+      "message": "在新标签页中打开链接"
+   },
+   "paste": {
+      "message": "粘贴"
+   },
+   "reload": {
+      "message": "重新加载"
+   },
+   "saveImageAs": {
+      "message": "图片另存为..."
+   },
+   "search": {
+      "message": "搜索"
+   },
+   "title": {
+      "message": "书签管理器"
+   },
+   "viewSource": {
+      "message": "查看源代码"
+   }
+}

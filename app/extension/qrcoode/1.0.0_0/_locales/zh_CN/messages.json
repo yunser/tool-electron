@@ -1,0 +1,11 @@
+{
+   "appDesc": {
+      "message": "二维码(QR码)生成-生成当前页面二维码，移动设备扫码后可访问当前浏览网页,BUG和建议请发邮件至（joy.liangcha@foxmail.com）"
+   },
+   "appName": {
+      "message": "二维码(QR码)生成-生成当前页面二维码"
+   },
+   "defaulttitle": {
+      "message": "二维码(QR码)生成-生成当前页面二维码"
+   }
+}

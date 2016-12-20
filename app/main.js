@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 
-var context = require('./node/electron-context-menu.js');
+//var context = require('./node/electron-context-menu.js');
 
 let filter = true;
 // default App should require default-app.js
@@ -15,19 +15,19 @@ let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
 //let mainUrl = `yunser://404`;
 //let mainUrl = `chrome://errorpage`; // file protocol
 
-ipcMain.on('asynchronous-message', function (event, arg) {
-    event.sender.send('asynchronous-reply', 'pong')
+ipcMain.on('opp', function (event, arg) {
+    mainWindow.webContents.send('opp-main', arg);
 });
 
-ipcMain.on('synchronous-message', function (event, arg) {
-    event.returnValue = 'pong'
-});
 // 保持一个对于 window 对象的全局引用，如果你不这样做，
 // 当 JavaScript 对象被垃圾回收， window 会被自动地关闭
 let mainWindow;
 
 global['global'] = {
-    exts: []
+    exts: [],
+    menus: [],
+    mm: [],
+    tabs: []
 };
 let remoteGlobal = global['global'];
 
@@ -206,11 +206,6 @@ function createWindow () {
             mainWindow.webContents.send('will-navigate', url);
             e.preventDefault();
         });
-
-        mainWindow.webContents.on('will-navigate2', function (e, url) {
-            mainWindow.webContents.send('will-navigate', url);
-            e.preventDefault();
-        });
     }
     
     
@@ -273,14 +268,14 @@ function createWindow () {
 
     mainWindow.loadURL(mainUrl);
 
-    context({
+    /*context({
         window: mainWindow,
         prepend: (params, browserWindow) => [{
             label: 'Rainbow',
             // only show it when right-clicking images
             visible: params.mediaType === 'image'
         }]
-    });
+    });*/
     
     // 设置窗口
     var presWindow = new BrowserWindow({

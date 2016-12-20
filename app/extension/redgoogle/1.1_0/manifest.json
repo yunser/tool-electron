@@ -16,27 +16,29 @@
     }
   ],
   "permissions": [
-    "notifications",
+    "webRequest",
     "background",
+    "contextMenus",
+    "debugger",
+    "idle",
+    "topSites",
+    "notifications",
     "bookmarks",
     "clipboardRead",
     "clipboardWrite",
     "contentSettings",
-    "contextMenus",
     "cookies",
-    "debugger",
     "storage",
     "activeTab",
     "history",
-    "idle",
-    "management",
     "notifications",
     "pageCapture",
     "tabs",
-    "topSites",
+
     "webNavigation",
-    "webRequest",
-    "webRequestBlocking"
+    "webRequestBlocking",
+
+    "management"
   ],
   "background": {
     "scripts": ["background.js"]

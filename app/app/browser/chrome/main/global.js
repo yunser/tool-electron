@@ -79,7 +79,6 @@ function safeCallback(w, f) {
 }
 
 const {makeEvent} = require(path.join('..', 'event.js'));
-console.log(makeEvent, 'mei')
 
 function safeWrapEvent(w, e) {
   var addListener = e.addListener;
@@ -101,7 +100,7 @@ function preventBrowserWindow(w) {
 function shutdownEverything() {
   const {BrowserWindow} = require('electron');
   function killer() {
-    console.log('killing all windows for shutdown');
+    //console.log('killing all windows for shutdown');
     for (var w of BrowserWindow.getAllWindows()) {
       w.close();
     }

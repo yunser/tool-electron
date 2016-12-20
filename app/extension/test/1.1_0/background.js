@@ -1,9 +1,13 @@
 // i18n
 console.log('国际化测试');
+chrome.contextMenus.create({
+    "title": "Test parent item"
+});
 console.log(chrome.i18n.getMessage("appDescription"))
 
 console.log('chrome', chrome);
 
+alert(1);
 
 if (window.webkitNotifications) {
     console.log("Notifications are supported!");
@@ -83,10 +87,10 @@ console.log("checkbox1:" + checkbox1 + " checkbox2:" + checkbox2);
 
 // Intentionally create an invalid item, to show off error checking in the
 // create callback.
-console.log("About to try creating an invalid item - an error about " +
+/*console.log("About to try creating an invalid item - an error about " +
             "item 999 should show up");
 chrome.contextMenus.create({"title": "Oops", "parentId":999}, function() {
   if (chrome.extension.lastError) {
     console.log("Got expected error: " + chrome.extension.lastError.message);
   }
-});
+});*/

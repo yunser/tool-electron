@@ -7,3 +7,18 @@
     width: 100px;
     height: 100px;
 }
+
+.ext-item {
+    overflow: hidden;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid #f00;
+}
+.ext-item .ext-icon {
+    width: 36px;
+    height: 36px;
+}
+.detail {
+    padding: 16px;
+    border: 1px solid #eee;
+}

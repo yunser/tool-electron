@@ -41,7 +41,7 @@ $(document).on('mousedown', '.btn', function (e) {
     // 第一次没有涟漪div，动态生成
     if (!wavesDiv.length){
         var div = "<div class='waves-effect'></div>";
-        $btn.append(div);
+        $btn.prepend(div);
         wavesDiv = $btn.find("div");
     }
 

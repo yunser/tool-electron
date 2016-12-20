@@ -1,121 +1,150 @@
 //const chrome = require('./chrome');
 
-var contextMenus = {
+const {remote} = require('electron');
 
-    /**
-     * @description create menu
-     * @param {Object} createProperties
-     * @param {Function} callback
-     * @return id
-     */
-    create: function (createProperties, callback) {
-        if (!this.menus) {
-            this.menus = [];
-        }
-        let id = new Date().getTime();
-        let contexts = createProperties.contexts || ['all'];
 
-        let item = {
-            id: id,
-            title: createProperties.title,
-            contexts: contexts,
-            onclick: createProperties.onclick
-        };
+function createContextMenus(curExtId, manifest, extension) {
+    
+    var contextMenus = {
 
-        console.log(chrome.curExt.id + '$')
-        if (createProperties.parentId) {
-            let parentItem = this._getItemById(createProperties.parentId);
-            console.log('把柄',parentItem )
-            if (parentItem) {
-                if (!parentItem.children) {
-                    parentItem.children = [];
+        /**
+         * @description create menu
+         * @param {Object} createProperties
+         * @param {Function} callback
+         * @return id
+         */
+        create: function (createProperties, callback) {
+            console.log(curExtId);
+            let remoteGlobal = remote.getGlobal('global');
+            //remoteGlobal.exts = null;
+            //remoteGlobal.mm = null;
+            remoteGlobal.curid = curExtId;
+
+            remoteGlobal.asd = new Date().getTime();
+            remoteGlobal.menus = ['1212']
+            console.log('create 哈哈');
+            console.log(remote.getGlobal('global'));
+
+            let globalMenu = remoteGlobal.menus;
+            console.log(globalMenu);
+            if (!globalMenu) {
+                console.log('空的')
+                globalMenu = [];
+            }
+            let id = new Date().getTime();
+            let contexts = createProperties.contexts || ['all'];
+
+            let item = {
+                id: id,
+                title: createProperties.title,
+                contexts: contexts,
+                onclick: createProperties.onclick
+            };
+
+            if (createProperties.parentId) {
+                let parentItem = this._getItemById(createProperties.parentId);
+                console.log('把柄',parentItem )
+                if (parentItem) {
+                    if (!parentItem.children) {
+                        parentItem.children = [];
+                    }
+                    parentItem.children.push(item);
+                } else {
+                    let msg = `menu item '${createProperties.title}' parentId ${createProperties.parentId} is error`;
+                    extension.lastError = {
+                        message: msg
+                    }
+                    //console.error(msg);
                 }
-                parentItem.children.push(item);
+
+                return id;
             } else {
-                console.error(`menu item '${createProperties.title}' parentId ${createProperties.parentId} is error`);
-            }
-
-            return id;
-        } else {
-            let extMenu;
-            if (!chrome.curExt) {
-                console.error('chrome.curExt error');
-                return;
-            }
-            for (let i = 0; i < this.menus.length; i++) {
-                if (this.menus[i].id === chrome.curExt.id) {
-                    extMenu = this.menus[i];
-                    break;
-                }
-            }
-            if (!extMenu) {
-
-                extMenu = {
-                    id: chrome.curExt.id,
-                    title: chrome.curExt.name,
-                    contexts: ['all'],
-                    children: []
-                };
-                console.log('插件'); // TODO console.log 不起作用
-                this.menus.push(extMenu);
-            }
-            extMenu.children.push(item);
-
-            return chrome.curExt.id;
-        }
-
-
-    },
-
-    /**
-     * @description
-     *
-     */
-    update: function () {
-        
-    },
-
-    /**
-     *
-     * @param {Integer} menuItemId
-     * @param {Function} callback
-     */
-    remove: function (menuItemId, callback) {
-    },
-
-    /**
-     *
-     * @param last
-     * @param hehe
-     * @return {string}
-     */
-    removeAll: function (last, hehe) {
-        Math.abs(7);
-        return '1212';
-    },
-
-    _getItemById: function (id) {
-        function _getInMenus(menus) {
-            for (let i = 0; i < menus.length; i++) {
-                if (menus[i].id === id) {
-                    return menus[i];
-                }
-                if (menus.children) {
-                    let item = _getInMenus(menus.children);
-                    if (item) {
-                        return item;
+                let extMenu;
+                
+                for (let i = 0; i < globalMenu.length; i++) {
+                    if (globalMenu[i].id === curExtId) {
+                        extMenu = globalMenu[i];
+                        break;
                     }
                 }
+                if (!extMenu) {
+
+                    extMenu = {
+                        id: curExtId,
+                        title: manifest.name,
+                        contexts: ['all'],
+                        children: []
+                    };
+                    console.log('插件'); // TODO console.log 不起作用
+
+                    globalMenu.push(extMenu);
+                    remote.getGlobal('global').mm = globalMenu;
+                }
+                extMenu.children.push(item);
+
+                console.log('最后')
+                console.log(remote.getGlobal('global').menus);
+
+                return curExtId;
             }
-            return null;
+
+
+        },
+
+        /**
+         * @description
+         *
+         */
+        update: function () {
+
+        },
+
+        /**
+         *
+         * @param {Integer} menuItemId
+         * @param {Function} callback
+         */
+        remove: function (menuItemId, callback) {
+        },
+
+        /**
+         *
+         * @param last
+         * @param hehe
+         * @return {string}
+         */
+        removeAll: function (last, hehe) {
+            Math.abs(7);
+            return '1212';
+        },
+
+        _getItemById: function (id) {
+            function _getInMenus(menus) {
+                for (let i = 0; i < menus.length; i++) {
+                    if (menus[i].id === id) {
+                        return menus[i];
+                    }
+                    if (menus.children) {
+                        let item = _getInMenus(menus.children);
+                        if (item) {
+                            return item;
+                        }
+                    }
+                }
+                return null;
+            }
+
+            let remoteGlobal = remote.getGlobal('global');
+            return _getInMenus(remoteGlobal.menus, id);
+
         }
 
-        return _getInMenus(this.menus, id);
+    };
+    
+    return contextMenus;
+}
 
-    }
 
-};
-
-module.exports = contextMenus;
+module.exports = createContextMenus;
 
 //"all", "page", "frame", "selection", "link", "editable", "image", "video", "audio", "launcher", "browser_action", or "page_action"

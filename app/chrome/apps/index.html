@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <link rel="stylesheet" href="chrome://resources/asset/lib/eui/1.3/ui.min.css">
-    <link rel="stylesheet" href="chrome://resources/asset/lib/editor/eui-editor.min.css">
+    <link rel="stylesheet" href="chrome://resources/lib/eui/1.3/ui.min.css">
+    <link rel="stylesheet" href="chrome://resources/lib/eui/1.3/iconfont.css">
+    <link rel="stylesheet" href="chrome://resources/css/ui-md.css">
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -20,18 +21,14 @@
     </ul>
     <h2 class="title">All Application</h2>
 </div>
+<div>
+    <ul id="ext-list">
 
-<script>
-    if (window.require) {
-        console.log(111);
-        window.nodeRequire = require;
-        delete window.require;
-        delete window.exports;
-        delete window.module;
-    }
-</script>
-<script src="chrome://resources/asset/lib/jquery/jquery-1.10.2.min.js"></script>
-<script src="chrome://resources/asset/lib/eui/1.3/ui.min.js"></script>
+    </ul>
+</div>
+<script src="chrome://resources/lib/jquery/jquery-1.10.2.min.js"></script>
+<script src="chrome://resources/lib/eui/1.3/ui.min.js"></script>
+<script src="chrome://resources/js/ui-md.js"></script>
 <script src="index.js"></script>
 </body>
 </html>

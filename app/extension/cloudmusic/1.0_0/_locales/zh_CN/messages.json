@@ -1,0 +1,10 @@
+{
+   "appDesc": {
+      "description": "App description.",
+      "message": "网易云音乐，好听的音乐"
+   },
+   "appName": {
+      "description": "App name.",
+      "message": "网易云音乐"
+   }
+}
