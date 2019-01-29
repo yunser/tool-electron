@@ -23,11 +23,13 @@
     "markdown-it-enml-todo": "^1.0.2",
     "qiniu": "^6.1.13",
     "xml2js": "^0.4.17",
-    "xmlreader": "^0.2.3"
+    "xmlreader": "^0.2.3",
+    "lodash": "^4.17.4"
   },
   "scripts": {
     "test": "hello",
     "start": "electron .",
+    "dev":"electron ./app/test/main",
     "packager": "electron-packager ./app mclans --all --out ./OutApp --version 0.37.3 --overwrite --icon=./app/img/icon/icon.ico"
   },
   "author": "chen",

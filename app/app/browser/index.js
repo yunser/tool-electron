@@ -268,6 +268,25 @@ chromeExtensions.load(appPath + '/extension', (err, extensions) => {
                 mm.newtab = 'chrome-extension://' + extension.id + '/' + extension.chrome_url_overrides.newtab;
             }
         }
+
+        // theme
+        if (extension.theme && extension.name === 'Litten') {
+            let theme = extension.theme;
+            console.info(theme);
+            if (theme.images) {
+                let images = theme.images;
+                //theme_ntp_background 大背景
+            }
+            if (theme.color) {
+                let color = theme.color;
+                //color.bookmark_text // 书签颜色
+                //color.button_background // + -x按钮背景色
+                //tab_background_text非 active tab 颜色
+                //tab_text : active tab text color
+                //ntp_background 大背景
+                // toolbar 工具栏
+            }
+        }
     })
 });
 

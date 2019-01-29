@@ -71,6 +71,10 @@ function createChrome(extensionPath) {
     }
 
     let manifestJson = fs.readFileSync(path.join(extensionPath, 'manifest.json'), 'utf-8');
+    if (!manifestJson) {
+        console.error('清单文件缺失或不可读');
+    }
+
     let manifest = JSON.parse(manifestJson);
     if (!manifest.permissions) {
         manifest.permissions = {};
@@ -736,6 +740,26 @@ function createChrome(extensionPath) {
     };
 
     chrome.themes = {
+        changeOSWallpaper() {
+            "use strict";
+
+        },
+        changeWallpaper() {},
+        getAccount() {
+            "use strict";
+
+        },
+        getAll() {},
+        getPersonData() {},
+        getSyncdataItem() {},
+        getWallpaper() {},
+        onAccountStatusChanged() {},
+        onChanged: new chrome.Event(),
+        openLoginDialog() {},
+        showLogin() {},
+        showSyncDataDlg() {},
+        skinSetting() {},
+        switchTo() {},
 
     };
 

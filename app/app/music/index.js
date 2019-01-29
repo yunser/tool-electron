@@ -103,7 +103,7 @@ var xml_string2 = `
         <MandatoryBitrate>0</MandatoryBitrate>
     </File>
 </List>`;
-let lrcFile = `F:\\Users\\cjh1\\Desktop\\酷狗列表.kgl`;
+/*let lrcFile = `F:\\Users\\cjh1\\Desktop\\酷狗列表.kgl`;
 
 
 
@@ -120,7 +120,7 @@ fs.readFileSync(lrcFile, 'utf8', (err, data) => {
         });
     });
 
-});
+});*/
 
 var parseString = require('xml2js').parseString;
 var xml = "<root>Hello xml2js!</root>"

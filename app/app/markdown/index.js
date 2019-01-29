@@ -60,7 +60,7 @@ function createTodoItem(token, TokenConstructor) {
 
 class FileManager {
     constructor() {
-        this.rootFile = 'F:\\Users\\cjh1\\Desktop\\note'; // 根目录
+        this.rootFile = '‪E:\\desktop\\note'; // 根目录
         this.selectFile = null; // 选择的文件
         this.curFile = null; // 当前正在编辑的文件
         this.treeObj = null;

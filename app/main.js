@@ -8,10 +8,11 @@ const fs = require('fs');
 
 let filter = true;
 // default App should require default-app.js
-let defaultApp = 'browser';
-
+let defaultApp = 'music';
+defaultApp = 'browser'
 let mainUrl = `file://${__dirname}/app/${defaultApp}/index.html`;
-//let mainUrl = 'http://tool.yun.com/slides/';
+mainUrl = `file://${__dirname}/index.html`
+//let mainUrl = 'http://tool.yun.com/tables/';
 //let mainUrl = `yunser://404`;
 //let mainUrl = `chrome://errorpage`; // file protocol
 
