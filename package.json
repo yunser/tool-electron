@@ -17,7 +17,7 @@
     "electron-is-dev": "^0.1.2",
     "electron-mocha": "^1.2.1",
 
-    "eslint": "^2.8.0",
+    "eslint": "^6.6.0",
     "htmlparser2": "^3.9.2",
     "jquery": "^3.1.1",
     "markdown-it-enml-todo": "^1.0.2",
